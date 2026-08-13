@@ -581,13 +581,17 @@
         <span class="eyebrow" id="drop-eyebrow">Next Batch</span>
         <h2 id="drop-heading">Loading next drop…</h2>
         <p id="drop-sub">Same rule as always — sariwang stock, ilang piraso lang bawat design. Unang bukas, unang pili.</p>
-        <a href="#regulars" class="btn btn-dark">Get Notified First</a>
+        <a href="#" class="btn btn-dark" id="drop-cta">Get Notified First</a>
       </div>
       <div class="countdown" id="countdown" aria-label="Countdown to next batch drop">
         <div class="cd-box"><b id="cd-days">--</b><span>Days</span></div>
         <div class="cd-box"><b id="cd-hours">--</b><span>Hrs</span></div>
         <div class="cd-box"><b id="cd-mins">--</b><span>Min</span></div>
         <div class="cd-box"><b id="cd-secs">--</b><span>Sec</span></div>
+      </div>
+      <div id="curating-note" style="display:none; max-width:280px; padding:24px; background:var(--green-deep); border-radius:16px; color:var(--cream-soft);">
+        <p style="font-family:'Fraunces',serif; font-style:italic; font-size:1.2rem; margin:0 0 8px;">Still curating.</p>
+        <p style="font-size:0.85rem; color:rgba(239,227,200,0.7); font-weight:300; margin:0;">We're sourcing the next batch — walang set date pa. Follow us so you don't miss the announcement.</p>
       </div>
     </section>
   </div>
@@ -672,13 +676,11 @@
   function pad(n){ return String(n).padStart(2,'0'); }
 
   function computeBatchStatus(batch, now){
-    const listing = new Date(batch.listingDate);
     const bidStart = new Date(batch.biddingStart);
     const bidEnd = new Date(batch.biddingEnd);
-    if (now < listing) return 'UPCOMING';
+    if (now < bidStart) return 'UPCOMING';
     if (now >= bidStart && now < bidEnd) return 'LIVE';
-    if (now >= bidEnd) return 'ENDED';
-    return 'UPCOMING';
+    return 'ENDED';
   }
 
   let countdownTarget = null;
@@ -743,16 +745,38 @@
     const grid = document.getElementById('pieces-grid');
     grid.innerHTML = (data.hotItems || []).map(renderTagCard).join('');
 
-    document.getElementById('drop-eyebrow').textContent = status === 'LIVE' ? 'Bidding Ends In' : status === 'UPCOMING' ? 'Next Batch' : 'Batch Ended';
-    const listingDate = new Date(batch.listingDate);
-    const dateLabel = listingDate.toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric', timeZone:'Asia/Manila' });
-    document.getElementById('drop-heading').textContent = status === 'LIVE'
-      ? `${batch.name} is live now.`
-      : status === 'UPCOMING'
-        ? `${batch.name} drops ${dateLabel}.`
-        : `${batch.name} has ended.`;
+    document.getElementById('drop-eyebrow').textContent = status === 'LIVE' ? 'Bidding Ends In' : status === 'UPCOMING' ? 'Next Batch' : 'No Batch Scheduled';
+    const bidStartDate = new Date(batch.biddingStart);
+    const bidEndDate = new Date(batch.biddingEnd);
+    const dateLabel = bidStartDate.toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric', timeZone:'Asia/Manila' });
 
-    countdownTarget = status === 'UPCOMING' ? listingDate : new Date(batch.biddingEnd);
+    const countdownEl = document.getElementById('countdown');
+    const curatingEl = document.getElementById('curating-note');
+    const ctaEl = document.getElementById('drop-cta');
+    const FACEBOOK_URL = "#"; // TODO: replace with your actual Facebook page URL
+
+    if (status === 'LIVE'){
+      document.getElementById('drop-heading').textContent = `${batch.name} is live now.`;
+      countdownEl.style.display = 'flex';
+      curatingEl.style.display = 'none';
+      ctaEl.textContent = 'Message Us on Facebook to Bid';
+      ctaEl.href = FACEBOOK_URL;
+      countdownTarget = bidEndDate;
+    } else if (status === 'UPCOMING'){
+      document.getElementById('drop-heading').textContent = `${batch.name} drops ${dateLabel}.`;
+      countdownEl.style.display = 'flex';
+      curatingEl.style.display = 'none';
+      ctaEl.textContent = 'Get Notified First';
+      ctaEl.href = '#regulars';
+      countdownTarget = bidStartDate;
+    } else {
+      document.getElementById('drop-heading').textContent = "Still curating the next batch.";
+      countdownEl.style.display = 'none';
+      curatingEl.style.display = 'block';
+      ctaEl.textContent = 'Follow Us for Updates';
+      ctaEl.href = FACEBOOK_URL;
+      countdownTarget = null;
+    }
     tickCountdown();
   }
 
