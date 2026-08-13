@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vestige Admin — Batch &amp; Listing Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
+    --paper:#faf7f0; --gold:#c9a468; --ink:#14201c; --line:rgba(20,32,28,0.14);
+    --danger:#b3402f;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; }
+  h1,h2,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'Space Mono',monospace; }
+  .wrap{ max-width:960px; margin:0 auto; padding:40px 24px 100px; }
+
+  .topbar{
+    background:var(--green-deep); color:var(--cream-soft);
+    padding:20px 24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar .brand{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.1em; }
+  .topbar a, .topbar button{ color:var(--gold); text-decoration:none; font-size:0.85rem; background:none; border:none; cursor:pointer; font-family:inherit; }
+
+  .warn-banner{
+    background:#fff3e0; border:1px solid #e0b878; color:#6b4a12;
+    border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:24px 0 36px; line-height:1.5;
+  }
+  .save-status{ font-size:0.82rem; padding:10px 14px; border-radius:8px; margin-top:14px; display:none; }
+  .save-status.ok{ display:block; background:#e3f1e6; color:#1b5e2a; }
+  .save-status.err{ display:block; background:#fbe3e0; color:var(--danger); }
+
+  h1{ font-size:2rem; margin:0 0 6px; color:var(--green-deep); }
+  .lead{ color:rgba(20,32,28,0.65); margin:0 0 34px; font-weight:300; }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:28px 26px; margin-bottom:26px; }
+  .card h2{ font-size:1.2rem; margin:0 0 20px; color:var(--green-deep); }
+
+  label{ display:block; font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase; color:rgba(20,32,28,0.55); margin-bottom:6px; font-family:'Space Mono',monospace; }
+  input, select{
+    width:100%; padding:11px 13px; border-radius:8px; border:1px solid var(--line);
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; background:var(--cream-soft); margin-bottom:16px;
+  }
+  input:focus, select:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
+  @media (max-width:640px){ .grid2{ grid-template-columns:1fr; } }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 18px; }
+  @media (max-width:640px){ .grid3{ grid-template-columns:1fr; } }
+
+  .item-row{ border:1px dashed var(--line); border-radius:12px; padding:18px 18px 4px; margin-bottom:16px; position:relative; background:var(--paper); }
+  .item-row .remove-btn{ position:absolute; top:12px; right:12px; background:none; border:none; color:var(--danger); cursor:pointer; font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.04em; }
+
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px; border:none; cursor:pointer; font-family:'Work Sans',sans-serif; font-size:0.88rem; font-weight:500; }
+  .btn-gold{ background:var(--gold); color:var(--green-deep); }
+  .btn-dark{ background:var(--green-deep); color:var(--cream-soft); }
+  .btn-outline{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .btn-add{ background:var(--cream); color:var(--green-deep); width:100%; justify-content:center; margin-bottom:10px; }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; }
+
+  .status-pill{ display:inline-block; padding:4px 12px; border-radius:999px; font-family:'Space Mono',monospace; font-size:0.72rem; margin-left:10px; }
+  .status-upcoming{ background:#e7dcc4; color:#6b4a12; }
+  .status-live{ background:#1b3a2f; color:#efe3c8; }
+  .status-ended{ background:#ddd; color:#555; }
+
+  #loginGate{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--green-deep); color:var(--cream-soft);
+  }
+  .login-box{ width:100%; max-width:360px; padding:0 24px; }
+  .login-box h1{ color:var(--cream-soft); font-size:1.6rem; }
+  .login-box label{ color:rgba(239,227,200,0.6); }
+  .login-box input{ background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); }
+  .login-err{ color:#f2a58c; font-size:0.82rem; margin-top:-8px; margin-bottom:14px; display:none; }
+
+  #adminApp{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginGate">
+  <div class="login-box">
+    <h1>Vestige Admin</h1>
+    <p style="color:rgba(239,227,200,0.65); font-weight:300; margin-bottom:26px;">Sign in to manage batches and listings.</p>
+    <label>Email</label>
+    <input type="email" id="loginEmail" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="loginPassword" autocomplete="current-password">
+    <p class="login-err" id="loginErr"></p>
+    <button class="btn btn-gold" id="loginBtn" style="width:100%; justify-content:center;">Sign In</button>
+  </div>
+</div>
+
+<div id="adminApp">
+  <div class="topbar">
+    <span class="brand">VESTIGE ADMIN</span>
+    <div style="display:flex; gap:20px; align-items:center;">
+      <a href="home.html">View Public Site</a>
+      <button id="signOutBtn">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="warn-banner">
+      <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
+      on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
+      Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
+    </div>
+
+    <h1>Batch &amp; Listing Manager</h1>
+    <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
+
+    <div class="card">
+      <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
+      <div class="grid3">
+        <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
+        <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
+        <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
+      </div>
+      <div class="grid3">
+        <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
+        <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
+        <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
+      </div>
+      <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
+    </div>
+
+    <div class="card">
+      <h2>Hot Items — This Batch</h2>
+      <div id="itemsContainer"></div>
+      <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
+    </div>
+
+    <div class="card">
+      <h2>Publish</h2>
+      <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
+      <div class="actions">
+        <button class="btn btn-gold" id="publishBtn">Publish to Live Site</button>
+      </div>
+      <div class="save-status" id="saveStatus"></div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const batchRef = doc(db, "vestige", "liveBatch");
+
+  const loginGate = document.getElementById('loginGate');
+  const adminApp = document.getElementById('adminApp');
+  const loginErr = document.getElementById('loginErr');
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    loginErr.style.display = 'none';
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch(err){
+      loginErr.textContent = "Sign-in failed — check your email and password.";
+      loginErr.style.display = 'block';
+    }
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (user){
+      loginGate.style.display = 'none';
+      adminApp.style.display = 'block';
+      loadCurrentBatch();
+    } else {
+      loginGate.style.display = 'flex';
+      adminApp.style.display = 'none';
+    }
+  });
+
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available' }; }
+
+  let state = {
+    batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
+    items: [defaultItem()]
+  };
+
+  async function loadCurrentBatch(){
+    try{
+      const snap = await getDoc(batchRef);
+      if (snap.exists()){
+        const data = snap.data();
+        state.batchNumber = data.batch?.number || '';
+        state.batchName = data.batch?.name || '';
+        state.listingDate = (data.batch?.listingDate || '').slice(0,16);
+        state.biddingStart = (data.batch?.biddingStart || '').slice(0,16);
+        state.biddingEnd = (data.batch?.biddingEnd || '').slice(0,16);
+        state.items = (data.hotItems || []).map(it => ({ id: uid(), ...it }));
+        if (state.items.length === 0) state.items = [defaultItem()];
+      }
+    } catch(err){
+      console.error('Could not load current batch:', err);
+    }
+    renderFields();
+  }
+
+  function renderFields(){
+    document.getElementById('batchNumber').value = state.batchNumber;
+    document.getElementById('batchName').value = state.batchName;
+    document.getElementById('listingDate').value = state.listingDate;
+    document.getElementById('biddingStart').value = state.biddingStart;
+    document.getElementById('biddingEnd').value = state.biddingEnd;
+    renderItems();
+    renderStatusPill();
+  }
+
+  function renderStatusPill(){
+    const pill = document.getElementById('status-pill');
+    const now = new Date();
+    const listing = state.listingDate ? new Date(state.listingDate) : null;
+    const bidStart = state.biddingStart ? new Date(state.biddingStart) : null;
+    const bidEnd = state.biddingEnd ? new Date(state.biddingEnd) : null;
+    let status = 'UPCOMING', cls = 'status-upcoming';
+    if (listing && bidStart && bidEnd){
+      if (now >= bidStart && now < bidEnd){ status = 'LIVE'; cls = 'status-live'; }
+      else if (now >= bidEnd){ status = 'ENDED'; cls = 'status-ended'; }
+    }
+    pill.textContent = status;
+    pill.className = 'status-pill ' + cls;
+  }
+
+  function renderItems(){
+    const c = document.getElementById('itemsContainer');
+    c.innerHTML = '';
+    state.items.forEach((it, idx) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <button class="remove-btn" data-idx="${idx}">REMOVE</button>
+        <div class="grid2">
+          <div><label>Brand</label><input type="text" data-field="brand" data-idx="${idx}" value="${it.brand}" placeholder="Fila Heritage"></div>
+          <div><label>Item Description</label><input type="text" data-field="item" data-idx="${idx}" value="${it.item}" placeholder="Embroidered crewneck · Black/Gold"></div>
+        </div>
+        <div class="grid3">
+          <div><label>Item Code</label><input type="text" data-field="code" data-idx="${idx}" value="${it.code}" placeholder="VG-014"></div>
+          <div><label>Size</label><input type="text" data-field="size" data-idx="${idx}" value="${it.size}" placeholder="M"></div>
+          <div><label>Starting Price (₱)</label><input type="number" min="0" data-field="price" data-idx="${idx}" value="${it.price}" placeholder="199"></div>
+        </div>
+        <div>
+          <label>Status</label>
+          <select data-field="status" data-idx="${idx}">
+            <option value="Available" ${it.status==='Available'?'selected':''}>Available</option>
+            <option value="1 Left" ${it.status==='1 Left'?'selected':''}>1 Left</option>
+            <option value="Claimed" ${it.status==='Claimed'?'selected':''}>Claimed</option>
+          </select>
+        </div>`;
+      c.appendChild(row);
+    });
+
+    c.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', (e) => {
+        const idx = Number(e.target.dataset.idx);
+        state.items[idx][e.target.dataset.field] = e.target.value;
+      });
+    });
+    c.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        state.items.splice(Number(e.target.dataset.idx), 1);
+        renderItems();
+      });
+    });
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    state.items.push(defaultItem());
+    renderItems();
+  });
+
+  ['batchNumber','batchName','listingDate','biddingStart','biddingEnd'].forEach(id => {
+    document.getElementById(id).addEventListener('input', (e) => {
+      state[id] = e.target.value;
+      renderStatusPill();
+    });
+  });
+
+  function buildPayload(){
+    return {
+      shop: { name: "Vestige Thrift Shop", timezone: "Asia/Manila", currency: "PHP" },
+      batch: {
+        number: state.batchNumber,
+        name: state.batchName,
+        listingDate: state.listingDate ? state.listingDate + ":00+08:00" : "",
+        biddingStart: state.biddingStart ? state.biddingStart + ":00+08:00" : "",
+        biddingEnd: state.biddingEnd ? state.biddingEnd + ":00+08:00" : ""
+      },
+      hotItems: state.items.map(it => ({
+        brand: it.brand, item: it.item, code: it.code, size: it.size,
+        price: Number(it.price) || 0, status: it.status
+      })),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  document.getElementById('publishBtn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.className = 'save-status';
+    statusEl.style.display = 'none';
+    try{
+      await setDoc(batchRef, buildPayload());
+      statusEl.textContent = 'Published — your live site is now updated.';
+      statusEl.className = 'save-status ok';
+    } catch(err){
+      console.error(err);
+      statusEl.textContent = 'Could not publish — check your Firestore rules allow this account to write.';
+      statusEl.className = 'save-status err';
+    }
+  });
+</script>
+
+</body>
+</html>
