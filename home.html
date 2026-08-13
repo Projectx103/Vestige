@@ -703,10 +703,14 @@
 
   function renderTagCard(item){
     const statusClass = item.status === 'Claimed' ? 'sold' : '';
+    const imgHtml = item.image
+      ? `<img src="${item.image}" alt="${item.brand} ${item.item}" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:8px;margin-bottom:14px;">`
+      : `<div style="width:100%;aspect-ratio:4/5;border-radius:8px;margin-bottom:14px;background:var(--paper);display:flex;align-items:center;justify-content:center;color:rgba(20,32,28,0.3);font-family:'Space Mono',monospace;font-size:0.7rem;">NO PHOTO YET</div>`;
     return `
       <article class="tag-card">
         <span class="tag-hole"></span>
         <span class="tag-status ${statusClass}">${item.status}</span>
+        ${imgHtml}
         <h3 class="tag-brand">${item.brand}</h3>
         <p class="tag-item">${item.item}</p>
         <div class="tag-meta">
