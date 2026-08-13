@@ -35,6 +35,62 @@
   .save-status.ok{ display:block; background:#e3f1e6; color:#1b5e2a; }
   .save-status.err{ display:block; background:#fbe3e0; color:var(--danger); }
 
+  /* ---------- Toast notification ---------- */
+  #toastLayer{
+    position:fixed; top:24px; right:24px; z-index:1000;
+    display:flex; flex-direction:column; gap:12px;
+    pointer-events:none;
+  }
+  @media (max-width:640px){
+    #toastLayer{ left:16px; right:16px; top:16px; }
+  }
+  .toast{
+    pointer-events:auto;
+    display:flex; align-items:flex-start; gap:12px;
+    min-width:280px; max-width:380px;
+    padding:16px 18px;
+    border-radius:12px;
+    background:var(--green-deep);
+    color:var(--cream-soft);
+    box-shadow:0 20px 40px -14px rgba(15,36,28,0.5);
+    border:1px solid rgba(239,227,200,0.14);
+    transform:translateX(420px);
+    opacity:0;
+    transition:transform .45s cubic-bezier(.22,.8,.32,1), opacity .45s;
+  }
+  .toast.in{ transform:translateX(0); opacity:1; }
+  .toast.out{ transform:translateX(420px); opacity:0; }
+  .toast-icon{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:0.85rem; font-weight:700;
+  }
+  .toast.toast-ok .toast-icon{ background:var(--gold); color:var(--green-deep); }
+  .toast.toast-err .toast-icon{ background:var(--danger); color:var(--cream-soft); }
+  .toast-body{ flex:1; }
+  .toast-title{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; margin:0 0 3px; }
+  .toast-msg{ font-size:0.8rem; color:rgba(239,227,200,0.72); font-weight:300; line-height:1.4; margin:0; }
+  .toast-close{
+    background:none; border:none; color:rgba(239,227,200,0.5); cursor:pointer;
+    font-size:1rem; line-height:1; padding:0 0 0 6px; flex-shrink:0;
+  }
+  .toast-close:hover{ color:var(--cream-soft); }
+
+  .btn[data-loading="true"]{
+    opacity:0.75; cursor:wait; pointer-events:none;
+  }
+  .btn-spinner{
+    width:14px; height:14px; border-radius:50%;
+    border:2px solid rgba(15,36,28,0.3); border-top-color:var(--green-deep);
+    animation:spin 0.7s linear infinite;
+    display:none;
+  }
+  .btn[data-loading="true"] .btn-spinner{ display:inline-block; }
+  .btn[data-loading="true"] .btn-label-default{ display:none; }
+  .btn-spinner-label{ display:none; }
+  .btn[data-loading="true"] .btn-spinner-label{ display:inline; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
   h1{ font-size:2rem; margin:0 0 6px; color:var(--green-deep); }
   .lead{ color:rgba(20,32,28,0.65); margin:0 0 34px; font-weight:300; }
 
@@ -84,6 +140,8 @@
 </style>
 </head>
 <body>
+
+<div id="toastLayer"></div>
 
 <div id="loginGate">
   <div class="login-box">
@@ -143,9 +201,12 @@
       <h2>Publish</h2>
       <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
       <div class="actions">
-        <button class="btn btn-gold" id="publishBtn">Publish to Live Site</button>
+        <button class="btn btn-gold" id="publishBtn">
+          <span class="btn-spinner"></span>
+          <span class="btn-label-default">Publish to Live Site</span>
+          <span class="btn-spinner-label">Publishing…</span>
+        </button>
       </div>
-      <div class="save-status" id="saveStatus"></div>
     </div>
 
   </div>
@@ -164,6 +225,20 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const batchRef = doc(db, "vestige", "liveBatch");
+
+  const CLOUDINARY_CLOUD_NAME = "dxv11m11i";
+  const CLOUDINARY_UPLOAD_PRESET = "vestige_signed";
+  const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+  async function uploadToCloudinary(file){
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Cloudinary upload failed');
+    const data = await res.json();
+    return data.secure_url;
+  }
 
   const loginGate = document.getElementById('loginGate');
   const adminApp = document.getElementById('adminApp');
@@ -195,7 +270,7 @@
   });
 
   function uid(){ return Math.random().toString(36).slice(2,9); }
-  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available' }; }
+  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available', image:'' }; }
 
   let state = {
     batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
@@ -258,6 +333,17 @@
           <div><label>Brand</label><input type="text" data-field="brand" data-idx="${idx}" value="${it.brand}" placeholder="Fila Heritage"></div>
           <div><label>Item Description</label><input type="text" data-field="item" data-idx="${idx}" value="${it.item}" placeholder="Embroidered crewneck · Black/Gold"></div>
         </div>
+        <div>
+          <label>Product Photo</label>
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <img data-preview="${idx}" src="${it.image || ''}" style="width:64px;height:80px;object-fit:cover;border-radius:6px;background:var(--cream-soft);border:1px solid var(--line);display:${it.image ? 'block' : 'none'};">
+            <label class="btn btn-outline" style="margin:0; cursor:pointer;">
+              Upload Photo
+              <input type="file" accept="image/*" data-upload-idx="${idx}" style="display:none;">
+            </label>
+            <span data-upload-status="${idx}" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5);"></span>
+          </div>
+        </div>
         <div class="grid3">
           <div><label>Item Code</label><input type="text" data-field="code" data-idx="${idx}" value="${it.code}" placeholder="VG-014"></div>
           <div><label>Size</label><input type="text" data-field="size" data-idx="${idx}" value="${it.size}" placeholder="M"></div>
@@ -278,6 +364,27 @@
       el.addEventListener('input', (e) => {
         const idx = Number(e.target.dataset.idx);
         state.items[idx][e.target.dataset.field] = e.target.value;
+      });
+    });
+    c.querySelectorAll('[data-upload-idx]').forEach(fileInput => {
+      fileInput.addEventListener('change', async (e) => {
+        const idx = Number(e.target.dataset.uploadIdx);
+        const file = e.target.files[0];
+        if (!file) return;
+        const statusEl = c.querySelector(`[data-upload-status="${idx}"]`);
+        const previewEl = c.querySelector(`[data-preview="${idx}"]`);
+        statusEl.textContent = 'Uploading…';
+        try{
+          const url = await uploadToCloudinary(file);
+          state.items[idx].image = url;
+          previewEl.src = url;
+          previewEl.style.display = 'block';
+          statusEl.textContent = 'Uploaded ✓';
+          setTimeout(() => { statusEl.textContent = ''; }, 3000);
+        } catch(err){
+          console.error(err);
+          statusEl.textContent = 'Upload failed';
+        }
       });
     });
     c.querySelectorAll('.remove-btn').forEach(btn => {
@@ -312,24 +419,56 @@
       },
       hotItems: state.items.map(it => ({
         brand: it.brand, item: it.item, code: it.code, size: it.size,
-        price: Number(it.price) || 0, status: it.status
+        price: Number(it.price) || 0, status: it.status, image: it.image || ''
       })),
       updatedAt: new Date().toISOString()
     };
   }
 
+  function showToast({ type = 'ok', title, message, duration = 4500 }){
+    const layer = document.getElementById('toastLayer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${type === 'ok' ? '✓' : '!'}</span>
+      <div class="toast-body">
+        <p class="toast-title">${title}</p>
+        <p class="toast-msg">${message}</p>
+      </div>
+      <button class="toast-close" aria-label="Dismiss">✕</button>
+    `;
+    layer.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('in'));
+
+    function dismiss(){
+      toast.classList.remove('in');
+      toast.classList.add('out');
+      setTimeout(() => toast.remove(), 450);
+    }
+    toast.querySelector('.toast-close').addEventListener('click', dismiss);
+    if (duration) setTimeout(dismiss, duration);
+  }
+
   document.getElementById('publishBtn').addEventListener('click', async () => {
-    const statusEl = document.getElementById('saveStatus');
-    statusEl.className = 'save-status';
-    statusEl.style.display = 'none';
+    const btn = document.getElementById('publishBtn');
+    btn.dataset.loading = 'true';
     try{
       await setDoc(batchRef, buildPayload());
-      statusEl.textContent = 'Published — your live site is now updated.';
-      statusEl.className = 'save-status ok';
+      showToast({
+        type: 'ok',
+        title: 'Published',
+        message: 'Your live site is updated — visitors will see the new batch now.'
+      });
     } catch(err){
       console.error(err);
-      statusEl.textContent = 'Could not publish — check your Firestore rules allow this account to write.';
-      statusEl.className = 'save-status err';
+      showToast({
+        type: 'err',
+        title: 'Publish Failed',
+        message: 'Could not save changes. Check your Firestore rules allow this account to write, then try again.',
+        duration: 7000
+      });
+    } finally {
+      btn.dataset.loading = 'false';
     }
   });
 </script>
