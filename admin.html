@@ -255,9 +255,9 @@
   }
   .product-card-fields{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
   .product-card-fields .full{ grid-column:1 / -1; }
-  .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:8px; width:90px; }
+  .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; width:150px; }
   .product-photo-col img{ width:80px; height:100px; object-fit:cover; border-radius:8px; background:var(--cream-soft); border:1px solid var(--line); }
-  .gallery-strip{ display:flex; flex-wrap:wrap; gap:6px; width:90px; justify-content:center; }
+  .gallery-strip{ display:flex; flex-wrap:wrap; gap:6px; width:150px; }
   .gallery-thumb{ position:relative; width:38px; height:38px; }
   .gallery-thumb img{ width:100%; height:100%; object-fit:cover; border-radius:5px; border:1px solid var(--line); }
   .gallery-thumb .x{
@@ -467,6 +467,23 @@
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     const res = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
     if (!res.ok) throw new Error('Cloudinary upload failed');
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  const CLOUDINARY_VIDEO_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+  const MAX_PRODUCT_IMAGES = 5;
+  const MAX_VIDEO_SIZE_MB = 50;
+
+  async function uploadVideoToCloudinary(file){
+    if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024){
+      throw new Error(`Video is too large — keep it under ${MAX_VIDEO_SIZE_MB}MB.`);
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(CLOUDINARY_VIDEO_UPLOAD_URL, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Cloudinary video upload failed');
     const data = await res.json();
     return data.secure_url;
   }
@@ -869,7 +886,7 @@
         const data = d.data();
         // Backward compat: older products saved a single "image" field. Fold it into images[].
         const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
-        return { id: d.id, ...data, images };
+        return { id: d.id, ...data, images, video: data.video || '' };
       });
       renderProductList();
     } catch(err){
@@ -894,10 +911,24 @@
               </div>
             `).join('')}
           </div>
-          <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
+          <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px; display:${(p.images || []).length >= 5 ? 'none' : 'inline-flex'};">
             + Add Photo
             <input type="file" accept="image/*" data-p-upload-idx="${idx}" style="display:none;">
           </label>
+          <span class="mono" style="font-size:0.62rem; color:rgba(20,32,28,0.4);">${(p.images || []).length}/5 photos</span>
+
+          <div style="width:100%; height:1px; background:var(--line); margin:6px 0;"></div>
+
+          ${p.video ? `
+            <div style="display:flex; align-items:center; gap:6px; font-size:0.68rem; color:var(--green-deep); font-family:'Space Mono',monospace;">▶ Video attached</div>
+            <button type="button" class="btn btn-outline" data-p-remove-video="${idx}" style="font-size:0.68rem; padding:6px 10px; color:var(--danger); border-color:var(--danger);">Remove Video</button>
+          ` : `
+            <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
+              + Add Video
+              <input type="file" accept="video/mp4" data-p-video-idx="${idx}" style="display:none;">
+            </label>
+          `}
+          <span class="mono" data-p-video-status="${idx}" style="font-size:0.62rem; color:rgba(20,32,28,0.4);"></span>
         </div>
         <div class="product-card-fields">
           <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${p.brand || ''}" placeholder="Fila Heritage"></div>
@@ -930,6 +961,10 @@
         const idx = Number(e.target.dataset.pUploadIdx);
         const file = e.target.files[0];
         if (!file) return;
+        if ((categoryProducts[idx].images || []).length >= MAX_PRODUCT_IMAGES){
+          showToast({ type: 'err', title: 'Photo Limit Reached', message: `Products can have up to ${MAX_PRODUCT_IMAGES} photos.` });
+          return;
+        }
         try{
           const url = await uploadToCloudinary(file);
           if (!categoryProducts[idx].images) categoryProducts[idx].images = [];
@@ -939,6 +974,31 @@
           console.error(err);
           showToast({ type: 'err', title: 'Upload Failed', message: 'Could not upload the photo. Try again.' });
         }
+      });
+    });
+    c.querySelectorAll('[data-p-video-idx]').forEach(fileInput => {
+      fileInput.addEventListener('change', async (e) => {
+        const idx = Number(e.target.dataset.pVideoIdx);
+        const file = e.target.files[0];
+        if (!file) return;
+        const statusEl = c.querySelector(`[data-p-video-status="${idx}"]`);
+        statusEl.textContent = 'Uploading video…';
+        try{
+          const url = await uploadVideoToCloudinary(file);
+          categoryProducts[idx].video = url;
+          renderProductList();
+        } catch(err){
+          console.error(err);
+          statusEl.textContent = '';
+          showToast({ type: 'err', title: 'Video Upload Failed', message: err.message || 'Could not upload the video. Try again.' });
+        }
+      });
+    });
+    c.querySelectorAll('[data-p-remove-video]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.target.dataset.pRemoveVideo);
+        categoryProducts[idx].video = '';
+        renderProductList();
       });
     });
     c.querySelectorAll('[data-p-remove-img]').forEach(btn => {
@@ -957,7 +1017,7 @@
         try{
           await updateDoc(doc(db, 'products', p.id), {
             brand: p.brand || '', item: p.item || '', price: Number(p.price) || 0,
-            status: p.status || 'Available', images: p.images || []
+            status: p.status || 'Available', images: p.images || [], video: p.video || ''
           });
           showToast({ type: 'ok', title: 'Product Saved', message: `${p.brand || 'Product'} updated successfully.` });
         } catch(err){
@@ -990,7 +1050,7 @@
     try{
       await addDoc(productsCol, {
         categoryId: currentCategoryId, brand: '', item: '', price: 0,
-        status: 'Available', images: [], createdAt: new Date().toISOString()
+        status: 'Available', images: [], video: '', createdAt: new Date().toISOString()
       });
       loadProductsForCategory(currentCategoryId);
     } catch(err){
