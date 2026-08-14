@@ -473,6 +473,7 @@
     VESTIGE
   </div>
   <ul class="nav-links">
+    <li><a href="shop.html">Shop</a></li>
     <li><a href="#pieces">This Week's Batch</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="#difference">The Difference</a></li>
@@ -686,11 +687,11 @@
   let countdownTarget = null;
 
   function tickCountdown(){
+    if (!countdownTarget){ return; }
     const elD = document.getElementById('cd-days');
     const elH = document.getElementById('cd-hours');
     const elM = document.getElementById('cd-mins');
     const elS = document.getElementById('cd-secs');
-    if (!countdownTarget){ return; }
     const diff = countdownTarget - new Date();
     if (diff <= 0){
       elD.textContent='00'; elH.textContent='00'; elM.textContent='00'; elS.textContent='00';
@@ -716,7 +717,7 @@
         <h3 class="tag-brand">${item.brand}</h3>
         <p class="tag-item">${item.item}</p>
         <div class="tag-meta">
-          <span class="tag-code">${item.code} / ${item.size}</span>
+          <span class="tag-code">Size ${item.size}</span>
           <span class="tag-price">₱${Number(item.price).toLocaleString()}</span>
         </div>
       </article>`;
