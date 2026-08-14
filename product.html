@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vestige — Product</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
+    --paper:#faf7f0; --gold:#c9a468; --gold-soft:#dcc190; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --line-on-dark:rgba(239,227,200,0.22);
+    --danger:#b3402f;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; line-height:1.5; }
+  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'Space Mono',monospace; }
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+
+  .nav{
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px;
+    background:rgba(250,247,240,0.9); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-logo{ font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; letter-spacing:0.14em; text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px; }
+  .nav-mark{ width:26px; height:26px; }
+  .nav-cta{ font-size:0.78rem; letter-spacing:0.05em; border:1px solid currentColor; padding:9px 18px; border-radius:999px; text-decoration:none; }
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:rgba(20,32,28,0.55); font-size:0.85rem; margin:30px 0 20px;
+  }
+  .back-link:hover{ color:var(--green-deep); }
+
+  .product-layout{
+    display:grid; grid-template-columns:1fr 1fr; gap:60px;
+    padding-bottom:90px; align-items:flex-start;
+  }
+  @media (max-width:860px){ .product-layout{ grid-template-columns:1fr; gap:30px; } }
+
+  /* ---------- Gallery ---------- */
+  .gallery-main{
+    width:100%; aspect-ratio:4/5; border-radius:16px; overflow:hidden;
+    background:var(--cream-soft); margin-bottom:14px; position:relative;
+  }
+  .gallery-main img{ width:100%; height:100%; object-fit:cover; }
+  .gallery-main .no-photo{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    color:rgba(20,32,28,0.28); font-family:'Space Mono',monospace; font-size:0.75rem;
+  }
+  .gallery-thumbs{ display:flex; gap:10px; flex-wrap:wrap; }
+  .gallery-thumbs img{
+    width:70px; height:88px; object-fit:cover; border-radius:8px; cursor:pointer;
+    border:2px solid transparent; opacity:0.7; transition:opacity .2s, border-color .2s;
+  }
+  .gallery-thumbs img:hover{ opacity:1; }
+  .gallery-thumbs img.active{ opacity:1; border-color:var(--gold); }
+
+  /* ---------- Info column ---------- */
+  .status-pill{
+    display:inline-block; padding:5px 13px; border-radius:999px; font-family:'Space Mono',monospace;
+    font-size:0.72rem; margin-bottom:16px; letter-spacing:0.03em;
+  }
+  .status-available{ background:#e3f1e6; color:#1b5e2a; }
+  .status-1left{ background:#fff3d6; color:#8a5a00; }
+  .status-claimed{ background:rgba(20,32,28,0.1); color:rgba(20,32,28,0.55); }
+
+  .p-brand{ font-size:clamp(1.8rem,3.4vw,2.5rem); margin:0 0 6px; color:var(--green-deep); font-weight:600; }
+  .p-desc{ color:rgba(20,32,28,0.62); font-weight:300; font-size:1rem; margin:0 0 22px; line-height:1.6; }
+  .p-price{ font-family:'Space Mono',monospace; font-weight:700; font-size:1.8rem; color:var(--green-deep); margin-bottom:26px; }
+  .p-price span{ font-size:0.65rem; letter-spacing:0.06em; text-transform:uppercase; color:rgba(20,32,28,0.45); display:block; font-weight:400; margin-bottom:4px; font-family:'Space Mono',monospace; }
+
+  .bid-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px; }
+  .bid-btn{
+    flex:1; min-width:120px; padding:16px 20px; border-radius:12px; border:none; cursor:pointer;
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; font-weight:600;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .bid-btn:hover{ transform:translateY(-2px); }
+  .bid-btn small{ font-family:'Space Mono',monospace; font-weight:400; font-size:0.68rem; opacity:0.75; }
+  .bid-mine{ background:var(--green-deep); color:var(--cream-soft); }
+  .bid-steal{ background:var(--gold); color:var(--green-deep); }
+  .bid-lock{ background:var(--ink); color:var(--cream-soft); }
+  .bid-btn[disabled]{ opacity:0.45; cursor:not-allowed; transform:none; }
+
+  .reviews-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    margin-bottom:26px;
+  }
+  .reviews-left{ display:flex; align-items:center; gap:10px; }
+  .reviews-count{ font-size:0.92rem; font-weight:500; }
+  .stars{ display:flex; gap:3px; }
+  .stars svg{ width:16px; height:16px; }
+
+  .fav-btn{
+    width:42px; height:42px; border-radius:50%; border:1.5px solid var(--ink);
+    background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:transform .2s;
+  }
+  .fav-btn:hover{ transform:scale(1.08); }
+  .fav-btn svg{ width:19px; height:19px; }
+  .fav-btn.active svg{ fill:var(--ink); }
+
+  .how-note{
+    background:var(--cream-soft); border-radius:12px; padding:16px 18px; font-size:0.85rem;
+    color:rgba(20,32,28,0.65); font-weight:300; line-height:1.6;
+  }
+  .how-note strong{ color:var(--green-deep); font-weight:600; }
+
+  /* ---------- Toast (same pattern as admin) ---------- */
+  #toastLayer{ position:fixed; top:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:12px; pointer-events:none; }
+  @media (max-width:640px){ #toastLayer{ left:16px; right:16px; top:16px; } }
+  .toast{
+    pointer-events:auto; display:flex; align-items:flex-start; gap:12px;
+    min-width:280px; max-width:380px; padding:16px 18px; border-radius:12px;
+    background:var(--green-deep); color:var(--cream-soft);
+    box-shadow:0 20px 40px -14px rgba(15,36,28,0.5); border:1px solid rgba(239,227,200,0.14);
+    transform:translateX(420px); opacity:0;
+    transition:transform .45s cubic-bezier(.22,.8,.32,1), opacity .45s;
+  }
+  .toast.in{ transform:translateX(0); opacity:1; }
+  .toast.out{ transform:translateX(420px); opacity:0; }
+  .toast-icon{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:0.85rem; font-weight:700;
+  }
+  .toast.toast-ok .toast-icon{ background:var(--gold); color:var(--green-deep); }
+  .toast-body{ flex:1; }
+  .toast-title{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; margin:0 0 3px; }
+  .toast-msg{ font-size:0.8rem; color:rgba(239,227,200,0.72); font-weight:300; line-height:1.4; margin:0; }
+  .toast-close{ background:none; border:none; color:rgba(239,227,200,0.5); cursor:pointer; font-size:1rem; padding:0 0 0 6px; flex-shrink:0; }
+
+  .loading-state{ padding:100px 0; text-align:center; color:rgba(20,32,28,0.45); font-weight:300; }
+</style>
+</head>
+<body>
+
+<div id="toastLayer"></div>
+
+<nav class="nav">
+  <a href="home.html" class="nav-logo">
+    <svg class="nav-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/>
+    </svg>
+    VESTIGE
+  </a>
+  <a class="nav-cta" href="home.html#regulars">Message Us</a>
+</nav>
+
+<div class="wrap">
+  <a href="shop.html" class="back-link">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    Back to Shop
+  </a>
+
+  <div id="loadingState" class="loading-state">Loading item…</div>
+
+  <div class="product-layout" id="productLayout" style="display:none;">
+
+    <div>
+      <div class="gallery-main" id="galleryMain"></div>
+      <div class="gallery-thumbs" id="galleryThumbs"></div>
+    </div>
+
+    <div>
+      <span class="status-pill" id="statusPill">Available</span>
+      <h1 class="p-brand" id="pBrand"></h1>
+      <p class="p-desc" id="pDesc"></p>
+
+      <div class="p-price"><span>Current Price</span><span id="pPrice"></span></div>
+
+      <div class="bid-actions">
+        <button class="bid-btn bid-mine" id="btnMine">Mine<small>Place next bid</small></button>
+        <button class="bid-btn bid-steal" id="btnSteal">Steal<small>Outbid current highest</small></button>
+        <button class="bid-btn bid-lock" id="btnLock">Lock<small>Reserve instantly</small></button>
+      </div>
+
+      <div class="reviews-row">
+        <div class="reviews-left">
+          <span class="reviews-count">Reviews (0)</span>
+          <div class="stars">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+          </div>
+        </div>
+        <button class="fav-btn" id="favBtn" aria-label="Add to favorites">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+        </button>
+      </div>
+
+      <div class="how-note">
+        <strong>How bidding works:</strong> Mine places the next bid at the current increment. Steal lets you outbid the highest bidder. Lock instantly reserves the item at the admin-set lock price. Whichever you choose, send a screenshot of your bid to our Facebook page to confirm it — that step is required either way.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const db = getFirestore(app);
+
+  function showToast({ type = 'ok', title, message, duration = 4500 }){
+    const layer = document.getElementById('toastLayer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${type === 'ok' ? '✓' : '!'}</span>
+      <div class="toast-body"><p class="toast-title">${title}</p><p class="toast-msg">${message}</p></div>
+      <button class="toast-close" aria-label="Dismiss">✕</button>
+    `;
+    layer.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('in'));
+    function dismiss(){ toast.classList.remove('in'); toast.classList.add('out'); setTimeout(() => toast.remove(), 450); }
+    toast.querySelector('.toast-close').addEventListener('click', dismiss);
+    if (duration) setTimeout(dismiss, duration);
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+
+  if (!productId){
+    document.getElementById('loadingState').textContent = "No item specified.";
+  } else {
+    const ref = doc(db, 'products', productId);
+    onSnapshot(ref, (snap) => {
+      if (!snap.exists()){
+        document.getElementById('loadingState').textContent = "This item couldn't be found — it may have been removed.";
+        return;
+      }
+      renderProduct({ id: snap.id, ...snap.data() });
+    }, (err) => {
+      console.error(err);
+      document.getElementById('loadingState').textContent = "Couldn't load this item.";
+    });
+  }
+
+  let currentGallery = [];
+
+  function renderProduct(p){
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('productLayout').style.display = 'grid';
+
+    document.title = `${p.brand || 'Item'} — Vestige`;
+    document.getElementById('pBrand').textContent = p.brand || 'Untitled';
+    document.getElementById('pDesc').textContent = p.item || '';
+    document.getElementById('pPrice').textContent = `₱${Number(p.price || 0).toLocaleString()}`;
+
+    const pill = document.getElementById('statusPill');
+    const statusMap = {
+      'Available': ['Available', 'status-available'],
+      '1 Left': ['1 Left', 'status-1left'],
+      'Claimed': ['Claimed', 'status-claimed']
+    };
+    const [label, cls] = statusMap[p.status] || statusMap['Available'];
+    pill.textContent = label;
+    pill.className = 'status-pill ' + cls;
+
+    const isClaimed = p.status === 'Claimed';
+    ['btnMine','btnSteal','btnLock'].forEach(id => {
+      document.getElementById(id).disabled = isClaimed;
+    });
+
+    currentGallery = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+    renderGallery(0);
+  }
+
+  function renderGallery(activeIdx){
+    const main = document.getElementById('galleryMain');
+    const thumbs = document.getElementById('galleryThumbs');
+
+    if (currentGallery.length === 0){
+      main.innerHTML = `<div class="no-photo">NO PHOTO YET</div>`;
+      thumbs.innerHTML = '';
+      return;
+    }
+
+    main.innerHTML = `<img src="${currentGallery[activeIdx]}" alt="">`;
+
+    if (currentGallery.length > 1){
+      thumbs.innerHTML = currentGallery.map((img, i) => `
+        <img src="${img}" class="${i === activeIdx ? 'active' : ''}" data-idx="${i}">
+      `).join('');
+      thumbs.querySelectorAll('img').forEach(el => {
+        el.addEventListener('click', () => renderGallery(Number(el.dataset.idx)));
+      });
+    } else {
+      thumbs.innerHTML = '';
+    }
+  }
+
+  // Mine / Steal / Lock — UI + placeholder feedback only.
+  // Real bidding logic (Firestore writes, increment/lock-price validation, auth gating) is built in Phase 6.
+  function bidPlaceholder(action){
+    showToast({
+      type: 'ok',
+      title: `${action} — Coming Soon`,
+      message: "The bidding system isn't wired up yet. For now, message us on Facebook with a screenshot of this item to bid."
+    });
+  }
+  document.getElementById('btnMine').addEventListener('click', () => bidPlaceholder('Mine'));
+  document.getElementById('btnSteal').addEventListener('click', () => bidPlaceholder('Steal'));
+  document.getElementById('btnLock').addEventListener('click', () => bidPlaceholder('Lock'));
+
+  // Favorite — UI + placeholder only. Real save-to-account logic is Phase 8 (needs accounts from Phase 5).
+  document.getElementById('favBtn').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    const nowActive = !btn.classList.contains('active');
+    btn.classList.toggle('active', nowActive);
+    showToast({
+      type: 'ok',
+      title: nowActive ? 'Added to Favorites' : 'Removed from Favorites',
+      message: nowActive
+        ? "This is stored locally for now — creating an account (Phase 5) will make favorites permanent."
+        : "Removed from your local favorites."
+    });
+  });
+</script>
+
+</body>
+</html>
