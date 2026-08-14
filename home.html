@@ -479,7 +479,10 @@
     <li><a href="#difference">The Difference</a></li>
     <li><a href="#regulars">Join Us</a></li>
   </ul>
-  <a class="nav-cta" href="#pieces">Shop the Drop</a>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <a class="nav-cta" href="#pieces">Shop the Drop</a>
+    <span class="nav-cta" id="accountIndicator" style="cursor:pointer;">Sign In</span>
+  </div>
 </nav>
 
 <header class="hero">
@@ -805,6 +808,27 @@
   });
 
   setInterval(tickCountdown, 1000);
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const app2 = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const auth = getAuth(app2);
+  const indicator = document.getElementById('accountIndicator');
+
+  onAuthStateChanged(auth, (user) => {
+    if (user){
+      indicator.textContent = user.email.split('@')[0];
+      indicator.onclick = async () => {
+        if (confirm('Sign out?')){ await signOut(auth); window.location.reload(); }
+      };
+    } else {
+      indicator.textContent = 'Sign In';
+      indicator.onclick = () => { window.location.href = `auth.html?redirect=${encodeURIComponent(window.location.pathname)}`; };
+    }
+  });
 </script>
 
 </body>
