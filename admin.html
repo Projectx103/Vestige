@@ -198,6 +198,66 @@
   }
   .placeholder-view h2{ font-size:1.6rem; margin:0 0 10px; color:var(--green-deep); }
   .placeholder-view p{ color:rgba(20,32,28,0.6); font-weight:300; }
+
+  /* ---------- Products & Categories (Phase 2) ---------- */
+  .nav-item-row{ display:flex; align-items:center; }
+  .nav-chevron{
+    display:none; margin-left:auto; padding:4px; color:rgba(239,227,200,0.5);
+    transition:transform .25s;
+  }
+  .sidebar.expanded .nav-chevron{ display:block; }
+  .nav-chevron.open{ transform:rotate(90deg); }
+
+  .nav-sublist{
+    display:none; flex-direction:column; gap:1px;
+    padding:2px 14px 6px 44px;
+  }
+  .sidebar.expanded .nav-sublist.open{ display:flex; }
+  .nav-subitem{
+    padding:9px 10px; border-radius:8px; cursor:pointer;
+    color:rgba(239,227,200,0.55); font-size:0.8rem;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:background .2s, color .2s;
+  }
+  .nav-subitem:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
+  .nav-subitem.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px;
+    color:rgba(20,32,28,0.55); text-decoration:none; font-size:0.82rem;
+    margin-bottom:18px; cursor:pointer; background:none; border:none; font-family:inherit; padding:0;
+  }
+  .back-link:hover{ color:var(--green-deep); }
+
+  .category-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+  .category-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px;
+    cursor:pointer; transition:border-color .2s, transform .2s;
+  }
+  .category-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
+  .category-card h3{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0 0 4px; color:var(--green-deep); }
+  .category-card .count{ font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5); }
+  .category-card-actions{ display:flex; gap:10px; margin-top:14px; }
+  .category-card-actions button{
+    background:none; border:none; cursor:pointer; font-family:'Space Mono',monospace;
+    font-size:0.68rem; letter-spacing:0.04em; color:rgba(20,32,28,0.5); padding:0;
+  }
+  .category-card-actions button:hover{ color:var(--green-deep); }
+  .category-card-actions button.danger:hover{ color:var(--danger); }
+
+  .add-category-row{ display:flex; gap:12px; align-items:flex-start; }
+  .add-category-row input{ margin-bottom:0; }
+  .add-category-row .btn{ flex-shrink:0; }
+
+  .product-card{
+    display:flex; gap:16px; background:#fff; border:1px solid var(--line);
+    border-radius:14px; padding:16px; margin-bottom:14px; align-items:flex-start;
+  }
+  .product-card-fields{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+  .product-card-fields .full{ grid-column:1 / -1; }
+  .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:8px; width:90px; }
+  .product-photo-col img{ width:80px; height:100px; object-fit:cover; border-radius:8px; background:var(--cream-soft); border:1px solid var(--line); }
+  .product-card-actions{ flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
 </style>
 </head>
 <body>
@@ -239,10 +299,12 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
           <span class="nav-label">Dashboard</span>
         </div>
-        <div class="nav-item" data-view="products">
+        <div class="nav-item nav-item-row" data-view="products" id="navProducts">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7" cy="7" r="1"></circle></svg>
           <span class="nav-label">Products</span>
+          <svg class="nav-chevron" id="productsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
+        <div class="nav-sublist" id="categorySubNav"></div>
         <div class="nav-item" data-view="batches">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           <span class="nav-label">Batches</span>
@@ -316,12 +378,34 @@
 
         </div>
 
-        <!-- PRODUCTS VIEW (placeholder — Phase 2) -->
+        <!-- PRODUCTS VIEW: Category Overview -->
         <div class="view" id="view-products">
-          <div class="placeholder-view">
-            <span class="tag">Coming in Phase 2</span>
-            <h2>Products &amp; Categories</h2>
-            <p>This is where you'll manage your full product catalog, organized into categories like Hoodies, Jackets, and Windbreakers — each with its own listing view.</p>
+          <h1>Products</h1>
+          <p class="lead">Organize your catalog into categories. Click a category to manage its products.</p>
+
+          <div class="card">
+            <h2>Categories</h2>
+            <div class="category-grid" id="categoryGrid"></div>
+            <div class="add-category-row">
+              <input type="text" id="newCategoryName" placeholder="e.g. Hoodies, Jackets, Windbreakers">
+              <button class="btn btn-gold" id="addCategoryBtn">+ Add Category</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY DETAIL VIEW -->
+        <div class="view" id="view-category-detail">
+          <button class="back-link" id="backToProductsBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Back to Products
+          </button>
+          <h1 id="categoryDetailName">Category</h1>
+          <p class="lead">Manage products within this category.</p>
+
+          <div class="card">
+            <h2>Products</h2>
+            <div id="productListContainer"></div>
+            <button class="btn btn-add" id="addProductBtn">+ Add Product</button>
           </div>
         </div>
 
@@ -355,13 +439,15 @@
     getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc
+    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const batchRef = doc(db, "vestige", "liveBatch");
+  const categoriesCol = collection(db, "categories");
+  const productsCol = collection(db, "products");
 
   const CLOUDINARY_CLOUD_NAME = "dxv11m11i";
   const CLOUDINARY_UPLOAD_PRESET = "vestige_signed";
@@ -403,6 +489,7 @@
       document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
       document.getElementById('profileName').textContent = email;
       loadCurrentBatch();
+      refreshCategoriesView();
     } else {
       loginGate.style.display = 'flex';
       adminApp.style.display = 'none';
@@ -415,14 +502,26 @@
     sidebar.classList.toggle('expanded');
   });
 
+  function switchView(viewName){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewName).classList.add('active');
+  }
+
   document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
       document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
+      document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
       const viewName = item.dataset.view;
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-' + viewName).classList.add('active');
+      switchView(viewName);
+      if (viewName === 'products') refreshCategoriesView();
     });
+  });
+
+  document.getElementById('productsChevron').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('productsChevron').classList.toggle('open');
+    document.getElementById('categorySubNav').classList.toggle('open');
   });
 
   // ---------- Batch & Hot Items state (unchanged from before) ----------
@@ -634,6 +733,248 @@
       });
     } finally {
       btn.dataset.loading = 'false';
+    }
+  });
+
+  // ---------- Phase 2: Categories & Products ----------
+  let categories = [];
+  let allProductsForCounts = [];
+  let currentCategoryId = null;
+  let categoryProducts = [];
+
+  async function refreshCategoriesView(){
+    try{
+      const [catSnap, prodSnap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol)]);
+      categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      allProductsForCounts = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCategorySidebar();
+      renderCategoryGrid();
+    } catch(err){
+      console.error('Could not load categories/products:', err);
+    }
+  }
+
+  function renderCategorySidebar(){
+    const nav = document.getElementById('categorySubNav');
+    nav.innerHTML = categories.map(cat => `
+      <div class="nav-subitem ${cat.id === currentCategoryId ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name}</div>
+    `).join('');
+    nav.querySelectorAll('.nav-subitem').forEach(el => {
+      el.addEventListener('click', () => {
+        const cat = categories.find(c => c.id === el.dataset.catId);
+        if (cat) openCategoryDetail(cat);
+      });
+    });
+  }
+
+  function renderCategoryGrid(){
+    const grid = document.getElementById('categoryGrid');
+    if (categories.length === 0){
+      grid.innerHTML = `<p class="lead" style="grid-column:1/-1; margin:0;">No categories yet — add your first one below.</p>`;
+      return;
+    }
+    grid.innerHTML = categories.map(cat => {
+      const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
+      return `
+        <div class="category-card" data-cat-id="${cat.id}">
+          <h3>${cat.name}</h3>
+          <span class="count">${count} product${count === 1 ? '' : 's'}</span>
+          <div class="category-card-actions">
+            <button type="button" data-edit-cat="${cat.id}">Rename</button>
+            <button type="button" class="danger" data-delete-cat="${cat.id}">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        const cat = categories.find(c => c.id === card.dataset.catId);
+        if (cat) openCategoryDetail(cat);
+      });
+    });
+    grid.querySelectorAll('[data-edit-cat]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const cat = categories.find(c => c.id === btn.dataset.editCat);
+        const newName = prompt('Rename category', cat.name);
+        if (newName && newName.trim()){
+          await updateDoc(doc(db, 'categories', cat.id), { name: newName.trim() });
+          refreshCategoriesView();
+        }
+      });
+    });
+    grid.querySelectorAll('[data-delete-cat]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const cat = categories.find(c => c.id === btn.dataset.deleteCat);
+        const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
+        const msg = count > 0
+          ? `Delete "${cat.name}"? ${count} product(s) in it will remain but become uncategorized.`
+          : `Delete "${cat.name}"?`;
+        if (!confirm(msg)) return;
+        await deleteDoc(doc(db, 'categories', cat.id));
+        showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
+        refreshCategoriesView();
+      });
+    });
+  }
+
+  document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+    const input = document.getElementById('newCategoryName');
+    const name = input.value.trim();
+    if (!name) return;
+    try{
+      await addDoc(categoriesCol, { name, createdAt: new Date().toISOString() });
+      input.value = '';
+      showToast({ type: 'ok', title: 'Category Added', message: `"${name}" is ready for products.` });
+      refreshCategoriesView();
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could Not Add Category', message: 'Check your Firestore rules and try again.' });
+    }
+  });
+
+  function openCategoryDetail(cat){
+    currentCategoryId = cat.id;
+    document.getElementById('categoryDetailName').textContent = cat.name;
+    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
+    document.getElementById('navProducts').classList.add('active');
+    renderCategorySidebar();
+    switchView('category-detail');
+    loadProductsForCategory(cat.id);
+  }
+
+  document.getElementById('backToProductsBtn').addEventListener('click', () => {
+    currentCategoryId = null;
+    document.getElementById('navProducts').classList.add('active');
+    renderCategorySidebar();
+    switchView('products');
+    refreshCategoriesView();
+  });
+
+  async function loadProductsForCategory(categoryId){
+    try{
+      const q = query(productsCol, where('categoryId', '==', categoryId));
+      const snap = await getDocs(q);
+      categoryProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderProductList();
+    } catch(err){
+      console.error('Could not load products:', err);
+    }
+  }
+
+  function renderProductList(){
+    const c = document.getElementById('productListContainer');
+    if (categoryProducts.length === 0){
+      c.innerHTML = `<p class="lead" style="margin:0 0 16px;">No products in this category yet.</p>`;
+      return;
+    }
+    c.innerHTML = categoryProducts.map((p, idx) => `
+      <div class="product-card" data-idx="${idx}">
+        <div class="product-photo-col">
+          <img data-p-preview="${idx}" src="${p.image || ''}" style="display:${p.image ? 'block' : 'none'};">
+          <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
+            ${p.image ? 'Replace' : 'Upload'}
+            <input type="file" accept="image/*" data-p-upload-idx="${idx}" style="display:none;">
+          </label>
+          <button type="button" class="btn btn-outline" data-p-remove-photo="${idx}" style="display:${p.image ? 'inline-flex' : 'none'}; font-size:0.7rem; padding:6px 10px; color:var(--danger); border-color:var(--danger);">Remove</button>
+        </div>
+        <div class="product-card-fields">
+          <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${p.brand || ''}" placeholder="Fila Heritage"></div>
+          <div><label>Price (₱)</label><input type="number" min="0" data-p-field="price" data-p-idx="${idx}" value="${p.price || ''}" placeholder="1450"></div>
+          <div class="full"><label>Description</label><input type="text" data-p-field="item" data-p-idx="${idx}" value="${p.item || ''}" placeholder="Embroidered crewneck · Black/Gold"></div>
+          <div>
+            <label>Status</label>
+            <select data-p-field="status" data-p-idx="${idx}">
+              <option value="Available" ${p.status==='Available'?'selected':''}>Available</option>
+              <option value="1 Left" ${p.status==='1 Left'?'selected':''}>1 Left</option>
+              <option value="Claimed" ${p.status==='Claimed'?'selected':''}>Claimed</option>
+            </select>
+          </div>
+        </div>
+        <div class="product-card-actions">
+          <button type="button" class="btn btn-gold" data-p-save="${idx}" style="font-size:0.78rem; padding:9px 16px;">Save</button>
+          <button type="button" class="btn btn-outline" data-p-delete="${idx}" style="font-size:0.78rem; padding:9px 16px; color:var(--danger); border-color:var(--danger);">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    c.querySelectorAll('[data-p-field]').forEach(el => {
+      el.addEventListener('input', (e) => {
+        const idx = Number(e.target.dataset.pIdx);
+        categoryProducts[idx][e.target.dataset.pField] = e.target.value;
+      });
+    });
+    c.querySelectorAll('[data-p-upload-idx]').forEach(fileInput => {
+      fileInput.addEventListener('change', async (e) => {
+        const idx = Number(e.target.dataset.pUploadIdx);
+        const file = e.target.files[0];
+        if (!file) return;
+        try{
+          const url = await uploadToCloudinary(file);
+          categoryProducts[idx].image = url;
+          renderProductList();
+        } catch(err){
+          console.error(err);
+          showToast({ type: 'err', title: 'Upload Failed', message: 'Could not upload the photo. Try again.' });
+        }
+      });
+    });
+    c.querySelectorAll('[data-p-remove-photo]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.target.dataset.pRemovePhoto);
+        categoryProducts[idx].image = '';
+        renderProductList();
+      });
+    });
+    c.querySelectorAll('[data-p-save]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const idx = Number(e.target.dataset.pSave);
+        const p = categoryProducts[idx];
+        btn.dataset.loading = 'true';
+        try{
+          await updateDoc(doc(db, 'products', p.id), {
+            brand: p.brand || '', item: p.item || '', price: Number(p.price) || 0,
+            status: p.status || 'Available', image: p.image || ''
+          });
+          showToast({ type: 'ok', title: 'Product Saved', message: `${p.brand || 'Product'} updated successfully.` });
+        } catch(err){
+          console.error(err);
+          showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
+        } finally {
+          btn.dataset.loading = 'false';
+        }
+      });
+    });
+    c.querySelectorAll('[data-p-delete]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const idx = Number(e.target.dataset.pDelete);
+        const p = categoryProducts[idx];
+        if (!confirm(`Delete "${p.brand || 'this product'}"? This can't be undone.`)) return;
+        try{
+          await deleteDoc(doc(db, 'products', p.id));
+          showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
+          loadProductsForCategory(currentCategoryId);
+        } catch(err){
+          console.error(err);
+          showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' });
+        }
+      });
+    });
+  }
+
+  document.getElementById('addProductBtn').addEventListener('click', async () => {
+    if (!currentCategoryId) return;
+    try{
+      await addDoc(productsCol, {
+        categoryId: currentCategoryId, brand: '', item: '', price: 0,
+        status: 'Available', image: '', createdAt: new Date().toISOString()
+      });
+      loadProductsForCategory(currentCategoryId);
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could Not Add Product', message: 'Check your Firestore rules and try again.' });
     }
   });
 </script>
