@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Vestige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
+    --paper:#faf7f0; --gold:#c9a468; --gold-soft:#dcc190; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --danger:#b3402f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(201,164,104,0.14), transparent 60%),
+      linear-gradient(180deg, var(--green-deep), var(--green) 70%);
+    color:var(--cream-soft); font-family:'Work Sans',sans-serif; padding:24px;
+  }
+  h1,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'Space Mono',monospace; }
+  a{ color:inherit; }
+
+  .auth-card{
+    width:100%; max-width:400px; background:rgba(239,227,200,0.05);
+    border:1px solid rgba(239,227,200,0.16); border-radius:20px;
+    padding:36px 32px; backdrop-filter:blur(6px);
+  }
+  .logo-row{ display:flex; align-items:center; gap:10px; margin-bottom:26px; text-decoration:none; color:inherit; }
+  .logo-row svg{ width:24px; height:24px; }
+  .logo-row span{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.12em; font-size:1rem; }
+
+  h1{ font-size:1.6rem; margin:0 0 6px; }
+  .lead{ color:rgba(239,227,200,0.62); font-weight:300; font-size:0.88rem; margin:0 0 26px; }
+
+  .tabs{ display:flex; gap:4px; background:rgba(0,0,0,0.18); border-radius:10px; padding:4px; margin-bottom:24px; }
+  .tab{
+    flex:1; text-align:center; padding:9px 0; border-radius:7px; cursor:pointer;
+    font-size:0.85rem; color:rgba(239,227,200,0.55); transition:background .2s, color .2s;
+  }
+  .tab.active{ background:var(--gold); color:var(--green-deep); font-weight:600; }
+
+  label{ display:block; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:rgba(239,227,200,0.5); margin-bottom:6px; font-family:'Space Mono',monospace; }
+  input{
+    width:100%; padding:12px 13px; border-radius:9px; border:1px solid rgba(239,227,200,0.22);
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; background:rgba(239,227,200,0.07);
+    color:var(--cream-soft); margin-bottom:16px;
+  }
+  input::placeholder{ color:rgba(239,227,200,0.3); }
+  input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+    padding:13px 20px; border-radius:999px; border:none; cursor:pointer;
+    font-family:'Work Sans',sans-serif; font-size:0.92rem; font-weight:600;
+    margin-bottom:12px; transition:transform .2s, box-shadow .2s;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn-gold{ background:var(--gold); color:var(--green-deep); }
+  .btn-google{ background:#fff; color:var(--ink); }
+  .btn-google svg{ width:18px; height:18px; }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; transform:none; }
+
+  .divider{ display:flex; align-items:center; gap:12px; margin:18px 0; color:rgba(239,227,200,0.35); font-size:0.75rem; }
+  .divider::before, .divider::after{ content:''; flex:1; height:1px; background:rgba(239,227,200,0.16); }
+
+  .err{ color:#f2a58c; font-size:0.82rem; margin:-8px 0 14px; display:none; line-height:1.4; }
+  .info-box{
+    background:rgba(201,164,104,0.12); border:1px solid rgba(201,164,104,0.3);
+    border-radius:10px; padding:16px 18px; font-size:0.85rem; color:var(--cream-soft);
+    line-height:1.55; display:none; margin-bottom:6px;
+  }
+  .info-box strong{ color:var(--gold-soft); }
+  .info-box a, .info-box button.linklike{
+    color:var(--gold); text-decoration:underline; cursor:pointer; background:none; border:none;
+    font-family:inherit; font-size:inherit; padding:0;
+  }
+
+  .guest-note{
+    margin-top:22px; padding-top:20px; border-top:1px solid rgba(239,227,200,0.14);
+    font-size:0.82rem; color:rgba(239,227,200,0.55); line-height:1.6;
+  }
+  .guest-note strong{ color:var(--cream-soft); }
+</style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <a href="home.html" class="logo-row">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/></svg>
+      <span>VESTIGE</span>
+    </a>
+
+    <div id="formArea">
+      <h1 id="cardTitle">Welcome back</h1>
+      <p class="lead" id="cardLead">Sign in to bid, favorite items, and track your orders.</p>
+
+      <div class="tabs">
+        <div class="tab active" id="tabSignIn">Sign In</div>
+        <div class="tab" id="tabSignUp">Sign Up</div>
+      </div>
+
+      <button class="btn btn-google" id="googleBtn">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.3-1.8 14-5l-6.5-5.5C29.6 35.3 27 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5C39.9 37.4 44 31.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <p class="err" id="formErr"></p>
+
+      <div id="signInFields">
+        <label>Email</label>
+        <input type="email" id="siEmail" autocomplete="username">
+        <label>Password</label>
+        <input type="password" id="siPassword" autocomplete="current-password">
+        <button class="btn btn-gold" id="signInBtn">Sign In</button>
+      </div>
+
+      <div id="signUpFields" style="display:none;">
+        <label>Email</label>
+        <input type="email" id="suEmail" autocomplete="username">
+        <label>Password</label>
+        <input type="password" id="suPassword" placeholder="At least 6 characters" autocomplete="new-password">
+        <label>Confirm Password</label>
+        <input type="password" id="suPasswordConfirm" autocomplete="new-password">
+        <button class="btn btn-gold" id="signUpBtn">Create Account</button>
+      </div>
+
+      <div class="guest-note">
+        <strong>Don't want an account?</strong> You can still bid — just message us on Facebook with a screenshot of the item and your bid. Signed-in accounts get a few extras (auto-generated bid receipts, saved favorites), but they're not required to buy.
+      </div>
+    </div>
+
+    <div class="info-box" id="verifyBox">
+      <p style="margin:0 0 10px;"><strong>Check your email.</strong></p>
+      <p style="margin:0 0 12px;">We sent a verification link to <span id="verifyEmail" class="mono"></span>. Click it to confirm your account before bidding.</p>
+      <button class="linklike" id="resendBtn">Resend verification email</button>
+      &nbsp;·&nbsp;
+      <a href="home.html">Continue to site</a>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const redirectTo = params.get('redirect') || 'home.html';
+
+  async function ensureUserProfile(user){
+    const ref = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()){
+      await setDoc(ref, {
+        email: user.email,
+        createdAt: new Date().toISOString(),
+        favorites: []
+      });
+    }
+  }
+
+  function showError(msg){
+    const err = document.getElementById('formErr');
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+  function clearError(){
+    document.getElementById('formErr').style.display = 'none';
+  }
+
+  // ---------- Tab switching ----------
+  const tabSignIn = document.getElementById('tabSignIn');
+  const tabSignUp = document.getElementById('tabSignUp');
+  tabSignIn.addEventListener('click', () => {
+    tabSignIn.classList.add('active'); tabSignUp.classList.remove('active');
+    document.getElementById('signInFields').style.display = 'block';
+    document.getElementById('signUpFields').style.display = 'none';
+    document.getElementById('cardTitle').textContent = 'Welcome back';
+    document.getElementById('cardLead').textContent = 'Sign in to bid, favorite items, and track your orders.';
+    clearError();
+  });
+  tabSignUp.addEventListener('click', () => {
+    tabSignUp.classList.add('active'); tabSignIn.classList.remove('active');
+    document.getElementById('signInFields').style.display = 'none';
+    document.getElementById('signUpFields').style.display = 'block';
+    document.getElementById('cardTitle').textContent = 'Create your account';
+    document.getElementById('cardLead').textContent = 'Bid faster, save favorites, and get auto-generated bid receipts.';
+    clearError();
+  });
+
+  // ---------- Sign in ----------
+  document.getElementById('signInBtn').addEventListener('click', async () => {
+    clearError();
+    const email = document.getElementById('siEmail').value.trim();
+    const password = document.getElementById('siPassword').value;
+    if (!email || !password){ showError('Enter your email and password.'); return; }
+    try{
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await ensureUserProfile(cred.user);
+      window.location.href = redirectTo;
+    } catch(err){
+      showError('Sign-in failed — check your email and password.');
+    }
+  });
+
+  // ---------- Sign up ----------
+  document.getElementById('signUpBtn').addEventListener('click', async () => {
+    clearError();
+    const email = document.getElementById('suEmail').value.trim();
+    const password = document.getElementById('suPassword').value;
+    const confirm = document.getElementById('suPasswordConfirm').value;
+    if (!email || !password){ showError('Fill in all fields.'); return; }
+    if (password.length < 6){ showError('Password must be at least 6 characters.'); return; }
+    if (password !== confirm){ showError('Passwords don\'t match.'); return; }
+    try{
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await ensureUserProfile(cred.user);
+      await sendEmailVerification(cred.user);
+      showVerifyBox(email);
+    } catch(err){
+      if (err.code === 'auth/email-already-in-use'){
+        showError('That email is already registered — try signing in instead.');
+      } else {
+        showError('Could not create your account. Please try again.');
+      }
+    }
+  });
+
+  // ---------- Google sign-in ----------
+  document.getElementById('googleBtn').addEventListener('click', async () => {
+    clearError();
+    try{
+      const provider = new GoogleAuthProvider();
+      const cred = await signInWithPopup(auth, provider);
+      await ensureUserProfile(cred.user);
+      window.location.href = redirectTo;
+    } catch(err){
+      showError('Google sign-in failed or was cancelled.');
+    }
+  });
+
+  // ---------- Resend verification ----------
+  document.getElementById('resendBtn').addEventListener('click', async () => {
+    if (auth.currentUser){
+      try{
+        await sendEmailVerification(auth.currentUser);
+        document.getElementById('resendBtn').textContent = 'Sent ✓';
+        setTimeout(() => { document.getElementById('resendBtn').textContent = 'Resend verification email'; }, 4000);
+      } catch(err){
+        console.error(err);
+      }
+    }
+  });
+
+  function showVerifyBox(email){
+    document.getElementById('formArea').style.display = 'none';
+    document.getElementById('verifyBox').style.display = 'block';
+    document.getElementById('verifyEmail').textContent = email;
+  }
+
+  // If already signed in and verified, skip straight through.
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.emailVerified){
+      // Only auto-redirect if we're not mid-signup-flow (verify box not showing)
+      if (document.getElementById('verifyBox').style.display !== 'block'){
+        window.location.href = redirectTo;
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
