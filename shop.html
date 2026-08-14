@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Vestige Thrift Shop</title>
+<meta name="description" content="Browse Vestige's curated, authenticated branded jackets, hoodies, and crewnecks by category.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --green-soft:#2c4f41;
+    --cream:#efe3c8; --cream-soft:#f8f3e6; --paper:#faf7f0;
+    --gold:#c9a468; --gold-soft:#dcc190; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --line-on-dark:rgba(239,227,200,0.22);
+    --ease:cubic-bezier(.22,.8,.32,1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; font-weight:400; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'Space Mono',monospace; }
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+  .wrap{ max-width:1280px; margin:0 auto; padding:0 28px; }
+
+  /* ---------- Nav (matches home.html) ---------- */
+  .nav{
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px;
+    background:rgba(250,247,240,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-logo{ font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; letter-spacing:0.14em; display:flex; align-items:center; gap:10px; }
+  .nav-mark{ width:26px; height:26px; }
+  .nav-links{ display:flex; gap:32px; font-size:0.82rem; letter-spacing:0.04em; list-style:none; margin:0; padding:0; }
+  .nav-links a{ text-decoration:none; opacity:0.85; }
+  .nav-links a:hover{ opacity:1; }
+  .nav-links a.active{ color:var(--gold); opacity:1; }
+  .nav-cta{ font-size:0.78rem; letter-spacing:0.05em; border:1px solid currentColor; padding:9px 18px; border-radius:999px; text-decoration:none; white-space:nowrap; }
+  @media (max-width:820px){ .nav-links{ display:none; } }
+
+  /* ---------- Shop header ---------- */
+  .shop-header{
+    background:var(--green-deep); color:var(--cream-soft);
+    padding:70px 0 50px;
+  }
+  .shop-header .eyebrow{
+    font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--gold-soft); display:block; margin-bottom:14px;
+  }
+  .shop-header h1{ font-size:clamp(2.4rem,5vw,3.8rem); margin:0 0 12px; font-weight:600; }
+  .shop-header p{ color:rgba(239,227,200,0.68); font-weight:300; max-width:480px; margin:0; }
+
+  /* ---------- Shop layout ---------- */
+  .shop-layout{
+    display:grid; grid-template-columns:220px 1fr; gap:44px;
+    padding:50px 0 100px;
+    align-items:flex-start;
+  }
+  @media (max-width:900px){ .shop-layout{ grid-template-columns:1fr; } }
+
+  /* Category sidebar (desktop) */
+  .cat-sidebar{
+    position:sticky; top:90px;
+  }
+  .cat-sidebar h3{
+    font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:rgba(20,32,28,0.45); margin:0 0 16px; font-weight:400;
+  }
+  .cat-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .cat-item{
+    padding:10px 14px; border-radius:8px; cursor:pointer;
+    font-size:0.92rem; color:rgba(20,32,28,0.62);
+    display:flex; justify-content:space-between; align-items:center;
+    transition:background .2s, color .2s;
+  }
+  .cat-item:hover{ background:var(--cream-soft); color:var(--ink); }
+  .cat-item.active{ background:var(--green-deep); color:var(--cream-soft); }
+  .cat-item .cnt{ font-family:'Space Mono',monospace; font-size:0.7rem; opacity:0.6; }
+
+  /* Category chips (mobile) */
+  .cat-chips{
+    display:none; gap:10px; overflow-x:auto; padding:4px 0 18px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .cat-chips::-webkit-scrollbar{ display:none; }
+  @media (max-width:900px){
+    .cat-sidebar{ display:none; }
+    .cat-chips{ display:flex; }
+  }
+  .chip{
+    flex-shrink:0; padding:9px 18px; border-radius:999px; border:1px solid var(--line);
+    font-size:0.82rem; white-space:nowrap; cursor:pointer; color:rgba(20,32,28,0.62);
+  }
+  .chip.active{ background:var(--green-deep); border-color:var(--green-deep); color:var(--cream-soft); }
+
+  /* Product grid */
+  .product-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:28px 22px;
+  }
+  .product-card{
+    background:#fff; border-radius:14px; overflow:hidden;
+    border:1px solid var(--line);
+    transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .product-card:hover{ transform:translateY(-4px); box-shadow:0 20px 34px -18px rgba(15,36,28,0.28); }
+  .product-photo{
+    position:relative; width:100%; aspect-ratio:4/5; background:var(--cream-soft);
+    overflow:hidden;
+  }
+  .product-photo img{ width:100%; height:100%; object-fit:cover; }
+  .product-photo .no-photo{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    color:rgba(20,32,28,0.28); font-family:'Space Mono',monospace; font-size:0.7rem;
+  }
+  .product-badge{
+    position:absolute; top:12px; left:12px;
+    font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.05em;
+    padding:5px 10px; border-radius:999px; background:var(--green-deep); color:var(--gold-soft);
+  }
+  .product-badge.sold{ background:rgba(20,32,28,0.75); color:#fff; }
+  .product-info{ padding:16px 16px 18px; }
+  .product-brand{ font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; margin:0 0 3px; }
+  .product-desc{ font-size:0.82rem; color:rgba(20,32,28,0.58); margin:0 0 10px; font-weight:300; line-height:1.4; }
+  .product-price{ font-family:'Space Mono',monospace; font-weight:700; font-size:1rem; color:var(--green-deep); }
+
+  .empty-state{
+    padding:80px 24px; text-align:center; color:rgba(20,32,28,0.5); font-weight:300;
+  }
+
+  footer{ padding:50px 0 40px; color:rgba(20,32,28,0.6); border-top:1px solid var(--line); }
+  .footer-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; padding-bottom:26px; }
+  .footer-logo{ font-family:'Fraunces',serif; font-size:1.2rem; font-weight:600; color:var(--green-deep); }
+  .footer-bottom{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.04em; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="home.html" class="nav-logo" style="text-decoration:none; color:inherit;">
+    <svg class="nav-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/>
+    </svg>
+    VESTIGE
+  </a>
+  <ul class="nav-links">
+    <li><a href="shop.html" class="active">Shop</a></li>
+    <li><a href="home.html#pieces">This Week's Batch</a></li>
+    <li><a href="home.html#how">How It Works</a></li>
+    <li><a href="home.html#regulars">Join Us</a></li>
+  </ul>
+  <a class="nav-cta" href="home.html#regulars">Message Us</a>
+</nav>
+
+<header class="shop-header">
+  <div class="wrap">
+    <span class="eyebrow">Full Catalog</span>
+    <h1>Shop</h1>
+    <p>Every curated, authenticated piece we've got — browse by category, no two the same.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="shop-layout">
+
+    <aside class="cat-sidebar">
+      <h3>Categories</h3>
+      <ul class="cat-list" id="catList">
+        <li class="cat-item active" data-cat-id="all">All Items <span class="cnt" id="countAll">0</span></li>
+      </ul>
+    </aside>
+
+    <div>
+      <div class="cat-chips" id="catChips">
+        <div class="chip active" data-cat-id="all">All Items</div>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">No products here yet — check back soon.</div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-logo">VESTIGE THRIFT SHOP</div>
+    </div>
+    <div class="footer-bottom">© <span id="year"></span> VESTIGE — CURATED SECONDHAND, MANILA</div>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const db = getFirestore(app);
+
+  let categories = [];
+  let products = [];
+  let activeCategoryId = 'all';
+
+  function renderCategoryNav(){
+    const counts = { all: products.length };
+    categories.forEach(cat => {
+      counts[cat.id] = products.filter(p => p.categoryId === cat.id).length;
+    });
+
+    const listHtml = [`<li class="cat-item ${activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all">All Items <span class="cnt">${counts.all}</span></li>`]
+      .concat(categories.map(cat => `
+        <li class="cat-item ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name} <span class="cnt">${counts[cat.id] || 0}</span></li>
+      `)).join('');
+    document.getElementById('catList').innerHTML = listHtml;
+
+    const chipsHtml = [`<div class="chip ${activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all">All Items</div>`]
+      .concat(categories.map(cat => `
+        <div class="chip ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name}</div>
+      `)).join('');
+    document.getElementById('catChips').innerHTML = chipsHtml;
+
+    document.querySelectorAll('[data-cat-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        activeCategoryId = el.dataset.catId;
+        renderCategoryNav();
+        renderProductGrid();
+      });
+    });
+  }
+
+  function renderProductGrid(){
+    const grid = document.getElementById('productGrid');
+    const emptyState = document.getElementById('emptyState');
+    const filtered = activeCategoryId === 'all'
+      ? products
+      : products.filter(p => p.categoryId === activeCategoryId);
+
+    if (filtered.length === 0){
+      grid.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    grid.innerHTML = filtered.map(p => {
+      const isSold = p.status === 'Claimed';
+      const photoHtml = p.image
+        ? `<img src="${p.image}" alt="${p.brand || ''} ${p.item || ''}">`
+        : `<div class="no-photo">NO PHOTO YET</div>`;
+      const badge = isSold
+        ? `<span class="product-badge sold">Claimed</span>`
+        : (p.status === '1 Left' ? `<span class="product-badge">1 Left</span>` : '');
+      return `
+        <div class="product-card">
+          <div class="product-photo">
+            ${photoHtml}
+            ${badge}
+          </div>
+          <div class="product-info">
+            <h3 class="product-brand">${p.brand || 'Untitled'}</h3>
+            <p class="product-desc">${p.item || ''}</p>
+            <span class="product-price">₱${Number(p.price || 0).toLocaleString()}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  onSnapshot(collection(db, 'categories'), (snap) => {
+    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCategoryNav();
+    renderProductGrid();
+  }, (err) => console.error('Categories listener error:', err));
+
+  onSnapshot(collection(db, 'products'), (snap) => {
+    products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCategoryNav();
+    renderProductGrid();
+  }, (err) => console.error('Products listener error:', err));
+</script>
+
+</body>
+</html>
