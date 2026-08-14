@@ -120,19 +120,12 @@
         <label>Password</label>
         <input type="password" id="siPassword" autocomplete="current-password">
         <button class="btn btn-gold" id="signInBtn">Sign In</button>
+        <p style="text-align:center; font-size:0.78rem; margin-top:10px;">
+          <button type="button" class="linklike" id="forgotAccessBtn" style="color:var(--gold); text-decoration:underline; background:none; border:none; cursor:pointer; font-family:inherit; font-size:inherit;">Signing in on a new device?</button>
+        </p>
       </div>
 
-      <div id="signUpFields" style="display:none;">
-        <label>Email</label>
-        <input type="email" id="suEmail" autocomplete="username">
-        <label>Password</label>
-        <input type="password" id="suPassword" placeholder="At least 6 characters" autocomplete="new-password">
-        <label>Confirm Password</label>
-        <input type="password" id="suPasswordConfirm" autocomplete="new-password">
-        <button class="btn btn-gold" id="signUpBtn">Create Account</button>
-      </div>
 
-      <div class="guest-note">
         <strong>Don't want an account?</strong> You can still bid — just message us on Facebook with a screenshot of the item and your bid. Signed-in accounts get a few extras (auto-generated bid receipts, saved favorites), but they're not required to buy.
       </div>
     </div>
@@ -149,8 +142,9 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged
+    getAuth, signInWithEmailAndPassword,
+    GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged,
+    sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc
@@ -196,12 +190,7 @@
     clearError();
   });
   tabSignUp.addEventListener('click', () => {
-    tabSignUp.classList.add('active'); tabSignIn.classList.remove('active');
-    document.getElementById('signInFields').style.display = 'none';
-    document.getElementById('signUpFields').style.display = 'block';
-    document.getElementById('cardTitle').textContent = 'Create your account';
-    document.getElementById('cardLead').textContent = 'Bid faster, save favorites, and get auto-generated bid receipts.';
-    clearError();
+    window.location.href = 'join.html';
   });
 
   // ---------- Sign in ----------
@@ -219,28 +208,20 @@
     }
   });
 
-  // ---------- Sign up ----------
-  document.getElementById('signUpBtn').addEventListener('click', async () => {
+  document.getElementById('forgotAccessBtn').addEventListener('click', async () => {
     clearError();
-    const email = document.getElementById('suEmail').value.trim();
-    const password = document.getElementById('suPassword').value;
-    const confirm = document.getElementById('suPasswordConfirm').value;
-    if (!email || !password){ showError('Fill in all fields.'); return; }
-    if (password.length < 6){ showError('Password must be at least 6 characters.'); return; }
-    if (password !== confirm){ showError('Passwords don\'t match.'); return; }
+    const email = document.getElementById('siEmail').value.trim();
+    if (!email){ showError('Enter your email above first, then tap this again.'); return; }
     try{
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await ensureUserProfile(cred.user);
-      await sendEmailVerification(cred.user);
-      showVerifyBox(email);
+      await sendPasswordResetEmail(auth, email);
+      showError('');
+      alert(`We sent an access-recovery email to ${email}. Follow the link there to set a new password for this device.`);
     } catch(err){
-      if (err.code === 'auth/email-already-in-use'){
-        showError('That email is already registered — try signing in instead.');
-      } else {
-        showError('Could not create your account. Please try again.');
-      }
+      showError('Could not send a recovery email — check the address is correct.');
     }
   });
+
+  // ---------- Sign up now happens via join.html (custom OTP flow) ----------
 
   // ---------- Google sign-in ----------
   document.getElementById('googleBtn').addEventListener('click', async () => {
