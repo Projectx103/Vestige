@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vestige Admin — Batch &amp; Listing Manager</title>
+<title>Vestige Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -13,49 +13,33 @@
     --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
     --paper:#faf7f0; --gold:#c9a468; --ink:#14201c; --line:rgba(20,32,28,0.14);
     --danger:#b3402f;
+    --sidebar-collapsed:76px; --sidebar-expanded:248px;
   }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; }
   h1,h2,.serif{ font-family:'Fraunces',serif; }
   .mono{ font-family:'Space Mono',monospace; }
-  .wrap{ max-width:960px; margin:0 auto; padding:40px 24px 100px; }
-
-  .topbar{
-    background:var(--green-deep); color:var(--cream-soft);
-    padding:20px 24px; display:flex; align-items:center; justify-content:space-between;
-  }
-  .topbar .brand{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.1em; }
-  .topbar a, .topbar button{ color:var(--gold); text-decoration:none; font-size:0.85rem; background:none; border:none; cursor:pointer; font-family:inherit; }
+  .wrap{ max-width:960px; margin:0 auto; padding:36px 32px 100px; }
+  svg{ display:block; }
 
   .warn-banner{
     background:#fff3e0; border:1px solid #e0b878; color:#6b4a12;
-    border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:24px 0 36px; line-height:1.5;
+    border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:0 0 30px; line-height:1.5;
   }
-  .save-status{ font-size:0.82rem; padding:10px 14px; border-radius:8px; margin-top:14px; display:none; }
-  .save-status.ok{ display:block; background:#e3f1e6; color:#1b5e2a; }
-  .save-status.err{ display:block; background:#fbe3e0; color:var(--danger); }
 
   /* ---------- Toast notification ---------- */
   #toastLayer{
     position:fixed; top:24px; right:24px; z-index:1000;
-    display:flex; flex-direction:column; gap:12px;
-    pointer-events:none;
+    display:flex; flex-direction:column; gap:12px; pointer-events:none;
   }
-  @media (max-width:640px){
-    #toastLayer{ left:16px; right:16px; top:16px; }
-  }
+  @media (max-width:640px){ #toastLayer{ left:16px; right:16px; top:16px; } }
   .toast{
-    pointer-events:auto;
-    display:flex; align-items:flex-start; gap:12px;
-    min-width:280px; max-width:380px;
-    padding:16px 18px;
-    border-radius:12px;
-    background:var(--green-deep);
-    color:var(--cream-soft);
+    pointer-events:auto; display:flex; align-items:flex-start; gap:12px;
+    min-width:280px; max-width:380px; padding:16px 18px; border-radius:12px;
+    background:var(--green-deep); color:var(--cream-soft);
     box-shadow:0 20px 40px -14px rgba(15,36,28,0.5);
     border:1px solid rgba(239,227,200,0.14);
-    transform:translateX(420px);
-    opacity:0;
+    transform:translateX(420px); opacity:0;
     transition:transform .45s cubic-bezier(.22,.8,.32,1), opacity .45s;
   }
   .toast.in{ transform:translateX(0); opacity:1; }
@@ -70,20 +54,14 @@
   .toast-body{ flex:1; }
   .toast-title{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; margin:0 0 3px; }
   .toast-msg{ font-size:0.8rem; color:rgba(239,227,200,0.72); font-weight:300; line-height:1.4; margin:0; }
-  .toast-close{
-    background:none; border:none; color:rgba(239,227,200,0.5); cursor:pointer;
-    font-size:1rem; line-height:1; padding:0 0 0 6px; flex-shrink:0;
-  }
+  .toast-close{ background:none; border:none; color:rgba(239,227,200,0.5); cursor:pointer; font-size:1rem; line-height:1; padding:0 0 0 6px; flex-shrink:0; }
   .toast-close:hover{ color:var(--cream-soft); }
 
-  .btn[data-loading="true"]{
-    opacity:0.75; cursor:wait; pointer-events:none;
-  }
+  .btn[data-loading="true"]{ opacity:0.75; cursor:wait; pointer-events:none; }
   .btn-spinner{
     width:14px; height:14px; border-radius:50%;
     border:2px solid rgba(15,36,28,0.3); border-top-color:var(--green-deep);
-    animation:spin 0.7s linear infinite;
-    display:none;
+    animation:spin 0.7s linear infinite; display:none;
   }
   .btn[data-loading="true"] .btn-spinner{ display:inline-block; }
   .btn[data-loading="true"] .btn-label-default{ display:none; }
@@ -91,8 +69,8 @@
   .btn[data-loading="true"] .btn-spinner-label{ display:inline; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  h1{ font-size:2rem; margin:0 0 6px; color:var(--green-deep); }
-  .lead{ color:rgba(20,32,28,0.65); margin:0 0 34px; font-weight:300; }
+  h1{ font-size:1.9rem; margin:0 0 6px; color:var(--green-deep); }
+  .lead{ color:rgba(20,32,28,0.65); margin:0 0 30px; font-weight:300; }
 
   .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:28px 26px; margin-bottom:26px; }
   .card h2{ font-size:1.2rem; margin:0 0 20px; color:var(--green-deep); }
@@ -126,6 +104,7 @@
   .status-live{ background:#1b3a2f; color:#efe3c8; }
   .status-ended{ background:#ddd; color:#555; }
 
+  /* ---------- Login gate ---------- */
   #loginGate{
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--green-deep); color:var(--cream-soft);
@@ -136,7 +115,89 @@
   .login-box input{ background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); }
   .login-err{ color:#f2a58c; font-size:0.82rem; margin-top:-8px; margin-bottom:14px; display:none; }
 
+  /* ---------- Admin shell: sidebar + content ---------- */
   #adminApp{ display:none; }
+  .admin-shell{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width:var(--sidebar-collapsed);
+    background:var(--green-deep); color:var(--cream-soft);
+    flex-shrink:0;
+    display:flex; flex-direction:column;
+    transition:width .32s cubic-bezier(.22,.8,.32,1);
+    overflow:hidden;
+    position:sticky; top:0; height:100vh;
+  }
+  .sidebar.expanded{ width:var(--sidebar-expanded); }
+
+  .sidebar-top{
+    padding:22px 0 18px; display:flex; flex-direction:column; align-items:center;
+    border-bottom:1px solid rgba(239,227,200,0.12);
+  }
+  .sidebar.expanded .sidebar-top{ align-items:flex-start; padding:22px 20px 18px; }
+
+  .avatar-circle{
+    width:44px; height:44px; border-radius:50%;
+    background:var(--gold); color:var(--green-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem;
+    flex-shrink:0; overflow:hidden;
+  }
+  .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+
+  .profile-info{
+    display:none; flex-direction:column; margin-top:12px; width:100%;
+  }
+  .sidebar.expanded .profile-info{ display:flex; }
+  .profile-name{ font-family:'Fraunces',serif; font-size:0.95rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .profile-role{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.06em; color:var(--gold-soft,#dcc190); text-transform:uppercase; margin-top:2px; }
+
+  .sidebar-toggle{
+    background:none; border:none; color:rgba(239,227,200,0.55); cursor:pointer;
+    padding:14px 0; display:flex; align-items:center; justify-content:center;
+    width:100%; border-bottom:1px solid rgba(239,227,200,0.12);
+  }
+  .sidebar-toggle:hover{ color:var(--cream-soft); }
+  .sidebar.expanded .sidebar-toggle{ justify-content:flex-end; padding-right:20px; }
+  .sidebar-toggle svg{ transition:transform .32s ease; }
+  .sidebar.expanded .sidebar-toggle svg{ transform:rotate(180deg); }
+
+  .sidebar-nav{ flex:1; padding:14px 0; display:flex; flex-direction:column; gap:2px; }
+  .nav-item{
+    display:flex; align-items:center; gap:16px;
+    padding:13px 0; margin:0 14px; border-radius:10px;
+    cursor:pointer; color:rgba(239,227,200,0.65);
+    justify-content:center;
+    transition:background .2s, color .2s;
+  }
+  .sidebar.expanded .nav-item{ justify-content:flex-start; padding:13px 14px; }
+  .nav-item:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
+  .nav-item.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
+  .nav-item svg{ flex-shrink:0; }
+  .nav-label{ display:none; white-space:nowrap; font-size:0.86rem; font-weight:500; }
+  .sidebar.expanded .nav-label{ display:inline; }
+
+  .sidebar-bottom{
+    padding:14px 0; border-top:1px solid rgba(239,227,200,0.12);
+    display:flex; flex-direction:column; gap:2px;
+  }
+
+  .main-content{ flex:1; min-width:0; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .placeholder-view{
+    display:flex; flex-direction:column; align-items:flex-start;
+    justify-content:center; min-height:60vh; max-width:420px;
+  }
+  .placeholder-view .tag{
+    font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--gold); background:rgba(201,164,104,0.12);
+    padding:5px 12px; border-radius:999px; margin-bottom:16px;
+  }
+  .placeholder-view h2{ font-size:1.6rem; margin:0 0 10px; color:var(--green-deep); }
+  .placeholder-view p{ color:rgba(20,32,28,0.6); font-weight:300; }
 </style>
 </head>
 <body>
@@ -157,55 +218,131 @@
 </div>
 
 <div id="adminApp">
-  <div class="topbar">
-    <span class="brand">VESTIGE ADMIN</span>
-    <div style="display:flex; gap:20px; align-items:center;">
-      <a href="home.html">View Public Site</a>
-      <button id="signOutBtn">Sign Out</button>
-    </div>
-  </div>
+  <div class="admin-shell">
 
-  <div class="wrap">
-
-    <div class="warn-banner">
-      <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
-      on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
-      Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
-    </div>
-
-    <h1>Batch &amp; Listing Manager</h1>
-    <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
-
-    <div class="card">
-      <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
-      <div class="grid3">
-        <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
-        <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
-        <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
+    <!-- ---------- SIDEBAR ---------- -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="avatar-circle" id="avatarCircle">V</div>
+        <div class="profile-info">
+          <span class="profile-name" id="profileName">Admin</span>
+          <span class="profile-role">Vestige Admin</span>
+        </div>
       </div>
-      <div class="grid3">
-        <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
-        <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
-        <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
+
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Expand menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+
+      <div class="sidebar-nav">
+        <div class="nav-item active" data-view="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" data-view="products">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7" cy="7" r="1"></circle></svg>
+          <span class="nav-label">Products</span>
+        </div>
+        <div class="nav-item" data-view="batches">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span class="nav-label">Batches</span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          <span class="nav-label">Settings</span>
+        </div>
       </div>
-      <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
-    </div>
 
-    <div class="card">
-      <h2>Hot Items — This Batch</h2>
-      <div id="itemsContainer"></div>
-      <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
-    </div>
+      <div class="sidebar-bottom">
+        <a href="home.html" class="nav-item" style="text-decoration:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
+          <span class="nav-label">View Public Site</span>
+        </a>
+        <div class="nav-item" id="signOutBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span class="nav-label">Sign Out</span>
+        </div>
+      </div>
+    </nav>
 
-    <div class="card">
-      <h2>Publish</h2>
-      <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
-      <div class="actions">
-        <button class="btn btn-gold" id="publishBtn">
-          <span class="btn-spinner"></span>
-          <span class="btn-label-default">Publish to Live Site</span>
-          <span class="btn-spinner-label">Publishing…</span>
-        </button>
+    <!-- ---------- MAIN CONTENT ---------- -->
+    <div class="main-content">
+      <div class="wrap">
+
+        <!-- DASHBOARD VIEW -->
+        <div class="view active" id="view-dashboard">
+
+          <div class="warn-banner">
+            <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
+            on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
+            Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
+          </div>
+
+          <h1>Batch &amp; Listing Manager</h1>
+          <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
+
+          <div class="card">
+            <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
+            <div class="grid3">
+              <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
+              <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
+              <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
+            </div>
+            <div class="grid3">
+              <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
+              <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
+              <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
+            </div>
+            <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
+          </div>
+
+          <div class="card">
+            <h2>Hot Items — This Batch</h2>
+            <div id="itemsContainer"></div>
+            <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
+          </div>
+
+          <div class="card">
+            <h2>Publish</h2>
+            <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
+            <div class="actions">
+              <button class="btn btn-gold" id="publishBtn">
+                <span class="btn-spinner"></span>
+                <span class="btn-label-default">Publish to Live Site</span>
+                <span class="btn-spinner-label">Publishing…</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PRODUCTS VIEW (placeholder — Phase 2) -->
+        <div class="view" id="view-products">
+          <div class="placeholder-view">
+            <span class="tag">Coming in Phase 2</span>
+            <h2>Products &amp; Categories</h2>
+            <p>This is where you'll manage your full product catalog, organized into categories like Hoodies, Jackets, and Windbreakers — each with its own listing view.</p>
+          </div>
+        </div>
+
+        <!-- BATCHES VIEW (placeholder — future phase) -->
+        <div class="view" id="view-batches">
+          <div class="placeholder-view">
+            <span class="tag">Coming soon</span>
+            <h2>Batch History</h2>
+            <p>A dedicated view of past and upcoming batches, separate from the live Dashboard editor, is planned for a later phase.</p>
+          </div>
+        </div>
+
+        <!-- SETTINGS VIEW (placeholder — future phase) -->
+        <div class="view" id="view-settings">
+          <div class="placeholder-view">
+            <span class="tag">Coming soon</span>
+            <h2>Settings</h2>
+            <p>Shop name, social links, and other configuration will live here in a later phase.</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -262,6 +399,9 @@
     if (user){
       loginGate.style.display = 'none';
       adminApp.style.display = 'block';
+      const email = user.email || 'Admin';
+      document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
+      document.getElementById('profileName').textContent = email;
       loadCurrentBatch();
     } else {
       loginGate.style.display = 'flex';
@@ -269,6 +409,23 @@
     }
   });
 
+  // ---------- Sidebar expand/collapse + nav switching ----------
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    sidebar.classList.toggle('expanded');
+  });
+
+  document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      const viewName = item.dataset.view;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + viewName).classList.add('active');
+    });
+  });
+
+  // ---------- Batch & Hot Items state (unchanged from before) ----------
   function uid(){ return Math.random().toString(36).slice(2,9); }
   function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available', image:'' }; }
 
@@ -309,11 +466,10 @@
   function renderStatusPill(){
     const pill = document.getElementById('status-pill');
     const now = new Date();
-    const listing = state.listingDate ? new Date(state.listingDate) : null;
     const bidStart = state.biddingStart ? new Date(state.biddingStart) : null;
     const bidEnd = state.biddingEnd ? new Date(state.biddingEnd) : null;
     let status = 'UPCOMING', cls = 'status-upcoming';
-    if (listing && bidStart && bidEnd){
+    if (bidStart && bidEnd){
       if (now >= bidStart && now < bidEnd){ status = 'LIVE'; cls = 'status-live'; }
       else if (now >= bidEnd){ status = 'ENDED'; cls = 'status-ended'; }
     }
@@ -338,9 +494,10 @@
           <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
             <img data-preview="${idx}" src="${it.image || ''}" style="width:64px;height:80px;object-fit:cover;border-radius:6px;background:var(--cream-soft);border:1px solid var(--line);display:${it.image ? 'block' : 'none'};">
             <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-              Upload Photo
+              ${it.image ? 'Replace Photo' : 'Upload Photo'}
               <input type="file" accept="image/*" data-upload-idx="${idx}" style="display:none;">
             </label>
+            <button type="button" class="btn btn-outline" data-remove-photo-idx="${idx}" style="display:${it.image ? 'inline-flex' : 'none'}; color:var(--danger); border-color:var(--danger);">Remove</button>
             <span data-upload-status="${idx}" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5);"></span>
           </div>
         </div>
@@ -381,10 +538,18 @@
           previewEl.style.display = 'block';
           statusEl.textContent = 'Uploaded ✓';
           setTimeout(() => { statusEl.textContent = ''; }, 3000);
+          renderItems();
         } catch(err){
           console.error(err);
           statusEl.textContent = 'Upload failed';
         }
+      });
+    });
+    c.querySelectorAll('[data-remove-photo-idx]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.target.dataset.removePhotoIdx);
+        state.items[idx].image = '';
+        renderItems();
       });
     });
     c.querySelectorAll('.remove-btn').forEach(btn => {
