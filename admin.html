@@ -257,6 +257,14 @@
   .product-card-fields .full{ grid-column:1 / -1; }
   .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:8px; width:90px; }
   .product-photo-col img{ width:80px; height:100px; object-fit:cover; border-radius:8px; background:var(--cream-soft); border:1px solid var(--line); }
+  .gallery-strip{ display:flex; flex-wrap:wrap; gap:6px; width:90px; justify-content:center; }
+  .gallery-thumb{ position:relative; width:38px; height:38px; }
+  .gallery-thumb img{ width:100%; height:100%; object-fit:cover; border-radius:5px; border:1px solid var(--line); }
+  .gallery-thumb .x{
+    position:absolute; top:-5px; right:-5px; width:16px; height:16px; border-radius:50%;
+    background:var(--danger); color:#fff; font-size:0.6rem; line-height:16px; text-align:center;
+    cursor:pointer; border:1px solid var(--paper);
+  }
   .product-card-actions{ flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
 </style>
 </head>
@@ -857,7 +865,12 @@
     try{
       const q = query(productsCol, where('categoryId', '==', categoryId));
       const snap = await getDocs(q);
-      categoryProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      categoryProducts = snap.docs.map(d => {
+        const data = d.data();
+        // Backward compat: older products saved a single "image" field. Fold it into images[].
+        const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
+        return { id: d.id, ...data, images };
+      });
       renderProductList();
     } catch(err){
       console.error('Could not load products:', err);
@@ -873,12 +886,18 @@
     c.innerHTML = categoryProducts.map((p, idx) => `
       <div class="product-card" data-idx="${idx}">
         <div class="product-photo-col">
-          <img data-p-preview="${idx}" src="${p.image || ''}" style="display:${p.image ? 'block' : 'none'};">
+          <div class="gallery-strip" data-gallery="${idx}">
+            ${(p.images || []).map((img, imgIdx) => `
+              <div class="gallery-thumb">
+                <img src="${img}">
+                <span class="x" data-p-remove-img="${idx}" data-img-idx="${imgIdx}">✕</span>
+              </div>
+            `).join('')}
+          </div>
           <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
-            ${p.image ? 'Replace' : 'Upload'}
+            + Add Photo
             <input type="file" accept="image/*" data-p-upload-idx="${idx}" style="display:none;">
           </label>
-          <button type="button" class="btn btn-outline" data-p-remove-photo="${idx}" style="display:${p.image ? 'inline-flex' : 'none'}; font-size:0.7rem; padding:6px 10px; color:var(--danger); border-color:var(--danger);">Remove</button>
         </div>
         <div class="product-card-fields">
           <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${p.brand || ''}" placeholder="Fila Heritage"></div>
@@ -913,7 +932,8 @@
         if (!file) return;
         try{
           const url = await uploadToCloudinary(file);
-          categoryProducts[idx].image = url;
+          if (!categoryProducts[idx].images) categoryProducts[idx].images = [];
+          categoryProducts[idx].images.push(url);
           renderProductList();
         } catch(err){
           console.error(err);
@@ -921,10 +941,11 @@
         }
       });
     });
-    c.querySelectorAll('[data-p-remove-photo]').forEach(btn => {
+    c.querySelectorAll('[data-p-remove-img]').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.pRemovePhoto);
-        categoryProducts[idx].image = '';
+        const idx = Number(e.target.dataset.pRemoveImg);
+        const imgIdx = Number(e.target.dataset.imgIdx);
+        categoryProducts[idx].images.splice(imgIdx, 1);
         renderProductList();
       });
     });
@@ -936,7 +957,7 @@
         try{
           await updateDoc(doc(db, 'products', p.id), {
             brand: p.brand || '', item: p.item || '', price: Number(p.price) || 0,
-            status: p.status || 'Available', image: p.image || ''
+            status: p.status || 'Available', images: p.images || []
           });
           showToast({ type: 'ok', title: 'Product Saved', message: `${p.brand || 'Product'} updated successfully.` });
         } catch(err){
@@ -969,7 +990,7 @@
     try{
       await addDoc(productsCol, {
         categoryId: currentCategoryId, brand: '', item: '', price: 0,
-        status: 'Available', image: '', createdAt: new Date().toISOString()
+        status: 'Available', images: [], createdAt: new Date().toISOString()
       });
       loadProductsForCategory(currentCategoryId);
     } catch(err){
