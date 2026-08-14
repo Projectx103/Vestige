@@ -252,7 +252,7 @@
     });
   }
 
-  let currentGallery = [];
+  let currentGallery = []; // array of { type: 'image'|'video', url }
 
   function renderProduct(p){
     document.getElementById('loadingState').style.display = 'none';
@@ -278,7 +278,9 @@
       document.getElementById(id).disabled = isClaimed;
     });
 
-    currentGallery = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+    const images = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+    currentGallery = images.map(url => ({ type: 'image', url }));
+    if (p.video){ currentGallery.push({ type: 'video', url: p.video }); }
     renderGallery(0);
   }
 
@@ -292,13 +294,19 @@
       return;
     }
 
-    main.innerHTML = `<img src="${currentGallery[activeIdx]}" alt="">`;
+    const active = currentGallery[activeIdx];
+    main.innerHTML = active.type === 'video'
+      ? `<video src="${active.url}" controls playsinline style="width:100%; height:100%; object-fit:cover; background:#000;"></video>`
+      : `<img src="${active.url}" alt="">`;
 
     if (currentGallery.length > 1){
-      thumbs.innerHTML = currentGallery.map((img, i) => `
-        <img src="${img}" class="${i === activeIdx ? 'active' : ''}" data-idx="${i}">
-      `).join('');
-      thumbs.querySelectorAll('img').forEach(el => {
+      thumbs.innerHTML = currentGallery.map((item, i) => {
+        if (item.type === 'video'){
+          return `<div class="gallery-thumb-video ${i === activeIdx ? 'active' : ''}" data-idx="${i}" style="width:70px;height:88px;border-radius:8px;background:var(--ink);color:var(--cream-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;border:2px solid ${i === activeIdx ? 'var(--gold)' : 'transparent'};opacity:${i === activeIdx ? '1' : '0.7'};">▶</div>`;
+        }
+        return `<img src="${item.url}" class="${i === activeIdx ? 'active' : ''}" data-idx="${i}">`;
+      }).join('');
+      thumbs.querySelectorAll('[data-idx]').forEach(el => {
         el.addEventListener('click', () => renderGallery(Number(el.dataset.idx)));
       });
     } else {
