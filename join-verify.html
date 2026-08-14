@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify — Vestige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
+    --paper:#faf7f0; --gold:#c9a468; --gold-soft:#dcc190; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --danger:#b3402f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+    background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; padding:50px 24px;
+  }
+  h1,.serif{ font-family:'Fraunces',serif; }
+  a{ color:inherit; }
+
+  .join-card{ width:100%; max-width:420px; text-align:center; }
+  .logo-row{ display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:34px; text-decoration:none; color:var(--green-deep); }
+  .logo-row svg{ width:22px; height:22px; }
+  .logo-row span{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.14em; font-size:1.05rem; }
+
+  h1{ font-size:1.5rem; margin:0 0 10px; color:var(--green-deep); font-weight:600; }
+  .sent-to{ font-size:0.88rem; color:rgba(20,32,28,0.6); margin:0 0 30px; }
+  .sent-to b{ color:var(--ink); }
+  .sent-to a{ color:var(--green-deep); text-decoration:underline; margin-left:4px; }
+
+  .field-group{ text-align:left; margin-bottom:16px; }
+  .field-row{ display:flex; gap:12px; }
+  .field-row .field-group{ flex:1; }
+  label{ display:block; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:rgba(20,32,28,0.5); margin-bottom:6px; font-family:'Space Mono',monospace; }
+  select, input{
+    width:100%; padding:12px 13px; border-radius:9px; border:1px solid var(--line);
+    font-family:'Work Sans',sans-serif; font-size:0.92rem; background:var(--cream-soft); color:var(--ink);
+  }
+  select:focus, input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+
+  #codeInput{ text-align:center; font-family:'Space Mono',monospace; font-size:1.3rem; letter-spacing:0.4em; padding-left:8px; }
+
+  .dob-row{ display:flex; gap:10px; }
+  .dob-row select{ flex:1; }
+
+  .checkbox-row{ display:flex; align-items:flex-start; gap:10px; text-align:left; margin-bottom:14px; }
+  .checkbox-row input[type="checkbox"]{ width:18px; height:18px; flex-shrink:0; margin-top:2px; accent-color:var(--green-deep); }
+  .checkbox-row label{ font-size:0.82rem; color:rgba(20,32,28,0.65); text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; margin:0; line-height:1.4; }
+  .checkbox-row a{ color:var(--green-deep); text-decoration:underline; }
+
+  .err{ color:var(--danger); font-size:0.82rem; margin:0 0 14px; text-align:left; display:none; }
+
+  .btn{
+    width:100%; padding:14px 20px; border-radius:999px; border:none; cursor:pointer;
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; font-weight:600;
+    background:var(--green-deep); color:var(--cream-soft); margin-top:8px;
+    transition:transform .2s;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; transform:none; }
+
+  hr.divider{ border:none; border-top:1px solid var(--line); margin:26px 0; }
+</style>
+</head>
+<body>
+
+  <div class="join-card">
+    <a href="home.html" class="logo-row">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/></svg>
+      <span>VESTIGE</span>
+    </a>
+
+    <h1>Now let's make you a Vestige Member.</h1>
+    <p class="sent-to">We've sent a code to <b id="emailDisplay"></b><a href="join.html">Edit</a></p>
+
+    <div class="field-group">
+      <label>Code</label>
+      <input type="text" id="codeInput" maxlength="6" inputmode="numeric" placeholder="000000">
+    </div>
+
+    <hr class="divider">
+
+    <div class="field-row">
+      <div class="field-group"><label>First Name</label><input type="text" id="firstName"></div>
+      <div class="field-group"><label>Last Name</label><input type="text" id="lastName"></div>
+    </div>
+
+    <div class="field-group">
+      <label>Shopping Preference</label>
+      <select id="shoppingPref">
+        <option value="">Select one</option>
+        <option value="Men's">Men's</option>
+        <option value="Women's">Women's</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Date of Birth</label>
+      <div class="dob-row">
+        <select id="dobMonth"><option value="">Month</option></select>
+        <select id="dobDay"><option value="">Day</option></select>
+        <select id="dobYear"><option value="">Year</option></select>
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="emailOptIn">
+      <label for="emailOptIn">Sign up for emails to get updates from Vestige on products, offers and your Member benefits.</label>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="agreeTerms">
+      <label for="agreeTerms">I agree to Vestige <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a>.</label>
+    </div>
+
+    <p class="err" id="err"></p>
+
+    <button class="btn" id="createBtn">Create Account</button>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('email') || '';
+  document.getElementById('emailDisplay').textContent = email;
+
+  if (!email){
+    window.location.href = 'join.html';
+  }
+
+  // Populate month/day/year selects
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const monthSel = document.getElementById('dobMonth');
+  months.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1; opt.textContent = m;
+    monthSel.appendChild(opt);
+  });
+  const daySel = document.getElementById('dobDay');
+  for (let d = 1; d <= 31; d++){
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    daySel.appendChild(opt);
+  }
+  const yearSel = document.getElementById('dobYear');
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 13; y >= thisYear - 100; y--){
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+
+  function sanitizeEmailForDocId(e){
+    return e.trim().toLowerCase().replace(/[.#$/\[\]]/g, '_');
+  }
+
+  function showError(msg){
+    const err = document.getElementById('err');
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+
+  function generatePassword(){
+    const arr = new Uint8Array(24);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  document.getElementById('createBtn').addEventListener('click', async () => {
+    const err = document.getElementById('err');
+    err.style.display = 'none';
+
+    const code = document.getElementById('codeInput').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const shoppingPref = document.getElementById('shoppingPref').value;
+    const dobMonth = document.getElementById('dobMonth').value;
+    const dobDay = document.getElementById('dobDay').value;
+    const dobYear = document.getElementById('dobYear').value;
+    const emailOptIn = document.getElementById('emailOptIn').checked;
+    const agreeTerms = document.getElementById('agreeTerms').checked;
+
+    if (!/^\d{6}$/.test(code)){ showError('Enter the 6-digit code from your email.'); return; }
+    if (!firstName || !lastName){ showError('Enter your first and last name.'); return; }
+    if (!shoppingPref){ showError('Select a shopping preference.'); return; }
+    if (!dobMonth || !dobDay || !dobYear){ showError('Enter your full date of birth.'); return; }
+    if (!agreeTerms){ showError('You must agree to the Privacy Policy and Terms of Use.'); return; }
+
+    const btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    btn.textContent = 'Verifying…';
+
+    try{
+      const docId = sanitizeEmailForDocId(email);
+      const pendingRef = doc(db, 'pendingSignups', docId);
+      const pendingSnap = await getDoc(pendingRef);
+
+      if (!pendingSnap.exists()){
+        showError('Your code has expired or was not found. Go back and request a new one.');
+        btn.disabled = false; btn.textContent = 'Create Account';
+        return;
+      }
+      const pending = pendingSnap.data();
+      if (new Date(pending.expiresAt) < new Date()){
+        showError('This code has expired. Go back and request a new one.');
+        btn.disabled = false; btn.textContent = 'Create Account';
+        return;
+      }
+      if (pending.code !== code){
+        showError('That code is incorrect.');
+        btn.disabled = false; btn.textContent = 'Create Account';
+        return;
+      }
+
+      // Code verified — create the actual Firebase account with an invisible random password.
+      const password = generatePassword();
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        email, firstName, lastName,
+        shoppingPreference: shoppingPref,
+        dateOfBirth: `${dobYear}-${String(dobMonth).padStart(2,'0')}-${String(dobDay).padStart(2,'0')}`,
+        emailOptIn, agreedToTermsAt: new Date().toISOString(),
+        verifiedViaOTP: true,
+        createdAt: new Date().toISOString(),
+        favorites: []
+      });
+
+      await deleteDoc(pendingRef);
+
+      window.location.href = 'home.html';
+    } catch(e){
+      console.error(e);
+      if (e.code === 'auth/email-already-in-use'){
+        showError('An account already exists for this email. Try signing in instead.');
+      } else {
+        showError('Something went wrong creating your account. Please try again.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
+  });
+</script>
+
+</body>
+</html>

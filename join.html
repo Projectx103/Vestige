@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Vestige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
+    --paper:#faf7f0; --gold:#c9a468; --gold-soft:#dcc190; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --danger:#b3402f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; padding:24px;
+  }
+  h1,.serif{ font-family:'Fraunces',serif; }
+  a{ color:inherit; }
+
+  .join-card{ width:100%; max-width:400px; text-align:center; }
+  .logo-row{ display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:40px; text-decoration:none; color:var(--green-deep); }
+  .logo-row svg{ width:22px; height:22px; }
+  .logo-row span{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.14em; font-size:1.05rem; }
+
+  h1{ font-size:1.5rem; margin:0 0 30px; color:var(--green-deep); font-weight:600; }
+
+  .field-group{ text-align:left; margin-bottom:18px; }
+  label{ display:block; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:rgba(20,32,28,0.5); margin-bottom:6px; font-family:'Space Mono',monospace; }
+  select, input{
+    width:100%; padding:13px 14px; border-radius:9px; border:1px solid var(--line);
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; background:var(--cream-soft); color:var(--ink);
+  }
+  select:focus, input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+
+  .err{ color:var(--danger); font-size:0.82rem; margin:0 0 14px; text-align:left; display:none; }
+
+  .agree-text{ font-size:0.78rem; color:rgba(20,32,28,0.55); line-height:1.5; margin:18px 0 24px; text-align:left; }
+  .agree-text a{ color:var(--green-deep); text-decoration:underline; font-weight:500; }
+
+  .btn{
+    width:100%; padding:14px 20px; border-radius:999px; border:none; cursor:pointer;
+    font-family:'Work Sans',sans-serif; font-size:0.95rem; font-weight:600;
+    background:var(--green-deep); color:var(--cream-soft);
+    transition:transform .2s;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; transform:none; }
+
+  .guest-link{ margin-top:24px; font-size:0.82rem; color:rgba(20,32,28,0.5); }
+  .guest-link a{ color:var(--green-deep); text-decoration:underline; }
+</style>
+</head>
+<body>
+
+  <div class="join-card">
+    <a href="home.html" class="logo-row">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/></svg>
+      <span>VESTIGE</span>
+    </a>
+
+    <h1>Enter your email to join us or sign in.</h1>
+
+    <div class="field-group">
+      <label>Country</label>
+      <select id="country">
+        <option>Philippines</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Email</label>
+      <input type="email" id="emailInput" placeholder="jefferson.molina@email.com" autocomplete="email">
+    </div>
+
+    <p class="err" id="err"></p>
+
+    <p class="agree-text">
+      By continuing, I agree to Vestige <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a>.
+    </p>
+
+    <button class="btn" id="continueBtn">Continue</button>
+
+    <p class="guest-link">Don't want an account? <a href="home.html#regulars">Just message us on Facebook to bid.</a></p>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const db = getFirestore(app);
+
+  // ---------- EmailJS setup ----------
+  // TODO: replace these three with your real values from EmailJS once you have them.
+  const EMAILJS_PUBLIC_KEY = "s0FDXDWOiFlPyVsHD";
+  const EMAILJS_SERVICE_ID = "service_1sqph0s";
+  const EMAILJS_TEMPLATE_ID = "template_dyo6f6o";
+
+  function loadEmailJS(){
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+      script.onload = () => { window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); resolve(); };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function generateCode(){
+    return String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+  }
+
+  function sanitizeEmailForDocId(email){
+    return email.trim().toLowerCase().replace(/[.#$/\[\]]/g, '_');
+  }
+
+  function showError(msg){
+    const err = document.getElementById('err');
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+
+  document.getElementById('continueBtn').addEventListener('click', async () => {
+    const err = document.getElementById('err');
+    err.style.display = 'none';
+    const email = document.getElementById('emailInput').value.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)){
+      showError('Enter a valid email address.');
+      return;
+    }
+
+    const btn = document.getElementById('continueBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending code…';
+
+    try{
+      const code = generateCode();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const docId = sanitizeEmailForDocId(email);
+
+      await setDoc(doc(db, 'pendingSignups', docId), {
+        email, code, expiresAt, createdAt: new Date().toISOString()
+      });
+
+      await loadEmailJS();
+      await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: email,
+        code: code
+      });
+
+      window.location.href = `join-verify.html?email=${encodeURIComponent(email)}`;
+    } catch(e){
+      console.error(e);
+      showError('Could not send your code. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Continue';
+    }
+  });
+</script>
+
+</body>
+</html>
