@@ -51,11 +51,25 @@
     width:100%; aspect-ratio:4/5; border-radius:16px; overflow:hidden;
     background:var(--cream-soft); margin-bottom:14px; position:relative;
   }
-  .gallery-main img{ width:100%; height:100%; object-fit:cover; }
+  .gallery-main img, .gallery-main video{ width:100%; height:100%; object-fit:cover; }
   .gallery-main .no-photo{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     color:rgba(20,32,28,0.28); font-family:'Space Mono',monospace; font-size:0.75rem;
   }
+  .gallery-nav-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; border-radius:50%; border:none;
+    background:rgba(15,36,28,0.55); color:#fff; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .2s, background .2s;
+    z-index:2;
+  }
+  .gallery-main:hover .gallery-nav-btn{ opacity:1; }
+  .gallery-nav-btn:hover{ background:rgba(15,36,28,0.8); }
+  .gallery-nav-btn.prev{ left:12px; }
+  .gallery-nav-btn.next{ right:12px; }
+  .gallery-nav-btn svg{ width:18px; height:18px; }
+  @media (max-width:640px){ .gallery-nav-btn{ opacity:1; } }
   .gallery-thumbs{ display:flex; gap:10px; flex-wrap:wrap; }
   .gallery-thumbs img{
     width:70px; height:88px; object-fit:cover; border-radius:8px; cursor:pointer;
@@ -169,7 +183,15 @@
   <div class="product-layout" id="productLayout" style="display:none;">
 
     <div>
-      <div class="gallery-main" id="galleryMain"></div>
+      <div class="gallery-main" id="galleryMain">
+        <button class="gallery-nav-btn prev" id="galleryPrev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div id="galleryMedia" style="width:100%; height:100%;"></div>
+        <button class="gallery-nav-btn next" id="galleryNext" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
       <div class="gallery-thumbs" id="galleryThumbs"></div>
     </div>
 
@@ -253,6 +275,7 @@
   }
 
   let currentGallery = []; // array of { type: 'image'|'video', url }
+  let activeGalleryIdx = 0;
 
   function renderProduct(p){
     document.getElementById('loadingState').style.display = 'none';
@@ -285,34 +308,57 @@
   }
 
   function renderGallery(activeIdx){
-    const main = document.getElementById('galleryMain');
+    activeGalleryIdx = activeIdx;
+    const media = document.getElementById('galleryMedia');
     const thumbs = document.getElementById('galleryThumbs');
+    const prevBtn = document.getElementById('galleryPrev');
+    const nextBtn = document.getElementById('galleryNext');
 
     if (currentGallery.length === 0){
-      main.innerHTML = `<div class="no-photo">NO PHOTO YET</div>`;
+      media.innerHTML = `<div class="no-photo">NO PHOTO YET</div>`;
       thumbs.innerHTML = '';
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
       return;
     }
 
+    const showArrows = currentGallery.length > 1;
+    prevBtn.style.display = showArrows ? 'flex' : 'none';
+    nextBtn.style.display = showArrows ? 'flex' : 'none';
+
     const active = currentGallery[activeIdx];
-    main.innerHTML = active.type === 'video'
-      ? `<video src="${active.url}" controls playsinline style="width:100%; height:100%; object-fit:cover; background:#000;"></video>`
+    media.innerHTML = active.type === 'video'
+      ? `<video src="${active.url}" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:cover; background:#000;"></video>`
       : `<img src="${active.url}" alt="">`;
 
     if (currentGallery.length > 1){
       thumbs.innerHTML = currentGallery.map((item, i) => {
         if (item.type === 'video'){
-          return `<div class="gallery-thumb-video ${i === activeIdx ? 'active' : ''}" data-idx="${i}" style="width:70px;height:88px;border-radius:8px;background:var(--ink);color:var(--cream-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;border:2px solid ${i === activeIdx ? 'var(--gold)' : 'transparent'};opacity:${i === activeIdx ? '1' : '0.7'};">▶</div>`;
+          return `<div class="gallery-thumb-video" data-idx="${i}" style="width:70px;height:88px;border-radius:8px;background:var(--ink);color:var(--cream-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;border:2px solid ${i === activeIdx ? 'var(--gold)' : 'transparent'};opacity:${i === activeIdx ? '1' : '0.7'};">▶</div>`;
         }
         return `<img src="${item.url}" class="${i === activeIdx ? 'active' : ''}" data-idx="${i}">`;
       }).join('');
+      // Hover previews instantly (desktop); click confirms too, so touch devices still work.
       thumbs.querySelectorAll('[data-idx]').forEach(el => {
-        el.addEventListener('click', () => renderGallery(Number(el.dataset.idx)));
+        const idx = Number(el.dataset.idx);
+        el.addEventListener('mouseenter', () => renderGallery(idx));
+        el.addEventListener('click', () => renderGallery(idx));
       });
     } else {
       thumbs.innerHTML = '';
     }
   }
+
+  document.getElementById('galleryPrev').addEventListener('click', () => {
+    if (currentGallery.length === 0) return;
+    const nextIdx = (activeGalleryIdx - 1 + currentGallery.length) % currentGallery.length;
+    renderGallery(nextIdx);
+  });
+  document.getElementById('galleryNext').addEventListener('click', () => {
+    if (currentGallery.length === 0) return;
+    const nextIdx = (activeGalleryIdx + 1) % currentGallery.length;
+    renderGallery(nextIdx);
+  });
 
   // Mine / Steal / Lock — UI + placeholder feedback only.
   // Real bidding logic (Firestore writes, increment/lock-price validation, auth gating) is built in Phase 6.
