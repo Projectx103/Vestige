@@ -104,6 +104,7 @@
     display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:28px 22px;
   }
   .product-card{
+    display:block;
     background:#fff; border-radius:14px; overflow:hidden;
     border:1px solid var(--line);
     transition:transform .3s var(--ease), box-shadow .3s var(--ease);
@@ -254,14 +255,15 @@
 
     grid.innerHTML = filtered.map(p => {
       const isSold = p.status === 'Claimed';
-      const photoHtml = p.image
-        ? `<img src="${p.image}" alt="${p.brand || ''} ${p.item || ''}">`
+      const gallery = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+      const photoHtml = gallery.length
+        ? `<img src="${gallery[0]}" alt="${p.brand || ''} ${p.item || ''}">`
         : `<div class="no-photo">NO PHOTO YET</div>`;
       const badge = isSold
         ? `<span class="product-badge sold">Claimed</span>`
         : (p.status === '1 Left' ? `<span class="product-badge">1 Left</span>` : '');
       return `
-        <div class="product-card">
+        <a href="product.html?id=${p.id}" class="product-card" style="text-decoration:none; color:inherit;">
           <div class="product-photo">
             ${photoHtml}
             ${badge}
@@ -271,7 +273,7 @@
             <p class="product-desc">${p.item || ''}</p>
             <span class="product-price">₱${Number(p.price || 0).toLocaleString()}</span>
           </div>
-        </div>`;
+        </a>`;
     }).join('');
   }
 
