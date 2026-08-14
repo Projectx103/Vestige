@@ -506,19 +506,39 @@
 
   document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
 
-  onAuthStateChanged(auth, (user) => {
-    if (user){
-      loginGate.style.display = 'none';
-      adminApp.style.display = 'block';
-      const email = user.email || 'Admin';
-      document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
-      document.getElementById('profileName').textContent = email;
-      loadCurrentBatch();
-      refreshCategoriesView();
-    } else {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user){
       loginGate.style.display = 'flex';
       adminApp.style.display = 'none';
+      return;
     }
+
+    // Verify this signed-in account is an authorized admin — not just "someone is logged in."
+    let isAdmin = false;
+    try{
+      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+      isAdmin = adminSnap.exists();
+    } catch(err){
+      console.error('Admin check failed:', err);
+      isAdmin = false;
+    }
+
+    if (!isAdmin){
+      await signOut(auth);
+      loginErr.textContent = "This account isn't authorized for admin access.";
+      loginErr.style.display = 'block';
+      loginGate.style.display = 'flex';
+      adminApp.style.display = 'none';
+      return;
+    }
+
+    loginGate.style.display = 'none';
+    adminApp.style.display = 'block';
+    const email = user.email || 'Admin';
+    document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
+    document.getElementById('profileName').textContent = email;
+    loadCurrentBatch();
+    refreshCategoriesView();
   });
 
   // ---------- Sidebar expand/collapse + nav switching ----------
