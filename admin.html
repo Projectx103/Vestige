@@ -27,7 +27,6 @@
     border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:0 0 30px; line-height:1.5;
   }
 
-  /* ---------- Toast notification ---------- */
   #toastLayer{
     position:fixed; top:24px; right:24px; z-index:1000;
     display:flex; flex-direction:column; gap:12px; pointer-events:none;
@@ -104,7 +103,6 @@
   .status-live{ background:#1b3a2f; color:#efe3c8; }
   .status-ended{ background:#ddd; color:#555; }
 
-  /* ---------- Login gate ---------- */
   #loginGate{
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--green-deep); color:var(--cream-soft);
@@ -115,7 +113,6 @@
   .login-box input{ background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); }
   .login-err{ color:#f2a58c; font-size:0.82rem; margin-top:-8px; margin-bottom:14px; display:none; }
 
-  /* ---------- Admin shell: sidebar + content ---------- */
   #adminApp{ display:none; }
   .admin-shell{ display:flex; min-height:100vh; }
 
@@ -199,7 +196,6 @@
   .placeholder-view h2{ font-size:1.6rem; margin:0 0 10px; color:var(--green-deep); }
   .placeholder-view p{ color:rgba(20,32,28,0.6); font-weight:300; }
 
-  /* ---------- Products & Categories (Phase 2) ---------- */
   .nav-item-row{ display:flex; align-items:center; }
   .nav-chevron{
     display:none; margin-left:auto; padding:4px; color:rgba(239,227,200,0.5);
@@ -288,7 +284,6 @@
 <div id="adminApp">
   <div class="admin-shell">
 
-    <!-- ---------- SIDEBAR ---------- -->
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="avatar-circle" id="avatarCircle">V</div>
@@ -335,11 +330,9 @@
       </div>
     </nav>
 
-    <!-- ---------- MAIN CONTENT ---------- -->
     <div class="main-content">
       <div class="wrap">
 
-        <!-- DASHBOARD VIEW -->
         <div class="view active" id="view-dashboard">
 
           <div class="warn-banner">
@@ -386,7 +379,6 @@
 
         </div>
 
-        <!-- PRODUCTS VIEW: Category Overview -->
         <div class="view" id="view-products">
           <h1>Products</h1>
           <p class="lead">Organize your catalog into categories. Click a category to manage its products.</p>
@@ -401,7 +393,6 @@
           </div>
         </div>
 
-        <!-- CATEGORY DETAIL VIEW -->
         <div class="view" id="view-category-detail">
           <button class="back-link" id="backToProductsBtn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -417,7 +408,6 @@
           </div>
         </div>
 
-        <!-- BATCHES VIEW (placeholder — future phase) -->
         <div class="view" id="view-batches">
           <div class="placeholder-view">
             <span class="tag">Coming soon</span>
@@ -426,7 +416,6 @@
           </div>
         </div>
 
-        <!-- SETTINGS VIEW (placeholder — future phase) -->
         <div class="view" id="view-settings">
           <div class="placeholder-view">
             <span class="tag">Coming soon</span>
@@ -456,6 +445,7 @@
   const batchRef = doc(db, "vestige", "liveBatch");
   const categoriesCol = collection(db, "categories");
   const productsCol = collection(db, "products");
+  const roleGrantsCol = collection(db, "roleGrants");
 
   const CLOUDINARY_CLOUD_NAME = "dxv11m11i";
   const CLOUDINARY_UPLOAD_PRESET = "vestige_signed";
@@ -514,10 +504,20 @@
     }
 
     // Verify this signed-in account is an authorized admin — not just "someone is logged in."
+    // Roles live in the `roleGrants` collection: documents with subjectUid == this user's
+    // uid, action == "granted", and role == "admin" or "super_admin".
     let isAdmin = false;
     try{
-      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-      isAdmin = adminSnap.exists();
+      const grantsQuery = query(
+        roleGrantsCol,
+        where('subjectUid', '==', user.uid),
+        where('action', '==', 'granted')
+      );
+      const grantsSnap = await getDocs(grantsQuery);
+      isAdmin = grantsSnap.docs.some(d => {
+        const role = d.data().role;
+        return role === 'admin' || role === 'super_admin';
+      });
     } catch(err){
       console.error('Admin check failed:', err);
       isAdmin = false;
@@ -541,7 +541,6 @@
     refreshCategoriesView();
   });
 
-  // ---------- Sidebar expand/collapse + nav switching ----------
   const sidebar = document.getElementById('sidebar');
   document.getElementById('sidebarToggle').addEventListener('click', () => {
     sidebar.classList.toggle('expanded');
@@ -569,7 +568,6 @@
     document.getElementById('categorySubNav').classList.toggle('open');
   });
 
-  // ---------- Batch & Hot Items state (unchanged from before) ----------
   function uid(){ return Math.random().toString(36).slice(2,9); }
   function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available', image:'' }; }
 
@@ -781,7 +779,6 @@
     }
   });
 
-  // ---------- Phase 2: Categories & Products ----------
   let categories = [];
   let allProductsForCounts = [];
   let currentCategoryId = null;
@@ -904,7 +901,6 @@
       const snap = await getDocs(q);
       categoryProducts = snap.docs.map(d => {
         const data = d.data();
-        // Backward compat: older products saved a single "image" field. Fold it into images[].
         const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
         return { id: d.id, ...data, images, video: data.video || '' };
       });
