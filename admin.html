@@ -249,7 +249,7 @@
     display:flex; gap:16px; background:#fff; border:1px solid var(--line);
     border-radius:14px; padding:16px; margin-bottom:14px; align-items:flex-start;
   }
-  .product-card-fields{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+  .product-card-fields{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0 14px; min-width:0; }
   .product-card-fields .full{ grid-column:1 / -1; }
   .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; width:150px; }
   .product-photo-col img{ width:80px; height:100px; object-fit:cover; border-radius:8px; background:var(--cream-soft); border:1px solid var(--line); }
@@ -262,6 +262,31 @@
     cursor:pointer; border:1px solid var(--paper);
   }
   .product-card-actions{ flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
+
+  /* Product detail additions */
+  .readonly-box{
+    width:100%; padding:11px 13px; border-radius:8px; border:1px solid var(--line);
+    font-size:0.95rem; background:rgba(20,32,28,0.04); margin-bottom:16px; min-height:44px;
+    display:flex; align-items:center; color:var(--green-deep); font-weight:500;
+  }
+  .readonly-box.empty{ color:rgba(20,32,28,0.4); font-weight:300; }
+  .sold-section{
+    grid-column:1 / -1; border:1px solid var(--gold); background:rgba(201,164,104,0.08);
+    border-radius:12px; padding:14px 14px 0; margin-bottom:16px; display:none;
+  }
+  .sold-section.show{ display:block; }
+  .sold-section-title{
+    font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--green-deep); margin:0 0 12px;
+  }
+  .sold-section .grid3{ gap:0 14px; }
+  @media (max-width:760px){
+    .product-card{ flex-direction:column; }
+    .product-card-fields{ width:100%; grid-template-columns:1fr; }
+    .product-card-actions{ flex-direction:row; }
+  }
+  .field-hint{ font-size:0.68rem; color:rgba(20,32,28,0.45); margin:-10px 0 14px; font-weight:300; }
+  input.invalid{ border-color:var(--danger); background:#fff4f1; }
 </style>
 </head>
 <body>
@@ -475,6 +500,39 @@
     if (!res.ok) throw new Error('Cloudinary video upload failed');
     const data = await res.json();
     return data.secure_url;
+  }
+
+  // Escapes text placed inside HTML attributes so quotes in remarks/names don't break the form.
+  function esc(v){
+    return String(v ?? '')
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Auto size — same rules as the spreadsheet IF() formula, checked top to bottom.
+  // Length and width are in inches. If the measurements are over the chart, returns '' (shown as "Over chart").
+  const SIZE_CHART = [
+    { w:18, l:25, size:'XS' },
+    { w:19, l:26, size:'S' },
+    { w:20, l:27, size:'M' },
+    { w:21, l:28, size:'L' },
+    { w:22, l:29, size:'L-XL' },
+    { w:23, l:30, size:'XL' },
+    { w:24, l:31, size:'XL-2XL' },
+    { w:25, l:32, size:'2XL' }
+  ];
+  function computeSize(length, width){
+    const L = parseFloat(length), W = parseFloat(width);
+    if (!(L > 0) || !(W > 0)) return '';
+    for (const row of SIZE_CHART){
+      if (W < row.w && L < row.l) return row.size;
+    }
+    return 'OVER';
+  }
+  function sizeDisplay(size){
+    if (!size) return { text:'Enter length & width', empty:true };
+    if (size === 'OVER') return { text:'Over chart', empty:true };
+    return { text:size, empty:false };
   }
 
   const loginGate = document.getElementById('loginGate');
@@ -892,7 +950,19 @@
       categoryProducts = snap.docs.map(d => {
         const data = d.data();
         const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
-        return { id: d.id, ...data, images, video: data.video || '' };
+        return {
+          id: d.id, ...data, images, video: data.video || '',
+          // inventory fields (older products won't have these yet)
+          remarks: data.remarks || '',
+          productName: data.productName || '',
+          length: data.length ?? '',
+          width: data.width ?? '',
+          quantity: data.quantity ?? 1,
+          investmentPrice: data.investmentPrice ?? '',
+          soldTo: data.soldTo || '',
+          priceSold: data.priceSold ?? '',
+          waybill: data.waybill || ''
+        };
       });
       renderProductList();
     } catch(err){
@@ -906,7 +976,13 @@
       c.innerHTML = `<p class="lead" style="margin:0 0 16px;">No products in this category yet.</p>`;
       return;
     }
-    c.innerHTML = categoryProducts.map((p, idx) => `
+    const currentCat = categories.find(cat => cat.id === currentCategoryId);
+    const categoryName = currentCat ? currentCat.name : '—';
+
+    c.innerHTML = categoryProducts.map((p, idx) => {
+      const sd = sizeDisplay(computeSize(p.length, p.width));
+      const isClaimed = p.status === 'Claimed';
+      return `
       <div class="product-card" data-idx="${idx}">
         <div class="product-photo-col">
           <div class="gallery-strip" data-gallery="${idx}">
@@ -937,9 +1013,24 @@
           <span class="mono" data-p-video-status="${idx}" style="font-size:0.62rem; color:rgba(20,32,28,0.4);"></span>
         </div>
         <div class="product-card-fields">
-          <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${p.brand || ''}" placeholder="Fila Heritage"></div>
-          <div><label>Price (₱)</label><input type="number" min="0" data-p-field="price" data-p-idx="${idx}" value="${p.price || ''}" placeholder="1450"></div>
-          <div class="full"><label>Description</label><input type="text" data-p-field="item" data-p-idx="${idx}" value="${p.item || ''}" placeholder="Embroidered crewneck · Black/Gold"></div>
+          <div><label>Product Name</label><input type="text" data-p-field="productName" data-p-idx="${idx}" value="${esc(p.productName)}" placeholder="Fila Heritage Crewneck"></div>
+          <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${esc(p.brand)}" placeholder="Fila Heritage"></div>
+          <div class="full"><label>Description</label><input type="text" data-p-field="item" data-p-idx="${idx}" value="${esc(p.item)}" placeholder="Embroidered crewneck · Black/Gold"></div>
+          <div class="full"><label>Remarks</label><input type="text" data-p-field="remarks" data-p-idx="${idx}" value="${esc(p.remarks)}" placeholder="Condition notes, flaws, etc."></div>
+
+          <div><label>Length (in)</label><input type="number" min="0" step="0.1" data-p-field="length" data-p-idx="${idx}" value="${esc(p.length)}" placeholder="26"></div>
+          <div><label>Width (in)</label><input type="number" min="0" step="0.1" data-p-field="width" data-p-idx="${idx}" value="${esc(p.width)}" placeholder="19"></div>
+
+          <div>
+            <label>Size (auto)</label>
+            <div class="readonly-box ${sd.empty ? 'empty' : ''}" data-p-size="${idx}">${sd.text}</div>
+          </div>
+          <div>
+            <label>Category</label>
+            <div class="readonly-box">${esc(categoryName)}</div>
+          </div>
+
+          <div><label>Quantity on Hand</label><input type="number" min="0" step="1" data-p-field="quantity" data-p-idx="${idx}" value="${esc(p.quantity)}" placeholder="1"></div>
           <div>
             <label>Status</label>
             <select data-p-field="status" data-p-idx="${idx}">
@@ -948,18 +1039,53 @@
               <option value="Claimed" ${p.status==='Claimed'?'selected':''}>Claimed</option>
             </select>
           </div>
+
+          <div><label>Investment Price (₱)</label><input type="number" min="0" step="0.01" data-p-field="investmentPrice" data-p-idx="${idx}" value="${esc(p.investmentPrice)}" placeholder="What you paid for it"></div>
+          <div><label>Starting Bid Price (₱)</label><input type="number" min="0" step="0.01" data-p-field="price" data-p-idx="${idx}" value="${esc(p.price)}" placeholder="1450"></div>
+
+          <div class="sold-section ${isClaimed ? 'show' : ''}" data-p-sold="${idx}">
+            <p class="sold-section-title">Sale Details — required for claimed items</p>
+            <div class="grid3">
+              <div><label>Sold To *</label><input type="text" data-p-field="soldTo" data-p-idx="${idx}" value="${esc(p.soldTo)}" placeholder="Buyer name"></div>
+              <div><label>Price Sold (₱) *</label><input type="number" min="0" step="0.01" data-p-field="priceSold" data-p-idx="${idx}" value="${esc(p.priceSold)}" placeholder="1800"></div>
+              <div><label>Waybill No.</label><input type="text" data-p-field="waybill" data-p-idx="${idx}" value="${esc(p.waybill)}" placeholder="Optional — add later"></div>
+            </div>
+          </div>
         </div>
         <div class="product-card-actions">
           <button type="button" class="btn btn-gold" data-p-save="${idx}" style="font-size:0.78rem; padding:9px 16px;">Save</button>
           <button type="button" class="btn btn-outline" data-p-delete="${idx}" style="font-size:0.78rem; padding:9px 16px; color:var(--danger); border-color:var(--danger);">Delete</button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     c.querySelectorAll('[data-p-field]').forEach(el => {
       el.addEventListener('input', (e) => {
         const idx = Number(e.target.dataset.pIdx);
-        categoryProducts[idx][e.target.dataset.pField] = e.target.value;
+        const field = e.target.dataset.pField;
+        categoryProducts[idx][field] = e.target.value;
+        e.target.classList.remove('invalid');
+
+        // Recalculate size live when length or width changes
+        if (field === 'length' || field === 'width'){
+          const p = categoryProducts[idx];
+          const sd = sizeDisplay(computeSize(p.length, p.width));
+          const box = c.querySelector(`[data-p-size="${idx}"]`);
+          box.textContent = sd.text;
+          box.classList.toggle('empty', sd.empty);
+        }
+
+        // Show the sale section as soon as the status is set to Claimed
+        if (field === 'status'){
+          const sold = c.querySelector(`[data-p-sold="${idx}"]`);
+          const claimed = e.target.value === 'Claimed';
+          sold.classList.toggle('show', claimed);
+          if (claimed){
+            const soldTo = sold.querySelector('[data-p-field="soldTo"]');
+            if (soldTo && !soldTo.value) soldTo.focus();
+          }
+        }
       });
     });
     c.querySelectorAll('[data-p-upload-idx]').forEach(fileInput => {
@@ -1019,13 +1145,52 @@
       btn.addEventListener('click', async (e) => {
         const idx = Number(e.target.dataset.pSave);
         const p = categoryProducts[idx];
+        const card = c.querySelector(`.product-card[data-idx="${idx}"]`);
+        const isClaimed = p.status === 'Claimed';
+
+        // Claimed items must have a buyer and the price they sold for. Waybill stays optional.
+        if (isClaimed){
+          const missing = [];
+          const soldToEl = card.querySelector('[data-p-field="soldTo"]');
+          const priceSoldEl = card.querySelector('[data-p-field="priceSold"]');
+          if (!String(p.soldTo || '').trim()){ missing.push('Sold To'); soldToEl.classList.add('invalid'); }
+          if (p.priceSold === '' || p.priceSold === null || isNaN(Number(p.priceSold))){ missing.push('Price Sold'); priceSoldEl.classList.add('invalid'); }
+          if (missing.length){
+            showToast({
+              type: 'err', title: 'Sale Details Needed',
+              message: `Fill in ${missing.join(' and ')} before saving a claimed item. Waybill No. can be added later.`,
+              duration: 6500
+            });
+            return;
+          }
+        }
+
         btn.dataset.loading = 'true';
         try{
           await updateDoc(doc(db, 'products', p.id), {
-            brand: p.brand || '', item: p.item || '', price: Number(p.price) || 0,
-            status: p.status || 'Available', images: p.images || [], video: p.video || ''
+            productName: (p.productName || '').trim(),
+            brand: p.brand || '',
+            item: p.item || '',
+            remarks: p.remarks || '',
+            length: p.length === '' ? null : Number(p.length),
+            width: p.width === '' ? null : Number(p.width),
+            size: (() => { const s = computeSize(p.length, p.width); return s === 'OVER' ? '' : s; })(),
+            quantity: p.quantity === '' ? 0 : Number(p.quantity),
+            investmentPrice: p.investmentPrice === '' ? null : Number(p.investmentPrice),
+            price: Number(p.price) || 0,
+            status: p.status || 'Available',
+            // Sale details are only kept while the item is Claimed
+            soldTo: isClaimed ? (p.soldTo || '').trim() : '',
+            priceSold: isClaimed ? Number(p.priceSold) : null,
+            waybill: isClaimed ? (p.waybill || '').trim() : '',
+            images: p.images || [],
+            video: p.video || '',
+            updatedAt: new Date().toISOString()
           });
-          showToast({ type: 'ok', title: 'Product Saved', message: `${p.brand || 'Product'} updated successfully.` });
+          if (!isClaimed){
+            p.soldTo = ''; p.priceSold = ''; p.waybill = '';
+          }
+          showToast({ type: 'ok', title: 'Product Saved', message: `${p.productName || p.brand || 'Product'} updated successfully.` });
         } catch(err){
           console.error(err);
           showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
@@ -1038,7 +1203,7 @@
       btn.addEventListener('click', async (e) => {
         const idx = Number(e.target.dataset.pDelete);
         const p = categoryProducts[idx];
-        if (!confirm(`Delete "${p.brand || 'this product'}"? This can't be undone.`)) return;
+        if (!confirm(`Delete "${p.productName || p.brand || 'this product'}"? This can't be undone.`)) return;
         try{
           await deleteDoc(doc(db, 'products', p.id));
           showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
@@ -1055,8 +1220,12 @@
     if (!currentCategoryId) return;
     try{
       await addDoc(productsCol, {
-        categoryId: currentCategoryId, brand: '', item: '', price: 0,
-        status: 'Available', images: [], video: '', createdAt: new Date().toISOString()
+        categoryId: currentCategoryId,
+        productName: '', brand: '', item: '', remarks: '',
+        length: null, width: null, size: '',
+        quantity: 1, investmentPrice: null, price: 0,
+        status: 'Available', soldTo: '', priceSold: null, waybill: '',
+        images: [], video: '', createdAt: new Date().toISOString()
       });
       loadProductsForCategory(currentCategoryId);
     } catch(err){
