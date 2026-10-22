@@ -287,6 +287,98 @@
   }
   .field-hint{ font-size:0.68rem; color:rgba(20,32,28,0.45); margin:-10px 0 14px; font-weight:300; }
   input.invalid{ border-color:var(--danger); background:#fff4f1; }
+
+  /* ===== Inventory: Folder View + Attribute View ===== */
+  .wrap.wide{ max-width:1480px; }
+  .cat-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:22px; }
+  .cat-head h1{ margin-bottom:4px; }
+  .code-chip{
+    display:inline-block; font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.08em;
+    padding:4px 9px; border-radius:6px; background:rgba(201,164,104,0.16); color:#6b4a12;
+    border:1px solid rgba(201,164,104,0.4); white-space:nowrap;
+  }
+  .code-chip.big{ font-size:0.82rem; padding:7px 14px; flex-shrink:0; }
+  .category-card .code-chip{ float:right; margin-top:2px; }
+
+  .view-tabs{ display:inline-flex; gap:4px; padding:4px; background:rgba(20,32,28,0.06); border-radius:999px; margin-bottom:18px; }
+  .view-tab{
+    border:none; background:transparent; font-family:'Work Sans',sans-serif; font-size:0.84rem; font-weight:500;
+    padding:9px 22px; border-radius:999px; cursor:pointer; color:rgba(20,32,28,0.6); transition:background .2s,color .2s;
+  }
+  .view-tab:hover:not(:disabled):not(.active){ color:var(--green-deep); }
+  .view-tab.active{ background:var(--green-deep); color:var(--cream-soft); }
+  .view-tab:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .folder-card{ padding:20px 0 14px; }
+  .folder-toolbar{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:0 22px 14px; }
+  .tb-left,.tb-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .tb-left input,.tb-left select{ margin:0; width:auto; }
+  .tb-left input{ width:300px; max-width:100%; }
+  .tb-right .btn{ padding:10px 18px; font-size:0.82rem; }
+  .folder-stats{ padding:0 22px 12px; font-size:0.7rem; color:rgba(20,32,28,0.55); letter-spacing:0.03em; }
+  .table-scroll{ overflow:auto; border-top:1px solid var(--line); border-bottom:1px solid var(--line); max-height:62vh; }
+  .inv-table{ border-collapse:separate; border-spacing:0; width:100%; font-size:0.84rem; white-space:nowrap; }
+  .inv-table thead th{
+    position:sticky; top:0; z-index:2; background:var(--green-deep); color:var(--cream-soft); text-align:left;
+    font-family:'Space Mono',monospace; font-weight:400; font-size:0.66rem; letter-spacing:0.05em; text-transform:uppercase;
+    padding:12px 14px; cursor:pointer; user-select:none; border-right:1px solid rgba(239,227,200,0.1);
+  }
+  .inv-table thead th:hover{ background:var(--green); }
+  .inv-table thead th .arrow{ margin-left:6px; color:var(--gold); font-size:0.6rem; }
+  .inv-table th.num,.inv-table td.num{ text-align:right; }
+  .inv-table tbody td{ padding:11px 14px; border-bottom:1px solid var(--line); max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+  .inv-table tbody tr{ cursor:pointer; background:#fff; }
+  .inv-table tbody tr:nth-child(even){ background:var(--paper); }
+  .inv-table tbody tr:hover{ background:rgba(201,164,104,0.12); }
+  .inv-table tbody tr.selected{ background:rgba(201,164,104,0.26); box-shadow:inset 3px 0 0 var(--gold); }
+  .inv-table tbody tr:focus-visible{ outline:2px solid var(--gold); outline-offset:-2px; }
+  .inv-table td.sku{ font-family:'Space Mono',monospace; font-size:0.76rem; color:var(--green-deep); font-weight:700; }
+  .inv-table td.muted{ color:rgba(20,32,28,0.3); }
+  .inv-table td.empty-state{ white-space:normal; text-align:center; padding:44px 20px; color:rgba(20,32,28,0.55); cursor:default; font-weight:300; max-width:none; }
+  .pill{ display:inline-block; padding:3px 10px; border-radius:999px; font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.03em; }
+  .pill-available{ background:#dfeadf; color:#1b4a30; }
+  .pill-left{ background:#f3e3c2; color:#6b4a12; }
+  .pill-claimed{ background:#e4e0d8; color:#4a4a46; }
+  .folder-hint{ margin:12px 22px 0; font-size:0.74rem; color:rgba(20,32,28,0.5); font-weight:300; }
+
+  .attr-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin-bottom:18px; position:sticky; top:0; z-index:5; background:var(--paper); padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .attr-bar-left,.attr-bar-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .attr-bar .btn{ padding:10px 18px; font-size:0.82rem; }
+  .attr-title{ font-family:'Fraunces',serif; font-size:1.2rem; margin:0; color:var(--green-deep); }
+  .btn-danger-outline{ color:var(--danger); border-color:var(--danger); }
+  .dirty-badge{
+    display:inline-flex; align-items:center; font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.04em;
+    padding:4px 10px; border-radius:999px; background:#fff3e0; color:#6b4a12; border:1px solid #e0b878;
+  }
+  .attr-layout{ display:grid; grid-template-columns:330px 1fr; gap:22px; align-items:start; }
+  @media (max-width:980px){ .attr-layout{ grid-template-columns:1fr; } }
+  .attr-card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:22px 22px 6px; margin-bottom:20px; }
+  .attr-card h3{
+    font-family:'Fraunces',serif; font-size:1.02rem; margin:0 0 16px; color:var(--green-deep);
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .attr-card h3 .meta{ font-family:'Space Mono',monospace; font-size:0.66rem; color:rgba(20,32,28,0.45); font-weight:400; }
+  .grid2 .span2{ grid-column:1 / -1; }
+  .media-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .media-grid:empty{ display:none; }
+  .media-thumb{ position:relative; aspect-ratio:4/5; }
+  .media-thumb img{ width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:var(--cream-soft); }
+  .media-thumb .x{
+    position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:var(--danger); color:#fff;
+    font-size:0.68rem; line-height:20px; text-align:center; cursor:pointer; border:2px solid #fff;
+  }
+  .media-thumb .cover-tag{
+    position:absolute; left:6px; bottom:6px; font-family:'Space Mono',monospace; font-size:0.56rem; letter-spacing:0.06em;
+    text-transform:uppercase; background:rgba(15,36,28,0.82); color:var(--cream-soft); padding:2px 7px; border-radius:999px;
+  }
+  .add-media{ margin:0 0 16px; cursor:pointer; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; font-size:0.82rem; color:var(--ink); padding:10px 18px; }
+  .media-empty{ font-size:0.8rem; color:rgba(20,32,28,0.5); font-weight:300; margin:0 0 14px; }
+  .media-status{ display:block; font-family:'Space Mono',monospace; font-size:0.66rem; color:rgba(20,32,28,0.5); margin:-6px 0 14px; min-height:1em; text-transform:none; letter-spacing:0; }
+  .attr-card video{ width:100%; border-radius:10px; background:#000; max-height:320px; margin-bottom:12px; }
 </style>
 </head>
 <body>
@@ -423,14 +515,48 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Back to Products
           </button>
-          <h1 id="categoryDetailName">Category</h1>
-          <p class="lead">Manage products within this category.</p>
 
-          <div class="card">
-            <h2>Products</h2>
-            <div id="productListContainer"></div>
-            <button class="btn btn-add" id="addProductBtn">+ Add Product</button>
+          <div class="cat-head">
+            <div>
+              <h1 id="categoryDetailName">Category</h1>
+              <p class="lead" style="margin:0;">Pick an item in Folder View, then open it in Attribute View to edit its details, photos and video.</p>
+            </div>
+            <span class="code-chip big" id="categoryCodeChip" title="SKU prefix for this category — numbering runs separately per category"></span>
           </div>
+
+          <div class="view-tabs" role="tablist" aria-label="Product views">
+            <button type="button" class="view-tab active" data-pview="folder" role="tab">Folder View</button>
+            <button type="button" class="view-tab" data-pview="attribute" id="attrTab" role="tab" disabled title="Select an item in Folder View first">Attribute View</button>
+          </div>
+
+          <div id="folderPanel" class="card folder-card">
+            <div class="folder-toolbar">
+              <div class="tb-left">
+                <input type="search" id="folderSearch" placeholder="Search SKU, name, brand, buyer, waybill…" autocomplete="off" aria-label="Search products">
+                <select id="folderStatus" aria-label="Filter by status">
+                  <option value="all">All statuses</option>
+                  <option value="Available">Available</option>
+                  <option value="1 Left">1 Left</option>
+                  <option value="Claimed">Claimed</option>
+                </select>
+              </div>
+              <div class="tb-right">
+                <button type="button" class="btn btn-outline" id="assignSkuBtn" style="display:none;">Assign SKUs</button>
+                <button type="button" class="btn btn-outline" id="openAttrBtn" disabled>Open in Attribute View</button>
+                <button type="button" class="btn btn-gold" id="addProductBtn">+ Add Product</button>
+              </div>
+            </div>
+            <div class="folder-stats mono" id="folderStats"></div>
+            <div class="table-scroll">
+              <table class="inv-table">
+                <thead><tr id="folderThead"></tr></thead>
+                <tbody id="folderTbody"></tbody>
+              </table>
+            </div>
+            <p class="folder-hint">Click a row to select it · double-click or press Enter to open it in Attribute View · click a column header to sort</p>
+          </div>
+
+          <div id="attributePanel" style="display:none;"></div>
         </div>
 
         <div class="view" id="view-batches">
@@ -461,7 +587,7 @@
     getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where
+    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
@@ -597,10 +723,12 @@
   function switchView(viewName){
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + viewName).classList.add('active');
+    document.querySelector('.wrap').classList.toggle('wide', viewName === 'category-detail');
   }
 
   document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     item.addEventListener('click', (e) => {
+      if (!confirmDiscard()) return;
       document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
@@ -837,6 +965,10 @@
       const [catSnap, prodSnap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol)]);
       categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       allProductsForCounts = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // Older categories (made before SKUs) get their code once, automatically.
+      for (const cat of categories){
+        if (!cat.code){ try{ await ensureCategoryCode(cat); } catch(e){ console.error('Category code failed:', e); } }
+      }
       renderCategorySidebar();
       renderCategoryGrid();
     } catch(err){
@@ -868,6 +1000,7 @@
       return `
         <div class="category-card" data-cat-id="${cat.id}">
           <h3>${cat.name}</h3>
+          ${cat.code ? `<span class="code-chip" title="SKU prefix">${SKU_PREFIX}-${cat.code}</span>` : ''}
           <span class="count">${count} product${count === 1 ? '' : 's'}</span>
           <div class="category-card-actions">
             <button type="button" data-edit-cat="${cat.id}">Rename</button>
@@ -915,7 +1048,8 @@
     const name = input.value.trim();
     if (!name) return;
     try{
-      await addDoc(categoriesCol, { name, createdAt: new Date().toISOString() });
+      const taken = new Set(categories.map(c => c.code).filter(Boolean));
+      await addDoc(categoriesCol, { name, code: makeCategoryCode(name, taken), nextSeq: 1, createdAt: new Date().toISOString() });
       input.value = '';
       showToast({ type: 'ok', title: 'Category Added', message: `"${name}" is ready for products.` });
       refreshCategoriesView();
@@ -925,313 +1059,706 @@
     }
   });
 
-  function openCategoryDetail(cat){
-    currentCategoryId = cat.id;
-    document.getElementById('categoryDetailName').textContent = cat.name;
-    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
-    document.getElementById('navProducts').classList.add('active');
-    renderCategorySidebar();
-    switchView('category-detail');
-    loadProductsForCategory(cat.id);
-  }
+  // =====================================================================
+  //  Category codes + SKUs
+  //  SKU format:  VG-<CATEGORY CODE>-<0001...>   e.g. VG-WIN-0001
+  //  Each category keeps its own counter (categories/{id}.nextSeq) that only
+  //  ever goes up, and it is advanced inside a Firestore transaction, so two
+  //  products can never receive the same number — even if one is deleted later.
+  // =====================================================================
+  const SKU_PREFIX = 'VG';
 
-  document.getElementById('backToProductsBtn').addEventListener('click', () => {
-    currentCategoryId = null;
-    document.getElementById('navProducts').classList.add('active');
-    renderCategorySidebar();
-    switchView('products');
-    refreshCategoriesView();
-  });
-
-  async function loadProductsForCategory(categoryId){
-    try{
-      const q = query(productsCol, where('categoryId', '==', categoryId));
-      const snap = await getDocs(q);
-      categoryProducts = snap.docs.map(d => {
-        const data = d.data();
-        const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
-        return {
-          id: d.id, ...data, images, video: data.video || '',
-          // inventory fields (older products won't have these yet)
-          remarks: data.remarks || '',
-          productName: data.productName || '',
-          length: data.length ?? '',
-          width: data.width ?? '',
-          quantity: data.quantity ?? 1,
-          investmentPrice: data.investmentPrice ?? '',
-          soldTo: data.soldTo || '',
-          priceSold: data.priceSold ?? '',
-          waybill: data.waybill || ''
-        };
-      });
-      renderProductList();
-    } catch(err){
-      console.error('Could not load products:', err);
+  function makeCategoryCode(name, taken){
+    const letters = String(name || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const base = (letters + 'XXX').slice(0, 3);
+    if (!taken.has(base)) return base;
+    // Name collision (e.g. "Windbreaker" vs "Wind Pants"): keep the first letter, vary the next two.
+    for (let i = 1; i < letters.length; i++){
+      for (let j = i + 1; j < letters.length; j++){
+        const c = letters[0] + letters[i] + letters[j];
+        if (!taken.has(c)) return c;
+      }
     }
-  }
-
-  function renderProductList(){
-    const c = document.getElementById('productListContainer');
-    if (categoryProducts.length === 0){
-      c.innerHTML = `<p class="lead" style="margin:0 0 16px;">No products in this category yet.</p>`;
-      return;
+    for (let n = 2; n < 10; n++){
+      const c = base.slice(0, 2) + n;
+      if (!taken.has(c)) return c;
     }
-    const currentCat = categories.find(cat => cat.id === currentCategoryId);
-    const categoryName = currentCat ? currentCat.name : '—';
-
-    c.innerHTML = categoryProducts.map((p, idx) => {
-      const sd = sizeDisplay(computeSize(p.length, p.width));
-      const isClaimed = p.status === 'Claimed';
-      return `
-      <div class="product-card" data-idx="${idx}">
-        <div class="product-photo-col">
-          <div class="gallery-strip" data-gallery="${idx}">
-            ${(p.images || []).map((img, imgIdx) => `
-              <div class="gallery-thumb">
-                <img src="${img}">
-                <span class="x" data-p-remove-img="${idx}" data-img-idx="${imgIdx}">✕</span>
-              </div>
-            `).join('')}
-          </div>
-          <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px; display:${(p.images || []).length >= 5 ? 'none' : 'inline-flex'};">
-            + Add Photo
-            <input type="file" accept="image/*" data-p-upload-idx="${idx}" style="display:none;">
-          </label>
-          <span class="mono" style="font-size:0.62rem; color:rgba(20,32,28,0.4);">${(p.images || []).length}/5 photos</span>
-
-          <div style="width:100%; height:1px; background:var(--line); margin:6px 0;"></div>
-
-          ${p.video ? `
-            <div style="display:flex; align-items:center; gap:6px; font-size:0.68rem; color:var(--green-deep); font-family:'Space Mono',monospace;">▶ Video attached</div>
-            <button type="button" class="btn btn-outline" data-p-remove-video="${idx}" style="font-size:0.68rem; padding:6px 10px; color:var(--danger); border-color:var(--danger);">Remove Video</button>
-          ` : `
-            <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
-              + Add Video
-              <input type="file" accept="video/mp4" data-p-video-idx="${idx}" style="display:none;">
-            </label>
-          `}
-          <span class="mono" data-p-video-status="${idx}" style="font-size:0.62rem; color:rgba(20,32,28,0.4);"></span>
-        </div>
-        <div class="product-card-fields">
-          <div><label>Product Name</label><input type="text" data-p-field="productName" data-p-idx="${idx}" value="${esc(p.productName)}" placeholder="Fila Heritage Crewneck"></div>
-          <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${esc(p.brand)}" placeholder="Fila Heritage"></div>
-          <div class="full"><label>Description</label><input type="text" data-p-field="item" data-p-idx="${idx}" value="${esc(p.item)}" placeholder="Embroidered crewneck · Black/Gold"></div>
-          <div class="full"><label>Remarks</label><input type="text" data-p-field="remarks" data-p-idx="${idx}" value="${esc(p.remarks)}" placeholder="Condition notes, flaws, etc."></div>
-
-          <div><label>Length (in)</label><input type="number" min="0" step="0.1" data-p-field="length" data-p-idx="${idx}" value="${esc(p.length)}" placeholder="26"></div>
-          <div><label>Width (in)</label><input type="number" min="0" step="0.1" data-p-field="width" data-p-idx="${idx}" value="${esc(p.width)}" placeholder="19"></div>
-
-          <div>
-            <label>Size (auto)</label>
-            <div class="readonly-box ${sd.empty ? 'empty' : ''}" data-p-size="${idx}">${sd.text}</div>
-          </div>
-          <div>
-            <label>Category</label>
-            <div class="readonly-box">${esc(categoryName)}</div>
-          </div>
-
-          <div><label>Quantity on Hand</label><input type="number" min="0" step="1" data-p-field="quantity" data-p-idx="${idx}" value="${esc(p.quantity)}" placeholder="1"></div>
-          <div>
-            <label>Status</label>
-            <select data-p-field="status" data-p-idx="${idx}">
-              <option value="Available" ${p.status==='Available'?'selected':''}>Available</option>
-              <option value="1 Left" ${p.status==='1 Left'?'selected':''}>1 Left</option>
-              <option value="Claimed" ${p.status==='Claimed'?'selected':''}>Claimed</option>
-            </select>
-          </div>
-
-          <div><label>Investment Price (₱)</label><input type="number" min="0" step="0.01" data-p-field="investmentPrice" data-p-idx="${idx}" value="${esc(p.investmentPrice)}" placeholder="What you paid for it"></div>
-          <div><label>Starting Bid Price (₱)</label><input type="number" min="0" step="0.01" data-p-field="price" data-p-idx="${idx}" value="${esc(p.price)}" placeholder="1450"></div>
-
-          <div class="sold-section ${isClaimed ? 'show' : ''}" data-p-sold="${idx}">
-            <p class="sold-section-title">Sale Details — required for claimed items</p>
-            <div class="grid3">
-              <div><label>Sold To *</label><input type="text" data-p-field="soldTo" data-p-idx="${idx}" value="${esc(p.soldTo)}" placeholder="Buyer name"></div>
-              <div><label>Price Sold (₱) *</label><input type="number" min="0" step="0.01" data-p-field="priceSold" data-p-idx="${idx}" value="${esc(p.priceSold)}" placeholder="1800"></div>
-              <div><label>Waybill No.</label><input type="text" data-p-field="waybill" data-p-idx="${idx}" value="${esc(p.waybill)}" placeholder="Optional — add later"></div>
-            </div>
-          </div>
-        </div>
-        <div class="product-card-actions">
-          <button type="button" class="btn btn-gold" data-p-save="${idx}" style="font-size:0.78rem; padding:9px 16px;">Save</button>
-          <button type="button" class="btn btn-outline" data-p-delete="${idx}" style="font-size:0.78rem; padding:9px 16px; color:var(--danger); border-color:var(--danger);">Delete</button>
-        </div>
-      </div>
-    `;
-    }).join('');
-
-    c.querySelectorAll('[data-p-field]').forEach(el => {
-      el.addEventListener('input', (e) => {
-        const idx = Number(e.target.dataset.pIdx);
-        const field = e.target.dataset.pField;
-        categoryProducts[idx][field] = e.target.value;
-        e.target.classList.remove('invalid');
-
-        // Recalculate size live when length or width changes
-        if (field === 'length' || field === 'width'){
-          const p = categoryProducts[idx];
-          const sd = sizeDisplay(computeSize(p.length, p.width));
-          const box = c.querySelector(`[data-p-size="${idx}"]`);
-          box.textContent = sd.text;
-          box.classList.toggle('empty', sd.empty);
-        }
-
-        // Show the sale section as soon as the status is set to Claimed
-        if (field === 'status'){
-          const sold = c.querySelector(`[data-p-sold="${idx}"]`);
-          const claimed = e.target.value === 'Claimed';
-          sold.classList.toggle('show', claimed);
-          if (claimed){
-            const soldTo = sold.querySelector('[data-p-field="soldTo"]');
-            if (soldTo && !soldTo.value) soldTo.focus();
-          }
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-upload-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.pUploadIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        if ((categoryProducts[idx].images || []).length >= MAX_PRODUCT_IMAGES){
-          showToast({ type: 'err', title: 'Photo Limit Reached', message: `Products can have up to ${MAX_PRODUCT_IMAGES} photos.` });
-          return;
-        }
-        try{
-          const url = await uploadToCloudinary(file);
-          if (!categoryProducts[idx].images) categoryProducts[idx].images = [];
-          categoryProducts[idx].images.push(url);
-          renderProductList();
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Upload Failed', message: 'Could not upload the photo. Try again.' });
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-video-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.pVideoIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        const statusEl = c.querySelector(`[data-p-video-status="${idx}"]`);
-        statusEl.textContent = 'Uploading video…';
-        try{
-          const url = await uploadVideoToCloudinary(file);
-          categoryProducts[idx].video = url;
-          renderProductList();
-        } catch(err){
-          console.error(err);
-          statusEl.textContent = '';
-          showToast({ type: 'err', title: 'Video Upload Failed', message: err.message || 'Could not upload the video. Try again.' });
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-remove-video]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.pRemoveVideo);
-        categoryProducts[idx].video = '';
-        renderProductList();
-      });
-    });
-    c.querySelectorAll('[data-p-remove-img]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.pRemoveImg);
-        const imgIdx = Number(e.target.dataset.imgIdx);
-        categoryProducts[idx].images.splice(imgIdx, 1);
-        renderProductList();
-      });
-    });
-    c.querySelectorAll('[data-p-save]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.target.dataset.pSave);
-        const p = categoryProducts[idx];
-        const card = c.querySelector(`.product-card[data-idx="${idx}"]`);
-        const isClaimed = p.status === 'Claimed';
-
-        // Claimed items must have a buyer and the price they sold for. Waybill stays optional.
-        if (isClaimed){
-          const missing = [];
-          const soldToEl = card.querySelector('[data-p-field="soldTo"]');
-          const priceSoldEl = card.querySelector('[data-p-field="priceSold"]');
-          if (!String(p.soldTo || '').trim()){ missing.push('Sold To'); soldToEl.classList.add('invalid'); }
-          if (p.priceSold === '' || p.priceSold === null || isNaN(Number(p.priceSold))){ missing.push('Price Sold'); priceSoldEl.classList.add('invalid'); }
-          if (missing.length){
-            showToast({
-              type: 'err', title: 'Sale Details Needed',
-              message: `Fill in ${missing.join(' and ')} before saving a claimed item. Waybill No. can be added later.`,
-              duration: 6500
-            });
-            return;
-          }
-        }
-
-        btn.dataset.loading = 'true';
-        try{
-          await updateDoc(doc(db, 'products', p.id), {
-            productName: (p.productName || '').trim(),
-            brand: p.brand || '',
-            item: p.item || '',
-            remarks: p.remarks || '',
-            length: p.length === '' ? null : Number(p.length),
-            width: p.width === '' ? null : Number(p.width),
-            size: (() => { const s = computeSize(p.length, p.width); return s === 'OVER' ? '' : s; })(),
-            quantity: p.quantity === '' ? 0 : Number(p.quantity),
-            investmentPrice: p.investmentPrice === '' ? null : Number(p.investmentPrice),
-            price: Number(p.price) || 0,
-            status: p.status || 'Available',
-            // Sale details are only kept while the item is Claimed
-            soldTo: isClaimed ? (p.soldTo || '').trim() : '',
-            priceSold: isClaimed ? Number(p.priceSold) : null,
-            waybill: isClaimed ? (p.waybill || '').trim() : '',
-            images: p.images || [],
-            video: p.video || '',
-            updatedAt: new Date().toISOString()
-          });
-          if (!isClaimed){
-            p.soldTo = ''; p.priceSold = ''; p.waybill = '';
-          }
-          showToast({ type: 'ok', title: 'Product Saved', message: `${p.productName || p.brand || 'Product'} updated successfully.` });
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
-        } finally {
-          btn.dataset.loading = 'false';
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-delete]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.target.dataset.pDelete);
-        const p = categoryProducts[idx];
-        if (!confirm(`Delete "${p.productName || p.brand || 'this product'}"? This can't be undone.`)) return;
-        try{
-          await deleteDoc(doc(db, 'products', p.id));
-          showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
-          loadProductsForCategory(currentCategoryId);
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' });
-        }
-      });
-    });
+    return base.slice(0, 1) + Date.now().toString(36).slice(-2).toUpperCase();
   }
 
-  document.getElementById('addProductBtn').addEventListener('click', async () => {
-    if (!currentCategoryId) return;
-    try{
-      await addDoc(productsCol, {
-        categoryId: currentCategoryId,
+  function formatSku(code, seq){
+    return `${SKU_PREFIX}-${code}-${String(seq).padStart(4, '0')}`;
+  }
+
+  // Gives older categories (created before SKUs existed) a code and a counter.
+  async function ensureCategoryCode(cat){
+    if (cat.code) return cat.code;
+    const taken = new Set(categories.filter(c => c.id !== cat.id && c.code).map(c => c.code));
+    const code = makeCategoryCode(cat.name, taken);
+    await updateDoc(doc(db, 'categories', cat.id), { code, nextSeq: cat.nextSeq || 1 });
+    cat.code = code;
+    cat.nextSeq = cat.nextSeq || 1;
+    return code;
+  }
+
+  async function createProductWithSku(catId){
+    const catRef = doc(db, 'categories', catId);
+    const newRef = doc(productsCol);
+    let sku = '';
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(catRef);
+      if (!snap.exists()) throw new Error('Category not found.');
+      const cd = snap.data();
+      if (!cd.code) throw new Error('Category has no code yet.');
+      const seq = cd.nextSeq || 1;
+      sku = formatSku(cd.code, seq);
+      tx.set(newRef, {
+        categoryId: catId, sku, skuSeq: seq,
         productName: '', brand: '', item: '', remarks: '',
         length: null, width: null, size: '',
         quantity: 1, investmentPrice: null, price: 0,
         status: 'Available', soldTo: '', priceSold: null, waybill: '',
         images: [], video: '', createdAt: new Date().toISOString()
       });
-      loadProductsForCategory(currentCategoryId);
+      tx.update(catRef, { nextSeq: seq + 1 });
+    });
+    return { id: newRef.id, sku };
+  }
+
+  // Backfills SKUs for products that were added before this feature, oldest first.
+  async function assignMissingSkus(){
+    const cat = currentCategory();
+    if (!cat) return 0;
+    await ensureCategoryCode(cat);
+    const missing = categoryProducts
+      .filter(p => !p.sku)
+      .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+    if (!missing.length) return 0;
+    const catRef = doc(db, 'categories', cat.id);
+    let assigned = [];
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(catRef);
+      const cd = snap.data();
+      let seq = cd.nextSeq || 1;
+      assigned = [];
+      for (const p of missing){
+        const sku = formatSku(cd.code, seq);
+        tx.update(doc(db, 'products', p.id), { sku, skuSeq: seq });
+        assigned.push({ id: p.id, sku, skuSeq: seq });
+        seq++;
+      }
+      tx.update(catRef, { nextSeq: seq });
+    });
+    assigned.forEach(a => {
+      const p = categoryProducts.find(x => x.id === a.id);
+      if (p){ p.sku = a.sku; p.skuSeq = a.skuSeq; }
+    });
+    return assigned.length;
+  }
+
+  // =====================================================================
+  //  Inventory: shared state + helpers
+  // =====================================================================
+  let selectedId = null;       // row selected in Folder View
+  let draft = null;            // working copy of the product open in Attribute View
+  let dirty = false;           // unsaved edits in Attribute View
+  let sortKey = 'sku';
+  let sortDir = 'asc';
+
+  function currentCategory(){ return categories.find(c => c.id === currentCategoryId) || null; }
+
+  function confirmDiscard(){
+    if (!dirty) return true;
+    if (confirm('You have unsaved changes on this product. Discard them?')){ dirty = false; return true; }
+    return false;
+  }
+  window.addEventListener('beforeunload', (e) => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+  function cloneProduct(p){ return { ...p, images: [...(p.images || [])] }; }
+
+  function normalizeProduct(id, data){
+    const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
+    return {
+      id, ...data, images, video: data.video || '',
+      sku: data.sku || '', skuSeq: data.skuSeq ?? null,
+      remarks: data.remarks || '',
+      productName: data.productName || '',
+      length: data.length ?? '',
+      width: data.width ?? '',
+      quantity: data.quantity ?? 1,
+      investmentPrice: data.investmentPrice ?? '',
+      soldTo: data.soldTo || '',
+      priceSold: data.priceSold ?? '',
+      waybill: data.waybill || ''
+    };
+  }
+
+  function peso(v){
+    if (v === '' || v === null || v === undefined || isNaN(Number(v))) return '';
+    return '₱' + Number(v).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  function sizeText(p){
+    const s = computeSize(p.length, p.width);
+    return s === 'OVER' ? 'Over chart' : s;
+  }
+  function statusPill(s){
+    const cls = s === 'Claimed' ? 'pill-claimed' : s === '1 Left' ? 'pill-left' : 'pill-available';
+    return `<span class="pill ${cls}">${esc(s)}</span>`;
+  }
+
+  // =====================================================================
+  //  Folder View (default) — one row per item, columns follow the inventory sheet
+  // =====================================================================
+  const COLUMNS = [
+    { key:'sku',       label:'SKU',              type:'text', cls:'sku', val:p => p.sku },
+    { key:'name',      label:'Product Name',     type:'text', val:p => p.productName || p.item },
+    { key:'brand',     label:'Brand',            type:'text', val:p => p.brand },
+    { key:'length',    label:'Length',           type:'num',  val:p => p.length, fmt:v => `${v} in` },
+    { key:'width',     label:'Width',            type:'num',  val:p => p.width,  fmt:v => `${v} in` },
+    { key:'size',      label:'Size',             type:'text', val:p => sizeText(p) },
+    { key:'category',  label:'Category',         type:'text', val:() => (currentCategory() || {}).name || '' },
+    { key:'qty',       label:'Qty on Hand',      type:'num',  val:p => p.quantity },
+    { key:'status',    label:'Status',           type:'text', val:p => p.status || 'Available', html:p => statusPill(p.status || 'Available') },
+    { key:'invest',    label:'Investment Price', type:'num',  val:p => p.investmentPrice, fmt:peso },
+    { key:'bid',       label:'Starting Bid',     type:'num',  val:p => p.price, fmt:peso },
+    { key:'soldTo',    label:'Sold To',          type:'text', val:p => p.soldTo },
+    { key:'priceSold', label:'Price Sold',       type:'num',  val:p => p.priceSold, fmt:peso },
+    { key:'waybill',   label:'Waybill No.',      type:'text', val:p => p.waybill },
+    { key:'remarks',   label:'Remarks',          type:'text', val:p => p.remarks }
+  ];
+
+  function isEmptyVal(col, v){
+    if (v === '' || v === null || v === undefined) return true;
+    if (col.type === 'num' && isNaN(Number(v))) return true;
+    return false;
+  }
+
+  function cellHtml(col, p){
+    if (col.html) return `<td>${col.html(p)}</td>`;
+    const v = col.val(p);
+    const numCls = col.type === 'num' ? 'num' : '';
+    const text = isEmptyVal(col, v) ? '' : (col.fmt ? col.fmt(v) : String(v));
+    if (text === '') return `<td class="${numCls} muted">—</td>`;
+    return `<td class="${numCls} ${col.cls || ''}" title="${esc(text)}">${esc(text)}</td>`;
+  }
+
+  function visibleProducts(){
+    const q = document.getElementById('folderSearch').value.trim().toLowerCase();
+    const st = document.getElementById('folderStatus').value;
+    const list = categoryProducts.filter(p => {
+      if (st !== 'all' && (p.status || 'Available') !== st) return false;
+      if (!q) return true;
+      return [p.sku, p.productName, p.item, p.brand, p.soldTo, p.waybill, p.remarks, sizeText(p)]
+        .some(v => String(v || '').toLowerCase().includes(q));
+    });
+    const col = COLUMNS.find(c => c.key === sortKey) || COLUMNS[0];
+    const dir = sortDir === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      const va = col.val(a), vb = col.val(b);
+      const ea = isEmptyVal(col, va), eb = isEmptyVal(col, vb);
+      if (ea && eb) return 0;
+      if (ea) return 1;          // blanks always sink to the bottom
+      if (eb) return -1;
+      if (col.type === 'num') return (Number(va) - Number(vb)) * dir;
+      return String(va).localeCompare(String(vb), undefined, { numeric: true, sensitivity: 'base' }) * dir;
+    });
+    return list;
+  }
+
+  function renderFolder(){
+    document.getElementById('folderThead').innerHTML = COLUMNS.map(c =>
+      `<th class="${c.type === 'num' ? 'num' : ''}" data-sort="${c.key}">${c.label}${
+        sortKey === c.key ? `<span class="arrow">${sortDir === 'asc' ? '▲' : '▼'}</span>` : ''
+      }</th>`).join('');
+
+    const list = visibleProducts();
+    const tbody = document.getElementById('folderTbody');
+    if (!list.length){
+      const msg = categoryProducts.length === 0
+        ? 'No products in this category yet. Click “+ Add Product” to create the first one — its SKU is assigned automatically.'
+        : 'No items match your search or filter.';
+      tbody.innerHTML = `<tr><td class="empty-state" colspan="${COLUMNS.length}">${msg}</td></tr>`;
+    } else {
+      tbody.innerHTML = list.map(p =>
+        `<tr tabindex="0" data-id="${p.id}" class="${p.id === selectedId ? 'selected' : ''}">${COLUMNS.map(c => cellHtml(c, p)).join('')}</tr>`
+      ).join('');
+    }
+
+    const count = s => categoryProducts.filter(p => (p.status || 'Available') === s).length;
+    const units = categoryProducts.reduce((n, p) => n + (Number(p.quantity) || 0), 0);
+    const shown = list.length !== categoryProducts.length ? `Showing ${list.length} of ${categoryProducts.length} · ` : '';
+    document.getElementById('folderStats').textContent = categoryProducts.length
+      ? `${shown}${categoryProducts.length} item${categoryProducts.length === 1 ? '' : 's'} · ${count('Available')} available · ${count('1 Left')} 1 left · ${count('Claimed')} claimed · ${units} unit${units === 1 ? '' : 's'} on hand`
+      : '';
+
+    const missing = categoryProducts.filter(p => !p.sku).length;
+    const assignBtn = document.getElementById('assignSkuBtn');
+    assignBtn.style.display = missing ? 'inline-flex' : 'none';
+    assignBtn.textContent = `Assign SKUs (${missing})`;
+    syncSelectionButtons();
+  }
+
+  function syncSelectionButtons(){
+    document.getElementById('openAttrBtn').disabled = !selectedId;
+    const tab = document.getElementById('attrTab');
+    tab.disabled = !selectedId;
+    tab.title = selectedId ? '' : 'Select an item in Folder View first';
+  }
+
+  function selectRow(id){
+    selectedId = id;
+    document.querySelectorAll('#folderTbody tr[data-id]').forEach(tr => tr.classList.toggle('selected', tr.dataset.id === id));
+    syncSelectionButtons();
+  }
+
+  function setProductView(view){
+    document.getElementById('folderPanel').style.display = view === 'folder' ? 'block' : 'none';
+    document.getElementById('attributePanel').style.display = view === 'attribute' ? 'block' : 'none';
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.pview === view));
+  }
+
+  function showFolder(){
+    if (!confirmDiscard()) return;
+    draft = null;
+    dirty = false;
+    setProductView('folder');
+    renderFolder();
+    const row = selectedId && document.querySelector(`#folderTbody tr[data-id="${selectedId}"]`);
+    if (row) row.focus({ preventScroll: false });
+  }
+
+  function openAttribute(id){
+    const p = categoryProducts.find(x => x.id === id);
+    if (!p) return;
+    selectedId = id;
+    draft = cloneProduct(p);
+    dirty = false;
+    setProductView('attribute');
+    renderAttribute();
+    syncSelectionButtons();
+    window.scrollTo({ top: 0 });
+  }
+
+  // --- Folder View events (wired once) ---
+  document.getElementById('folderThead').addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    const k = th.dataset.sort;
+    if (sortKey === k) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortKey = k; sortDir = 'asc'; }
+    renderFolder();
+  });
+  const folderBody = document.getElementById('folderTbody');
+  folderBody.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr[data-id]');
+    if (tr) selectRow(tr.dataset.id);
+  });
+  folderBody.addEventListener('dblclick', (e) => {
+    const tr = e.target.closest('tr[data-id]');
+    if (tr) openAttribute(tr.dataset.id);
+  });
+  folderBody.addEventListener('keydown', (e) => {
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    if (e.key === 'Enter'){ e.preventDefault(); openAttribute(tr.dataset.id); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      e.preventDefault();
+      const next = e.key === 'ArrowDown' ? tr.nextElementSibling : tr.previousElementSibling;
+      if (next && next.dataset.id){ next.focus(); selectRow(next.dataset.id); }
+    }
+  });
+  document.getElementById('folderSearch').addEventListener('input', renderFolder);
+  document.getElementById('folderStatus').addEventListener('change', renderFolder);
+  document.getElementById('openAttrBtn').addEventListener('click', () => { if (selectedId) openAttribute(selectedId); });
+  document.querySelectorAll('.view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.disabled) return;
+      if (tab.dataset.pview === 'folder') { if (document.getElementById('folderPanel').style.display === 'none') showFolder(); }
+      else if (selectedId && !draft) openAttribute(selectedId);
+    });
+  });
+
+  document.getElementById('assignSkuBtn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.dataset.loading = 'true';
+    try{
+      const n = await assignMissingSkus();
+      showToast({ type: 'ok', title: 'SKUs Assigned', message: `${n} existing item${n === 1 ? '' : 's'} numbered, oldest first.` });
+      renderFolder();
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could Not Assign SKUs', message: 'Check your Firestore rules and try again.' });
+    } finally {
+      btn.dataset.loading = 'false';
+    }
+  });
+
+  document.getElementById('addProductBtn').addEventListener('click', async (e) => {
+    if (!currentCategoryId) return;
+    const btn = e.currentTarget;
+    btn.dataset.loading = 'true';
+    try{
+      const cat = currentCategory();
+      await ensureCategoryCode(cat);
+      await assignMissingSkus();   // number any older items first so the sequence stays in order
+      const created = await createProductWithSku(cat.id);
+      await loadProductsForCategory(currentCategoryId);
+      showToast({ type: 'ok', title: 'Product Created', message: `${created.sku} is ready — fill in its details.` });
+      openAttribute(created.id);
     } catch(err){
       console.error(err);
       showToast({ type: 'err', title: 'Could Not Add Product', message: 'Check your Firestore rules and try again.' });
+    } finally {
+      btn.dataset.loading = 'false';
     }
+  });
+
+  // =====================================================================
+  //  Attribute View — a single item: details, photos, video, sale info
+  // =====================================================================
+  const attrPanel = document.getElementById('attributePanel');
+
+  function renderAttribute(){
+    const d = draft;
+    if (!d) return;
+    const cat = currentCategory();
+    const sd = sizeDisplay(computeSize(d.length, d.width));
+    const isClaimed = d.status === 'Claimed';
+    const imgs = d.images || [];
+
+    attrPanel.innerHTML = `
+      <div class="attr-bar">
+        <div class="attr-bar-left">
+          <button type="button" class="btn btn-outline" id="attrBack">← Folder View</button>
+          <span class="code-chip big">${esc(d.sku || 'NO SKU')}</span>
+          <h2 class="attr-title" id="attrTitle">${esc(d.productName || d.item || 'Untitled product')}</h2>
+          <span class="dirty-badge" id="dirtyBadge" style="display:${dirty ? 'inline-flex' : 'none'};">Unsaved changes</span>
+        </div>
+        <div class="attr-bar-right">
+          <button type="button" class="btn btn-outline btn-danger-outline" id="attrDelete">Delete</button>
+          <button type="button" class="btn btn-gold" id="attrSave">
+            <span class="btn-spinner"></span>
+            <span class="btn-label-default">Save changes</span>
+            <span class="btn-spinner-label">Saving…</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="attr-layout">
+        <div>
+          <div class="attr-card">
+            <h3>Photos <span class="meta">${imgs.length}/${MAX_PRODUCT_IMAGES}</span></h3>
+            <div class="media-grid">
+              ${imgs.map((img, i) => `
+                <div class="media-thumb">
+                  <img src="${esc(img)}" alt="Product photo ${i + 1}">
+                  ${i === 0 ? '<span class="cover-tag">Cover</span>' : ''}
+                  <span class="x" data-a-remove-img="${i}" title="Remove photo">✕</span>
+                </div>`).join('')}
+            </div>
+            ${imgs.length === 0 ? '<p class="media-empty">No photos yet.</p>' : ''}
+            ${imgs.length < MAX_PRODUCT_IMAGES ? `
+              <label class="btn btn-outline add-media">+ Add Photo
+                <input type="file" accept="image/*" multiple id="attrPhotoInput" style="display:none;">
+              </label>` : ''}
+            <span class="media-status" id="attrPhotoStatus"></span>
+          </div>
+
+          <div class="attr-card">
+            <h3>Video <span class="meta">MP4 · max ${MAX_VIDEO_SIZE_MB}MB</span></h3>
+            ${d.video ? `
+              <video src="${esc(d.video)}" controls preload="metadata"></video>
+              <button type="button" class="btn btn-outline btn-danger-outline add-media" id="attrRemoveVideo">Remove Video</button>
+            ` : `
+              <p class="media-empty">No video yet.</p>
+              <label class="btn btn-outline add-media">+ Add Video
+                <input type="file" accept="video/mp4" id="attrVideoInput" style="display:none;">
+              </label>
+            `}
+            <span class="media-status" id="attrVideoStatus"></span>
+          </div>
+        </div>
+
+        <div>
+          <div class="attr-card">
+            <h3>Product details</h3>
+            <div class="grid2">
+              <div><label>Product Name</label><input type="text" data-a-field="productName" value="${esc(d.productName)}" placeholder="Fila Heritage Crewneck"></div>
+              <div><label>Brand</label><input type="text" data-a-field="brand" value="${esc(d.brand)}" placeholder="Fila Heritage"></div>
+              <div class="span2"><label>Description</label><input type="text" data-a-field="item" value="${esc(d.item)}" placeholder="Embroidered crewneck · Black/Gold"></div>
+              <div class="span2"><label>Remarks</label><input type="text" data-a-field="remarks" value="${esc(d.remarks)}" placeholder="Condition notes, flaws, etc."></div>
+            </div>
+          </div>
+
+          <div class="attr-card">
+            <h3>Identification &amp; measurements</h3>
+            <div class="grid2">
+              <div><label>SKU</label><div class="readonly-box mono">${esc(d.sku || 'Not assigned yet')}</div></div>
+              <div><label>Category</label><div class="readonly-box">${esc(cat ? cat.name : '—')}</div></div>
+            </div>
+            <div class="grid3">
+              <div><label>Length (in)</label><input type="number" min="0" step="0.1" data-a-field="length" value="${esc(d.length)}" placeholder="26"></div>
+              <div><label>Width (in)</label><input type="number" min="0" step="0.1" data-a-field="width" value="${esc(d.width)}" placeholder="19"></div>
+              <div><label>Size (auto)</label><div class="readonly-box ${sd.empty ? 'empty' : ''}" id="attrSize">${sd.text}</div></div>
+            </div>
+          </div>
+
+          <div class="attr-card">
+            <h3>Inventory &amp; pricing</h3>
+            <div class="grid2">
+              <div><label>Quantity on Hand</label><input type="number" min="0" step="1" data-a-field="quantity" value="${esc(d.quantity)}" placeholder="1"></div>
+              <div>
+                <label>Status</label>
+                <select data-a-field="status">
+                  <option value="Available" ${d.status === 'Available' || !d.status ? 'selected' : ''}>Available</option>
+                  <option value="1 Left" ${d.status === '1 Left' ? 'selected' : ''}>1 Left</option>
+                  <option value="Claimed" ${d.status === 'Claimed' ? 'selected' : ''}>Claimed</option>
+                </select>
+              </div>
+              <div><label>Investment Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="investmentPrice" value="${esc(d.investmentPrice)}" placeholder="What you paid for it"></div>
+              <div><label>Starting Bid Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="price" value="${esc(d.price)}" placeholder="1450"></div>
+            </div>
+          </div>
+
+          <div class="sold-section ${isClaimed ? 'show' : ''}" id="attrSold">
+            <p class="sold-section-title">Sale details — required for claimed items</p>
+            <div class="grid3">
+              <div><label>Sold To *</label><input type="text" data-a-field="soldTo" value="${esc(d.soldTo)}" placeholder="Buyer name"></div>
+              <div><label>Price Sold (₱) *</label><input type="number" min="0" step="0.01" data-a-field="priceSold" value="${esc(d.priceSold)}" placeholder="1800"></div>
+              <div><label>Waybill No.</label><input type="text" data-a-field="waybill" value="${esc(d.waybill)}" placeholder="Optional — add later"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function markDirty(){
+    dirty = true;
+    const b = document.getElementById('dirtyBadge');
+    if (b) b.style.display = 'inline-flex';
+  }
+
+  attrPanel.addEventListener('input', (e) => {
+    const f = e.target.dataset.aField;
+    if (!f || !draft) return;
+    draft[f] = e.target.value;
+    e.target.classList.remove('invalid');
+    markDirty();
+
+    if (f === 'length' || f === 'width'){
+      const sd = sizeDisplay(computeSize(draft.length, draft.width));
+      const box = document.getElementById('attrSize');
+      box.textContent = sd.text;
+      box.classList.toggle('empty', sd.empty);
+    }
+    if (f === 'status'){
+      const sold = document.getElementById('attrSold');
+      const claimed = e.target.value === 'Claimed';
+      sold.classList.toggle('show', claimed);
+      if (claimed){
+        const soldTo = sold.querySelector('[data-a-field="soldTo"]');
+        if (soldTo && !soldTo.value) soldTo.focus();
+      }
+    }
+    if (f === 'productName' || f === 'item'){
+      document.getElementById('attrTitle').textContent = draft.productName || draft.item || 'Untitled product';
+    }
+  });
+
+  attrPanel.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.closest('#attrBack')) return showFolder();
+    if (t.closest('#attrSave')) return saveDraft(t.closest('#attrSave'));
+    if (t.closest('#attrDelete')) return deleteDraft();
+    const rm = t.closest('[data-a-remove-img]');
+    if (rm){
+      draft.images.splice(Number(rm.dataset.aRemoveImg), 1);
+      markDirty();
+      renderAttribute();
+      return;
+    }
+    if (t.closest('#attrRemoveVideo')){
+      draft.video = '';
+      markDirty();
+      renderAttribute();
+    }
+  });
+
+  attrPanel.addEventListener('change', async (e) => {
+    const t = e.target;
+    if (t.id === 'attrPhotoInput'){
+      const files = Array.from(t.files || []);
+      if (!files.length) return;
+      const room = MAX_PRODUCT_IMAGES - draft.images.length;
+      const batch = files.slice(0, Math.max(room, 0));
+      if (files.length > batch.length){
+        showToast({ type: 'err', title: 'Photo Limit Reached', message: `Products can have up to ${MAX_PRODUCT_IMAGES} photos — extra files were skipped.` });
+      }
+      const status = document.getElementById('attrPhotoStatus');
+      let failed = 0;
+      for (let i = 0; i < batch.length; i++){
+        status.textContent = `Uploading ${i + 1} of ${batch.length}…`;
+        try{
+          draft.images.push(await uploadToCloudinary(batch[i]));
+        } catch(err){
+          console.error(err);
+          failed++;
+        }
+      }
+      markDirty();
+      renderAttribute();
+      if (failed) showToast({ type: 'err', title: 'Upload Failed', message: `${failed} photo${failed === 1 ? '' : 's'} could not be uploaded. Try again.` });
+    }
+    if (t.id === 'attrVideoInput'){
+      const file = t.files && t.files[0];
+      if (!file) return;
+      const status = document.getElementById('attrVideoStatus');
+      status.textContent = 'Uploading video…';
+      try{
+        draft.video = await uploadVideoToCloudinary(file);
+        markDirty();
+        renderAttribute();
+      } catch(err){
+        console.error(err);
+        status.textContent = '';
+        showToast({ type: 'err', title: 'Video Upload Failed', message: err.message || 'Could not upload the video. Try again.' });
+      }
+    }
+  });
+
+  async function saveDraft(btn){
+    const d = draft;
+    if (!d) return;
+    const isClaimed = d.status === 'Claimed';
+
+    // Claimed items need a buyer and the price they sold for. Waybill stays optional.
+    if (isClaimed){
+      const missing = [];
+      const soldToEl = attrPanel.querySelector('[data-a-field="soldTo"]');
+      const priceSoldEl = attrPanel.querySelector('[data-a-field="priceSold"]');
+      if (!String(d.soldTo || '').trim()){ missing.push('Sold To'); soldToEl.classList.add('invalid'); }
+      if (d.priceSold === '' || d.priceSold === null || isNaN(Number(d.priceSold))){ missing.push('Price Sold'); priceSoldEl.classList.add('invalid'); }
+      if (missing.length){
+        showToast({
+          type: 'err', title: 'Sale Details Needed',
+          message: `Fill in ${missing.join(' and ')} before saving a claimed item. Waybill No. can be added later.`,
+          duration: 6500
+        });
+        return;
+      }
+    }
+
+    btn.dataset.loading = 'true';
+    try{
+      const size = computeSize(d.length, d.width);
+      const payload = {
+        productName: (d.productName || '').trim(),
+        brand: d.brand || '',
+        item: d.item || '',
+        remarks: d.remarks || '',
+        length: d.length === '' ? null : Number(d.length),
+        width: d.width === '' ? null : Number(d.width),
+        size: size === 'OVER' ? '' : size,
+        quantity: d.quantity === '' ? 0 : Number(d.quantity),
+        investmentPrice: d.investmentPrice === '' ? null : Number(d.investmentPrice),
+        price: Number(d.price) || 0,
+        status: d.status || 'Available',
+        // Sale details are only kept while the item is Claimed
+        soldTo: isClaimed ? (d.soldTo || '').trim() : '',
+        priceSold: isClaimed ? Number(d.priceSold) : null,
+        waybill: isClaimed ? (d.waybill || '').trim() : '',
+        images: d.images || [],
+        video: d.video || '',
+        updatedAt: new Date().toISOString()
+      };
+      await updateDoc(doc(db, 'products', d.id), payload);
+
+      const saved = normalizeProduct(d.id, { ...d, ...payload });
+      const idx = categoryProducts.findIndex(p => p.id === d.id);
+      if (idx >= 0) categoryProducts[idx] = saved;
+      draft = cloneProduct(saved);
+      dirty = false;
+      renderAttribute();
+      showToast({ type: 'ok', title: 'Product Saved', message: `${saved.sku || saved.productName || 'Product'} updated successfully.` });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
+      btn.dataset.loading = 'false';
+    }
+  }
+
+  async function deleteDraft(){
+    const d = draft;
+    if (!d) return;
+    const label = [d.sku, d.productName || d.brand].filter(Boolean).join(' — ') || 'this product';
+    if (!confirm(`Delete "${label}"? This can't be undone. (Its SKU number will not be reused.)`)) return;
+    try{
+      await deleteDoc(doc(db, 'products', d.id));
+      categoryProducts = categoryProducts.filter(p => p.id !== d.id);
+      selectedId = null;
+      draft = null;
+      dirty = false;
+      setProductView('folder');
+      renderFolder();
+      showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' });
+    }
+  }
+
+  // =====================================================================
+  //  Category detail: open / load / back
+  // =====================================================================
+  async function loadProductsForCategory(categoryId){
+    try{
+      const q = query(productsCol, where('categoryId', '==', categoryId));
+      const snap = await getDocs(q);
+      if (categoryId !== currentCategoryId) return;   // user already moved to another category
+      categoryProducts = snap.docs.map(d => normalizeProduct(d.id, d.data()));
+      renderFolder();
+    } catch(err){
+      console.error('Could not load products:', err);
+      showToast({ type: 'err', title: 'Could Not Load Products', message: 'Check your connection and Firestore rules, then reopen the category.' });
+    }
+  }
+
+  function showCategoryChip(cat){
+    document.getElementById('categoryCodeChip').textContent = cat.code ? `${SKU_PREFIX}-${cat.code}-####` : '…';
+  }
+
+  async function openCategoryDetail(cat){
+    if (!confirmDiscard()) return;
+    currentCategoryId = cat.id;
+    selectedId = null;
+    draft = null;
+    dirty = false;
+    sortKey = 'sku';
+    sortDir = 'asc';
+    document.getElementById('folderSearch').value = '';
+    document.getElementById('folderStatus').value = 'all';
+    document.getElementById('categoryDetailName').textContent = cat.name;
+    showCategoryChip(cat);
+    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
+    document.getElementById('navProducts').classList.add('active');
+    renderCategorySidebar();
+    switchView('category-detail');
+    setProductView('folder');
+    categoryProducts = [];
+    renderFolder();
+    ensureCategoryCode(cat).then(() => showCategoryChip(cat)).catch(err => console.error('Could not assign category code:', err));
+    loadProductsForCategory(cat.id);
+  }
+
+  document.getElementById('backToProductsBtn').addEventListener('click', () => {
+    if (!confirmDiscard()) return;
+    currentCategoryId = null;
+    selectedId = null;
+    draft = null;
+    document.getElementById('navProducts').classList.add('active');
+    renderCategorySidebar();
+    switchView('products');
+    refreshCategoriesView();
   });
 </script>
 
