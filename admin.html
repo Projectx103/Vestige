@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vestige Admin</title>
+<title>Vestige Admin — Batch &amp; Listing Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -13,64 +13,30 @@
     --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
     --paper:#faf7f0; --gold:#c9a468; --ink:#14201c; --line:rgba(20,32,28,0.14);
     --danger:#b3402f;
-    --sidebar-collapsed:76px; --sidebar-expanded:248px;
   }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; }
   h1,h2,.serif{ font-family:'Fraunces',serif; }
   .mono{ font-family:'Space Mono',monospace; }
-  .wrap{ max-width:960px; margin:0 auto; padding:36px 32px 100px; }
-  svg{ display:block; }
+  .wrap{ max-width:960px; margin:0 auto; padding:40px 24px 100px; }
+
+  .topbar{
+    background:var(--green-deep); color:var(--cream-soft);
+    padding:20px 24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar .brand{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:0.1em; }
+  .topbar a, .topbar button{ color:var(--gold); text-decoration:none; font-size:0.85rem; background:none; border:none; cursor:pointer; font-family:inherit; }
 
   .warn-banner{
     background:#fff3e0; border:1px solid #e0b878; color:#6b4a12;
-    border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:0 0 30px; line-height:1.5;
+    border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:24px 0 36px; line-height:1.5;
   }
+  .save-status{ font-size:0.82rem; padding:10px 14px; border-radius:8px; margin-top:14px; display:none; }
+  .save-status.ok{ display:block; background:#e3f1e6; color:#1b5e2a; }
+  .save-status.err{ display:block; background:#fbe3e0; color:var(--danger); }
 
-  /* ---------- Toast notification ---------- */
-  #toastLayer{
-    position:fixed; top:24px; right:24px; z-index:1000;
-    display:flex; flex-direction:column; gap:12px; pointer-events:none;
-  }
-  @media (max-width:640px){ #toastLayer{ left:16px; right:16px; top:16px; } }
-  .toast{
-    pointer-events:auto; display:flex; align-items:flex-start; gap:12px;
-    min-width:280px; max-width:380px; padding:16px 18px; border-radius:12px;
-    background:var(--green-deep); color:var(--cream-soft);
-    box-shadow:0 20px 40px -14px rgba(15,36,28,0.5);
-    border:1px solid rgba(239,227,200,0.14);
-    transform:translateX(420px); opacity:0;
-    transition:transform .45s cubic-bezier(.22,.8,.32,1), opacity .45s;
-  }
-  .toast.in{ transform:translateX(0); opacity:1; }
-  .toast.out{ transform:translateX(420px); opacity:0; }
-  .toast-icon{
-    flex-shrink:0; width:26px; height:26px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Mono',monospace; font-size:0.85rem; font-weight:700;
-  }
-  .toast.toast-ok .toast-icon{ background:var(--gold); color:var(--green-deep); }
-  .toast.toast-err .toast-icon{ background:var(--danger); color:var(--cream-soft); }
-  .toast-body{ flex:1; }
-  .toast-title{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; margin:0 0 3px; }
-  .toast-msg{ font-size:0.8rem; color:rgba(239,227,200,0.72); font-weight:300; line-height:1.4; margin:0; }
-  .toast-close{ background:none; border:none; color:rgba(239,227,200,0.5); cursor:pointer; font-size:1rem; line-height:1; padding:0 0 0 6px; flex-shrink:0; }
-  .toast-close:hover{ color:var(--cream-soft); }
-
-  .btn[data-loading="true"]{ opacity:0.75; cursor:wait; pointer-events:none; }
-  .btn-spinner{
-    width:14px; height:14px; border-radius:50%;
-    border:2px solid rgba(15,36,28,0.3); border-top-color:var(--green-deep);
-    animation:spin 0.7s linear infinite; display:none;
-  }
-  .btn[data-loading="true"] .btn-spinner{ display:inline-block; }
-  .btn[data-loading="true"] .btn-label-default{ display:none; }
-  .btn-spinner-label{ display:none; }
-  .btn[data-loading="true"] .btn-spinner-label{ display:inline; }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-
-  h1{ font-size:1.9rem; margin:0 0 6px; color:var(--green-deep); }
-  .lead{ color:rgba(20,32,28,0.65); margin:0 0 30px; font-weight:300; }
+  h1{ font-size:2rem; margin:0 0 6px; color:var(--green-deep); }
+  .lead{ color:rgba(20,32,28,0.65); margin:0 0 34px; font-weight:300; }
 
   .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:28px 26px; margin-bottom:26px; }
   .card h2{ font-size:1.2rem; margin:0 0 20px; color:var(--green-deep); }
@@ -104,7 +70,6 @@
   .status-live{ background:#1b3a2f; color:#efe3c8; }
   .status-ended{ background:#ddd; color:#555; }
 
-  /* ---------- Login gate ---------- */
   #loginGate{
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--green-deep); color:var(--cream-soft);
@@ -115,162 +80,10 @@
   .login-box input{ background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); }
   .login-err{ color:#f2a58c; font-size:0.82rem; margin-top:-8px; margin-bottom:14px; display:none; }
 
-  /* ---------- Admin shell: sidebar + content ---------- */
   #adminApp{ display:none; }
-  .admin-shell{ display:flex; min-height:100vh; }
-
-  .sidebar{
-    width:var(--sidebar-collapsed);
-    background:var(--green-deep); color:var(--cream-soft);
-    flex-shrink:0;
-    display:flex; flex-direction:column;
-    transition:width .32s cubic-bezier(.22,.8,.32,1);
-    overflow:hidden;
-    position:sticky; top:0; height:100vh;
-  }
-  .sidebar.expanded{ width:var(--sidebar-expanded); }
-
-  .sidebar-top{
-    padding:22px 0 18px; display:flex; flex-direction:column; align-items:center;
-    border-bottom:1px solid rgba(239,227,200,0.12);
-  }
-  .sidebar.expanded .sidebar-top{ align-items:flex-start; padding:22px 20px 18px; }
-
-  .avatar-circle{
-    width:44px; height:44px; border-radius:50%;
-    background:var(--gold); color:var(--green-deep);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem;
-    flex-shrink:0; overflow:hidden;
-  }
-  .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
-
-  .profile-info{
-    display:none; flex-direction:column; margin-top:12px; width:100%;
-  }
-  .sidebar.expanded .profile-info{ display:flex; }
-  .profile-name{ font-family:'Fraunces',serif; font-size:0.95rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .profile-role{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.06em; color:var(--gold-soft,#dcc190); text-transform:uppercase; margin-top:2px; }
-
-  .sidebar-toggle{
-    background:none; border:none; color:rgba(239,227,200,0.55); cursor:pointer;
-    padding:14px 0; display:flex; align-items:center; justify-content:center;
-    width:100%; border-bottom:1px solid rgba(239,227,200,0.12);
-  }
-  .sidebar-toggle:hover{ color:var(--cream-soft); }
-  .sidebar.expanded .sidebar-toggle{ justify-content:flex-end; padding-right:20px; }
-  .sidebar-toggle svg{ transition:transform .32s ease; }
-  .sidebar.expanded .sidebar-toggle svg{ transform:rotate(180deg); }
-
-  .sidebar-nav{ flex:1; padding:14px 0; display:flex; flex-direction:column; gap:2px; }
-  .nav-item{
-    display:flex; align-items:center; gap:16px;
-    padding:13px 0; margin:0 14px; border-radius:10px;
-    cursor:pointer; color:rgba(239,227,200,0.65);
-    justify-content:center;
-    transition:background .2s, color .2s;
-  }
-  .sidebar.expanded .nav-item{ justify-content:flex-start; padding:13px 14px; }
-  .nav-item:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
-  .nav-item.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
-  .nav-item svg{ flex-shrink:0; }
-  .nav-label{ display:none; white-space:nowrap; font-size:0.86rem; font-weight:500; }
-  .sidebar.expanded .nav-label{ display:inline; }
-
-  .sidebar-bottom{
-    padding:14px 0; border-top:1px solid rgba(239,227,200,0.12);
-    display:flex; flex-direction:column; gap:2px;
-  }
-
-  .main-content{ flex:1; min-width:0; }
-
-  .view{ display:none; }
-  .view.active{ display:block; }
-
-  .placeholder-view{
-    display:flex; flex-direction:column; align-items:flex-start;
-    justify-content:center; min-height:60vh; max-width:420px;
-  }
-  .placeholder-view .tag{
-    font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.1em;
-    text-transform:uppercase; color:var(--gold); background:rgba(201,164,104,0.12);
-    padding:5px 12px; border-radius:999px; margin-bottom:16px;
-  }
-  .placeholder-view h2{ font-size:1.6rem; margin:0 0 10px; color:var(--green-deep); }
-  .placeholder-view p{ color:rgba(20,32,28,0.6); font-weight:300; }
-
-  /* ---------- Products & Categories (Phase 2) ---------- */
-  .nav-item-row{ display:flex; align-items:center; }
-  .nav-chevron{
-    display:none; margin-left:auto; padding:4px; color:rgba(239,227,200,0.5);
-    transition:transform .25s;
-  }
-  .sidebar.expanded .nav-chevron{ display:block; }
-  .nav-chevron.open{ transform:rotate(90deg); }
-
-  .nav-sublist{
-    display:none; flex-direction:column; gap:1px;
-    padding:2px 14px 6px 44px;
-  }
-  .sidebar.expanded .nav-sublist.open{ display:flex; }
-  .nav-subitem{
-    padding:9px 10px; border-radius:8px; cursor:pointer;
-    color:rgba(239,227,200,0.55); font-size:0.8rem;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    transition:background .2s, color .2s;
-  }
-  .nav-subitem:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
-  .nav-subitem.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
-
-  .back-link{
-    display:inline-flex; align-items:center; gap:6px;
-    color:rgba(20,32,28,0.55); text-decoration:none; font-size:0.82rem;
-    margin-bottom:18px; cursor:pointer; background:none; border:none; font-family:inherit; padding:0;
-  }
-  .back-link:hover{ color:var(--green-deep); }
-
-  .category-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
-  .category-card{
-    background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px;
-    cursor:pointer; transition:border-color .2s, transform .2s;
-  }
-  .category-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
-  .category-card h3{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0 0 4px; color:var(--green-deep); }
-  .category-card .count{ font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5); }
-  .category-card-actions{ display:flex; gap:10px; margin-top:14px; }
-  .category-card-actions button{
-    background:none; border:none; cursor:pointer; font-family:'Space Mono',monospace;
-    font-size:0.68rem; letter-spacing:0.04em; color:rgba(20,32,28,0.5); padding:0;
-  }
-  .category-card-actions button:hover{ color:var(--green-deep); }
-  .category-card-actions button.danger:hover{ color:var(--danger); }
-
-  .add-category-row{ display:flex; gap:12px; align-items:flex-start; }
-  .add-category-row input{ margin-bottom:0; }
-  .add-category-row .btn{ flex-shrink:0; }
-
-  .product-card{
-    display:flex; gap:16px; background:#fff; border:1px solid var(--line);
-    border-radius:14px; padding:16px; margin-bottom:14px; align-items:flex-start;
-  }
-  .product-card-fields{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
-  .product-card-fields .full{ grid-column:1 / -1; }
-  .product-photo-col{ flex-shrink:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; width:150px; }
-  .product-photo-col img{ width:80px; height:100px; object-fit:cover; border-radius:8px; background:var(--cream-soft); border:1px solid var(--line); }
-  .gallery-strip{ display:flex; flex-wrap:wrap; gap:6px; width:150px; }
-  .gallery-thumb{ position:relative; width:38px; height:38px; }
-  .gallery-thumb img{ width:100%; height:100%; object-fit:cover; border-radius:5px; border:1px solid var(--line); }
-  .gallery-thumb .x{
-    position:absolute; top:-5px; right:-5px; width:16px; height:16px; border-radius:50%;
-    background:var(--danger); color:#fff; font-size:0.6rem; line-height:16px; text-align:center;
-    cursor:pointer; border:1px solid var(--paper);
-  }
-  .product-card-actions{ flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
 </style>
 </head>
 <body>
-
-<div id="toastLayer"></div>
 
 <div id="loginGate">
   <div class="login-box">
@@ -286,156 +99,53 @@
 </div>
 
 <div id="adminApp">
-  <div class="admin-shell">
+  <div class="topbar">
+    <span class="brand">VESTIGE ADMIN</span>
+    <div style="display:flex; gap:20px; align-items:center;">
+      <a href="home.html">View Public Site</a>
+      <button id="signOutBtn">Sign Out</button>
+    </div>
+  </div>
 
-    <!-- ---------- SIDEBAR ---------- -->
-    <nav class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <div class="avatar-circle" id="avatarCircle">V</div>
-        <div class="profile-info">
-          <span class="profile-name" id="profileName">Admin</span>
-          <span class="profile-role">Vestige Admin</span>
-        </div>
+  <div class="wrap">
+
+    <div class="warn-banner">
+      <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
+      on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
+      Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
+    </div>
+
+    <h1>Batch &amp; Listing Manager</h1>
+    <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
+
+    <div class="card">
+      <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
+      <div class="grid3">
+        <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
+        <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
+        <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
       </div>
-
-      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Expand menu">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-
-      <div class="sidebar-nav">
-        <div class="nav-item active" data-view="dashboard">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
-          <span class="nav-label">Dashboard</span>
-        </div>
-        <div class="nav-item nav-item-row" data-view="products" id="navProducts">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7" cy="7" r="1"></circle></svg>
-          <span class="nav-label">Products</span>
-          <svg class="nav-chevron" id="productsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-        <div class="nav-sublist" id="categorySubNav"></div>
-        <div class="nav-item" data-view="batches">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span class="nav-label">Batches</span>
-        </div>
-        <div class="nav-item" data-view="settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-          <span class="nav-label">Settings</span>
-        </div>
+      <div class="grid3">
+        <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
+        <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
+        <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
       </div>
+      <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
+    </div>
 
-      <div class="sidebar-bottom">
-        <a href="home.html" class="nav-item" style="text-decoration:none;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
-          <span class="nav-label">View Public Site</span>
-        </a>
-        <div class="nav-item" id="signOutBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span class="nav-label">Sign Out</span>
-        </div>
+    <div class="card">
+      <h2>Hot Items — This Batch</h2>
+      <div id="itemsContainer"></div>
+      <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
+    </div>
+
+    <div class="card">
+      <h2>Publish</h2>
+      <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
+      <div class="actions">
+        <button class="btn btn-gold" id="publishBtn">Publish to Live Site</button>
       </div>
-    </nav>
-
-    <!-- ---------- MAIN CONTENT ---------- -->
-    <div class="main-content">
-      <div class="wrap">
-
-        <!-- DASHBOARD VIEW -->
-        <div class="view active" id="view-dashboard">
-
-          <div class="warn-banner">
-            <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
-            on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
-            Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
-          </div>
-
-          <h1>Batch &amp; Listing Manager</h1>
-          <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
-
-          <div class="card">
-            <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
-            <div class="grid3">
-              <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
-              <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
-              <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
-            </div>
-            <div class="grid3">
-              <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
-              <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
-              <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
-            </div>
-            <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
-          </div>
-
-          <div class="card">
-            <h2>Hot Items — This Batch</h2>
-            <div id="itemsContainer"></div>
-            <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
-          </div>
-
-          <div class="card">
-            <h2>Publish</h2>
-            <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
-            <div class="actions">
-              <button class="btn btn-gold" id="publishBtn">
-                <span class="btn-spinner"></span>
-                <span class="btn-label-default">Publish to Live Site</span>
-                <span class="btn-spinner-label">Publishing…</span>
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- PRODUCTS VIEW: Category Overview -->
-        <div class="view" id="view-products">
-          <h1>Products</h1>
-          <p class="lead">Organize your catalog into categories. Click a category to manage its products.</p>
-
-          <div class="card">
-            <h2>Categories</h2>
-            <div class="category-grid" id="categoryGrid"></div>
-            <div class="add-category-row">
-              <input type="text" id="newCategoryName" placeholder="e.g. Hoodies, Jackets, Windbreakers">
-              <button class="btn btn-gold" id="addCategoryBtn">+ Add Category</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CATEGORY DETAIL VIEW -->
-        <div class="view" id="view-category-detail">
-          <button class="back-link" id="backToProductsBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            Back to Products
-          </button>
-          <h1 id="categoryDetailName">Category</h1>
-          <p class="lead">Manage products within this category.</p>
-
-          <div class="card">
-            <h2>Products</h2>
-            <div id="productListContainer"></div>
-            <button class="btn btn-add" id="addProductBtn">+ Add Product</button>
-          </div>
-        </div>
-
-        <!-- BATCHES VIEW (placeholder — future phase) -->
-        <div class="view" id="view-batches">
-          <div class="placeholder-view">
-            <span class="tag">Coming soon</span>
-            <h2>Batch History</h2>
-            <p>A dedicated view of past and upcoming batches, separate from the live Dashboard editor, is planned for a later phase.</p>
-          </div>
-        </div>
-
-        <!-- SETTINGS VIEW (placeholder — future phase) -->
-        <div class="view" id="view-settings">
-          <div class="placeholder-view">
-            <span class="tag">Coming soon</span>
-            <h2>Settings</h2>
-            <p>Shop name, social links, and other configuration will live here in a later phase.</p>
-          </div>
-        </div>
-
-      </div>
+      <div class="save-status" id="saveStatus"></div>
     </div>
 
   </div>
@@ -447,46 +157,13 @@
     getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where
+    getFirestore, doc, setDoc, getDoc
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const batchRef = doc(db, "vestige", "liveBatch");
-  const categoriesCol = collection(db, "categories");
-  const productsCol = collection(db, "products");
-
-  const CLOUDINARY_CLOUD_NAME = "dxv11m11i";
-  const CLOUDINARY_UPLOAD_PRESET = "vestige_signed";
-  const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-  async function uploadToCloudinary(file){
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Cloudinary upload failed');
-    const data = await res.json();
-    return data.secure_url;
-  }
-
-  const CLOUDINARY_VIDEO_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
-  const MAX_PRODUCT_IMAGES = 5;
-  const MAX_VIDEO_SIZE_MB = 50;
-
-  async function uploadVideoToCloudinary(file){
-    if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024){
-      throw new Error(`Video is too large — keep it under ${MAX_VIDEO_SIZE_MB}MB.`);
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(CLOUDINARY_VIDEO_UPLOAD_URL, { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Cloudinary video upload failed');
-    const data = await res.json();
-    return data.secure_url;
-  }
 
   const loginGate = document.getElementById('loginGate');
   const adminApp = document.getElementById('adminApp');
@@ -506,72 +183,19 @@
 
   document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user){
+  onAuthStateChanged(auth, (user) => {
+    if (user){
+      loginGate.style.display = 'none';
+      adminApp.style.display = 'block';
+      loadCurrentBatch();
+    } else {
       loginGate.style.display = 'flex';
       adminApp.style.display = 'none';
-      return;
     }
-
-    // Verify this signed-in account is an authorized admin — not just "someone is logged in."
-    let isAdmin = false;
-    try{
-      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-      isAdmin = adminSnap.exists();
-    } catch(err){
-      console.error('Admin check failed:', err);
-      isAdmin = false;
-    }
-
-    if (!isAdmin){
-      await signOut(auth);
-      loginErr.textContent = "This account isn't authorized for admin access.";
-      loginErr.style.display = 'block';
-      loginGate.style.display = 'flex';
-      adminApp.style.display = 'none';
-      return;
-    }
-
-    loginGate.style.display = 'none';
-    adminApp.style.display = 'block';
-    const email = user.email || 'Admin';
-    document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
-    document.getElementById('profileName').textContent = email;
-    loadCurrentBatch();
-    refreshCategoriesView();
   });
 
-  // ---------- Sidebar expand/collapse + nav switching ----------
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('sidebarToggle').addEventListener('click', () => {
-    sidebar.classList.toggle('expanded');
-  });
-
-  function switchView(viewName){
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + viewName).classList.add('active');
-  }
-
-  document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-    item.addEventListener('click', (e) => {
-      document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
-      const viewName = item.dataset.view;
-      switchView(viewName);
-      if (viewName === 'products') refreshCategoriesView();
-    });
-  });
-
-  document.getElementById('productsChevron').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('productsChevron').classList.toggle('open');
-    document.getElementById('categorySubNav').classList.toggle('open');
-  });
-
-  // ---------- Batch & Hot Items state (unchanged from before) ----------
   function uid(){ return Math.random().toString(36).slice(2,9); }
-  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available', image:'' }; }
+  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available' }; }
 
   let state = {
     batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
@@ -610,10 +234,11 @@
   function renderStatusPill(){
     const pill = document.getElementById('status-pill');
     const now = new Date();
+    const listing = state.listingDate ? new Date(state.listingDate) : null;
     const bidStart = state.biddingStart ? new Date(state.biddingStart) : null;
     const bidEnd = state.biddingEnd ? new Date(state.biddingEnd) : null;
     let status = 'UPCOMING', cls = 'status-upcoming';
-    if (bidStart && bidEnd){
+    if (listing && bidStart && bidEnd){
       if (now >= bidStart && now < bidEnd){ status = 'LIVE'; cls = 'status-live'; }
       else if (now >= bidEnd){ status = 'ENDED'; cls = 'status-ended'; }
     }
@@ -632,18 +257,6 @@
         <div class="grid2">
           <div><label>Brand</label><input type="text" data-field="brand" data-idx="${idx}" value="${it.brand}" placeholder="Fila Heritage"></div>
           <div><label>Item Description</label><input type="text" data-field="item" data-idx="${idx}" value="${it.item}" placeholder="Embroidered crewneck · Black/Gold"></div>
-        </div>
-        <div>
-          <label>Product Photo</label>
-          <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-            <img data-preview="${idx}" src="${it.image || ''}" style="width:64px;height:80px;object-fit:cover;border-radius:6px;background:var(--cream-soft);border:1px solid var(--line);display:${it.image ? 'block' : 'none'};">
-            <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-              ${it.image ? 'Replace Photo' : 'Upload Photo'}
-              <input type="file" accept="image/*" data-upload-idx="${idx}" style="display:none;">
-            </label>
-            <button type="button" class="btn btn-outline" data-remove-photo-idx="${idx}" style="display:${it.image ? 'inline-flex' : 'none'}; color:var(--danger); border-color:var(--danger);">Remove</button>
-            <span data-upload-status="${idx}" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5);"></span>
-          </div>
         </div>
         <div class="grid3">
           <div><label>Item Code</label><input type="text" data-field="code" data-idx="${idx}" value="${it.code}" placeholder="VG-014"></div>
@@ -665,35 +278,6 @@
       el.addEventListener('input', (e) => {
         const idx = Number(e.target.dataset.idx);
         state.items[idx][e.target.dataset.field] = e.target.value;
-      });
-    });
-    c.querySelectorAll('[data-upload-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.uploadIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        const statusEl = c.querySelector(`[data-upload-status="${idx}"]`);
-        const previewEl = c.querySelector(`[data-preview="${idx}"]`);
-        statusEl.textContent = 'Uploading…';
-        try{
-          const url = await uploadToCloudinary(file);
-          state.items[idx].image = url;
-          previewEl.src = url;
-          previewEl.style.display = 'block';
-          statusEl.textContent = 'Uploaded ✓';
-          setTimeout(() => { statusEl.textContent = ''; }, 3000);
-          renderItems();
-        } catch(err){
-          console.error(err);
-          statusEl.textContent = 'Upload failed';
-        }
-      });
-    });
-    c.querySelectorAll('[data-remove-photo-idx]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.removePhotoIdx);
-        state.items[idx].image = '';
-        renderItems();
       });
     });
     c.querySelectorAll('.remove-btn').forEach(btn => {
@@ -728,354 +312,24 @@
       },
       hotItems: state.items.map(it => ({
         brand: it.brand, item: it.item, code: it.code, size: it.size,
-        price: Number(it.price) || 0, status: it.status, image: it.image || ''
+        price: Number(it.price) || 0, status: it.status
       })),
       updatedAt: new Date().toISOString()
     };
   }
 
-  function showToast({ type = 'ok', title, message, duration = 4500 }){
-    const layer = document.getElementById('toastLayer');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-      <span class="toast-icon">${type === 'ok' ? '✓' : '!'}</span>
-      <div class="toast-body">
-        <p class="toast-title">${title}</p>
-        <p class="toast-msg">${message}</p>
-      </div>
-      <button class="toast-close" aria-label="Dismiss">✕</button>
-    `;
-    layer.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('in'));
-
-    function dismiss(){
-      toast.classList.remove('in');
-      toast.classList.add('out');
-      setTimeout(() => toast.remove(), 450);
-    }
-    toast.querySelector('.toast-close').addEventListener('click', dismiss);
-    if (duration) setTimeout(dismiss, duration);
-  }
-
   document.getElementById('publishBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('publishBtn');
-    btn.dataset.loading = 'true';
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.className = 'save-status';
+    statusEl.style.display = 'none';
     try{
       await setDoc(batchRef, buildPayload());
-      showToast({
-        type: 'ok',
-        title: 'Published',
-        message: 'Your live site is updated — visitors will see the new batch now.'
-      });
+      statusEl.textContent = 'Published — your live site is now updated.';
+      statusEl.className = 'save-status ok';
     } catch(err){
       console.error(err);
-      showToast({
-        type: 'err',
-        title: 'Publish Failed',
-        message: 'Could not save changes. Check your Firestore rules allow this account to write, then try again.',
-        duration: 7000
-      });
-    } finally {
-      btn.dataset.loading = 'false';
-    }
-  });
-
-  // ---------- Phase 2: Categories & Products ----------
-  let categories = [];
-  let allProductsForCounts = [];
-  let currentCategoryId = null;
-  let categoryProducts = [];
-
-  async function refreshCategoriesView(){
-    try{
-      const [catSnap, prodSnap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol)]);
-      categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      allProductsForCounts = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderCategorySidebar();
-      renderCategoryGrid();
-    } catch(err){
-      console.error('Could not load categories/products:', err);
-    }
-  }
-
-  function renderCategorySidebar(){
-    const nav = document.getElementById('categorySubNav');
-    nav.innerHTML = categories.map(cat => `
-      <div class="nav-subitem ${cat.id === currentCategoryId ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name}</div>
-    `).join('');
-    nav.querySelectorAll('.nav-subitem').forEach(el => {
-      el.addEventListener('click', () => {
-        const cat = categories.find(c => c.id === el.dataset.catId);
-        if (cat) openCategoryDetail(cat);
-      });
-    });
-  }
-
-  function renderCategoryGrid(){
-    const grid = document.getElementById('categoryGrid');
-    if (categories.length === 0){
-      grid.innerHTML = `<p class="lead" style="grid-column:1/-1; margin:0;">No categories yet — add your first one below.</p>`;
-      return;
-    }
-    grid.innerHTML = categories.map(cat => {
-      const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
-      return `
-        <div class="category-card" data-cat-id="${cat.id}">
-          <h3>${cat.name}</h3>
-          <span class="count">${count} product${count === 1 ? '' : 's'}</span>
-          <div class="category-card-actions">
-            <button type="button" data-edit-cat="${cat.id}">Rename</button>
-            <button type="button" class="danger" data-delete-cat="${cat.id}">Delete</button>
-          </div>
-        </div>`;
-    }).join('');
-
-    grid.querySelectorAll('.category-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('button')) return;
-        const cat = categories.find(c => c.id === card.dataset.catId);
-        if (cat) openCategoryDetail(cat);
-      });
-    });
-    grid.querySelectorAll('[data-edit-cat]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const cat = categories.find(c => c.id === btn.dataset.editCat);
-        const newName = prompt('Rename category', cat.name);
-        if (newName && newName.trim()){
-          await updateDoc(doc(db, 'categories', cat.id), { name: newName.trim() });
-          refreshCategoriesView();
-        }
-      });
-    });
-    grid.querySelectorAll('[data-delete-cat]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const cat = categories.find(c => c.id === btn.dataset.deleteCat);
-        const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
-        const msg = count > 0
-          ? `Delete "${cat.name}"? ${count} product(s) in it will remain but become uncategorized.`
-          : `Delete "${cat.name}"?`;
-        if (!confirm(msg)) return;
-        await deleteDoc(doc(db, 'categories', cat.id));
-        showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
-        refreshCategoriesView();
-      });
-    });
-  }
-
-  document.getElementById('addCategoryBtn').addEventListener('click', async () => {
-    const input = document.getElementById('newCategoryName');
-    const name = input.value.trim();
-    if (!name) return;
-    try{
-      await addDoc(categoriesCol, { name, createdAt: new Date().toISOString() });
-      input.value = '';
-      showToast({ type: 'ok', title: 'Category Added', message: `"${name}" is ready for products.` });
-      refreshCategoriesView();
-    } catch(err){
-      console.error(err);
-      showToast({ type: 'err', title: 'Could Not Add Category', message: 'Check your Firestore rules and try again.' });
-    }
-  });
-
-  function openCategoryDetail(cat){
-    currentCategoryId = cat.id;
-    document.getElementById('categoryDetailName').textContent = cat.name;
-    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
-    document.getElementById('navProducts').classList.add('active');
-    renderCategorySidebar();
-    switchView('category-detail');
-    loadProductsForCategory(cat.id);
-  }
-
-  document.getElementById('backToProductsBtn').addEventListener('click', () => {
-    currentCategoryId = null;
-    document.getElementById('navProducts').classList.add('active');
-    renderCategorySidebar();
-    switchView('products');
-    refreshCategoriesView();
-  });
-
-  async function loadProductsForCategory(categoryId){
-    try{
-      const q = query(productsCol, where('categoryId', '==', categoryId));
-      const snap = await getDocs(q);
-      categoryProducts = snap.docs.map(d => {
-        const data = d.data();
-        // Backward compat: older products saved a single "image" field. Fold it into images[].
-        const images = Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []);
-        return { id: d.id, ...data, images, video: data.video || '' };
-      });
-      renderProductList();
-    } catch(err){
-      console.error('Could not load products:', err);
-    }
-  }
-
-  function renderProductList(){
-    const c = document.getElementById('productListContainer');
-    if (categoryProducts.length === 0){
-      c.innerHTML = `<p class="lead" style="margin:0 0 16px;">No products in this category yet.</p>`;
-      return;
-    }
-    c.innerHTML = categoryProducts.map((p, idx) => `
-      <div class="product-card" data-idx="${idx}">
-        <div class="product-photo-col">
-          <div class="gallery-strip" data-gallery="${idx}">
-            ${(p.images || []).map((img, imgIdx) => `
-              <div class="gallery-thumb">
-                <img src="${img}">
-                <span class="x" data-p-remove-img="${idx}" data-img-idx="${imgIdx}">✕</span>
-              </div>
-            `).join('')}
-          </div>
-          <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px; display:${(p.images || []).length >= 5 ? 'none' : 'inline-flex'};">
-            + Add Photo
-            <input type="file" accept="image/*" data-p-upload-idx="${idx}" style="display:none;">
-          </label>
-          <span class="mono" style="font-size:0.62rem; color:rgba(20,32,28,0.4);">${(p.images || []).length}/5 photos</span>
-
-          <div style="width:100%; height:1px; background:var(--line); margin:6px 0;"></div>
-
-          ${p.video ? `
-            <div style="display:flex; align-items:center; gap:6px; font-size:0.68rem; color:var(--green-deep); font-family:'Space Mono',monospace;">▶ Video attached</div>
-            <button type="button" class="btn btn-outline" data-p-remove-video="${idx}" style="font-size:0.68rem; padding:6px 10px; color:var(--danger); border-color:var(--danger);">Remove Video</button>
-          ` : `
-            <label class="btn btn-outline" style="margin:0; cursor:pointer; font-size:0.72rem; padding:8px 12px;">
-              + Add Video
-              <input type="file" accept="video/mp4" data-p-video-idx="${idx}" style="display:none;">
-            </label>
-          `}
-          <span class="mono" data-p-video-status="${idx}" style="font-size:0.62rem; color:rgba(20,32,28,0.4);"></span>
-        </div>
-        <div class="product-card-fields">
-          <div><label>Brand</label><input type="text" data-p-field="brand" data-p-idx="${idx}" value="${p.brand || ''}" placeholder="Fila Heritage"></div>
-          <div><label>Price (₱)</label><input type="number" min="0" data-p-field="price" data-p-idx="${idx}" value="${p.price || ''}" placeholder="1450"></div>
-          <div class="full"><label>Description</label><input type="text" data-p-field="item" data-p-idx="${idx}" value="${p.item || ''}" placeholder="Embroidered crewneck · Black/Gold"></div>
-          <div>
-            <label>Status</label>
-            <select data-p-field="status" data-p-idx="${idx}">
-              <option value="Available" ${p.status==='Available'?'selected':''}>Available</option>
-              <option value="1 Left" ${p.status==='1 Left'?'selected':''}>1 Left</option>
-              <option value="Claimed" ${p.status==='Claimed'?'selected':''}>Claimed</option>
-            </select>
-          </div>
-        </div>
-        <div class="product-card-actions">
-          <button type="button" class="btn btn-gold" data-p-save="${idx}" style="font-size:0.78rem; padding:9px 16px;">Save</button>
-          <button type="button" class="btn btn-outline" data-p-delete="${idx}" style="font-size:0.78rem; padding:9px 16px; color:var(--danger); border-color:var(--danger);">Delete</button>
-        </div>
-      </div>
-    `).join('');
-
-    c.querySelectorAll('[data-p-field]').forEach(el => {
-      el.addEventListener('input', (e) => {
-        const idx = Number(e.target.dataset.pIdx);
-        categoryProducts[idx][e.target.dataset.pField] = e.target.value;
-      });
-    });
-    c.querySelectorAll('[data-p-upload-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.pUploadIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        if ((categoryProducts[idx].images || []).length >= MAX_PRODUCT_IMAGES){
-          showToast({ type: 'err', title: 'Photo Limit Reached', message: `Products can have up to ${MAX_PRODUCT_IMAGES} photos.` });
-          return;
-        }
-        try{
-          const url = await uploadToCloudinary(file);
-          if (!categoryProducts[idx].images) categoryProducts[idx].images = [];
-          categoryProducts[idx].images.push(url);
-          renderProductList();
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Upload Failed', message: 'Could not upload the photo. Try again.' });
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-video-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.pVideoIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        const statusEl = c.querySelector(`[data-p-video-status="${idx}"]`);
-        statusEl.textContent = 'Uploading video…';
-        try{
-          const url = await uploadVideoToCloudinary(file);
-          categoryProducts[idx].video = url;
-          renderProductList();
-        } catch(err){
-          console.error(err);
-          statusEl.textContent = '';
-          showToast({ type: 'err', title: 'Video Upload Failed', message: err.message || 'Could not upload the video. Try again.' });
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-remove-video]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.pRemoveVideo);
-        categoryProducts[idx].video = '';
-        renderProductList();
-      });
-    });
-    c.querySelectorAll('[data-p-remove-img]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.pRemoveImg);
-        const imgIdx = Number(e.target.dataset.imgIdx);
-        categoryProducts[idx].images.splice(imgIdx, 1);
-        renderProductList();
-      });
-    });
-    c.querySelectorAll('[data-p-save]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.target.dataset.pSave);
-        const p = categoryProducts[idx];
-        btn.dataset.loading = 'true';
-        try{
-          await updateDoc(doc(db, 'products', p.id), {
-            brand: p.brand || '', item: p.item || '', price: Number(p.price) || 0,
-            status: p.status || 'Available', images: p.images || [], video: p.video || ''
-          });
-          showToast({ type: 'ok', title: 'Product Saved', message: `${p.brand || 'Product'} updated successfully.` });
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
-        } finally {
-          btn.dataset.loading = 'false';
-        }
-      });
-    });
-    c.querySelectorAll('[data-p-delete]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.target.dataset.pDelete);
-        const p = categoryProducts[idx];
-        if (!confirm(`Delete "${p.brand || 'this product'}"? This can't be undone.`)) return;
-        try{
-          await deleteDoc(doc(db, 'products', p.id));
-          showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
-          loadProductsForCategory(currentCategoryId);
-        } catch(err){
-          console.error(err);
-          showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' });
-        }
-      });
-    });
-  }
-
-  document.getElementById('addProductBtn').addEventListener('click', async () => {
-    if (!currentCategoryId) return;
-    try{
-      await addDoc(productsCol, {
-        categoryId: currentCategoryId, brand: '', item: '', price: 0,
-        status: 'Available', images: [], video: '', createdAt: new Date().toISOString()
-      });
-      loadProductsForCategory(currentCategoryId);
-    } catch(err){
-      console.error(err);
-      showToast({ type: 'err', title: 'Could Not Add Product', message: 'Check your Firestore rules and try again.' });
+      statusEl.textContent = 'Could not publish — check your Firestore rules allow this account to write.';
+      statusEl.className = 'save-status err';
     }
   });
 </script>
