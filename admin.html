@@ -464,6 +464,13 @@
   .picker-foot-btns{ display:flex; gap:10px; }
   .picker-foot .btn{ padding:10px 20px; font-size:0.84rem; }
   @media (max-width:640px){ .picker-filters{ flex-direction:column; } .picker-filters select{ width:100%; } }
+
+  .batch-summary{
+    font-size:0.86rem; margin:0 0 16px; padding:10px 14px; border-radius:10px;
+    background:rgba(201,164,104,0.14); color:var(--green-deep);
+  }
+  .picker-foot-left{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .picker-foot-left .btn{ padding:8px 16px; font-size:0.78rem; }
 </style>
 </head>
 <body>
@@ -485,7 +492,10 @@
     </div>
     <div class="picker-list" id="pickerList"></div>
     <div class="picker-foot">
-      <span class="mono" id="pickerCount"></span>
+      <div class="picker-foot-left">
+        <span class="mono" id="pickerCount"></span>
+        <button type="button" class="btn btn-outline" id="pickerSelectAll" style="display:none;">Select all shown</button>
+      </div>
       <div class="picker-foot-btns">
         <button type="button" class="btn btn-outline" id="pickerCancel">Cancel</button>
         <button type="button" class="btn btn-gold" id="pickerAdd" disabled>Add selected</button>
@@ -598,6 +608,18 @@
             <div class="hot-warn" id="hotWarn" style="display:none;"></div>
             <div id="itemsContainer"></div>
             <button class="btn btn-add" id="addItemBtn">+ Add from Products</button>
+          </div>
+
+          <div class="card">
+            <div class="hot-head">
+              <h2>Batch Items — This Batch <span class="count-pill" id="batchCount">0</span></h2>
+              <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear all</button>
+            </div>
+            <p class="hot-note">Choose which <strong>Available</strong> products belong to this batch. They are listed on the shop's <strong>This Week's Batch</strong> page. Your hot items are included there automatically.</p>
+            <div class="batch-summary" id="batchSummary"></div>
+            <div class="hot-warn" id="batchWarn" style="display:none;"></div>
+            <div id="batchContainer"></div>
+            <button class="btn btn-add" id="addBatchBtn">+ Add from Products</button>
           </div>
 
           <div class="card">
@@ -875,7 +897,8 @@
   let state = {
     batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
     hotLimit: DEFAULT_HOT_LIMIT,
-    items: []
+    items: [],          // Hot Items (featured on home.html)
+    batchItems: []      // extra items that belong to this batch (shown on the shop's batch page)
   };
   let hotProducts = [];   // fresh copy of every product (statuses, picker list)
 
@@ -913,15 +936,17 @@
     return hotProducts;
   }
 
-  // Re-reads each linked item from Products. Returns the items whose product no longer exists.
+  // Re-reads each linked item (hot + batch) from Products. Returns the items whose product no longer exists.
   function refreshHotSnapshots(){
     const gone = [];
-    state.items = state.items.map(it => {
+    const relink = (it) => {
       if (!it.productId) return it;
       const p = hotProducts.find(x => x.id === it.productId);
       if (!p){ gone.push(it); return { ...it, missing: true }; }
       return toHotItem(p);
-    });
+    };
+    state.items = state.items.map(relink);
+    state.batchItems = state.batchItems.map(relink);
     return gone;
   }
 
@@ -930,6 +955,7 @@
       await fetchAllProducts();
       refreshHotSnapshots();
       renderHotItems();
+      renderBatchItems();
     } catch(err){
       console.error('Could not refresh hot items:', err);
     }
@@ -946,6 +972,7 @@
         state.biddingStart = (data.batch?.biddingStart || '').slice(0,16);
         state.biddingEnd = (data.batch?.biddingEnd || '').slice(0,16);
         state.items = (data.hotItems || []).map(it => ({ ...it }));
+        state.batchItems = (Array.isArray(data.batchItemIds) ? data.batchItemIds : []).filter(Boolean).map(id => ({ productId: id }));
         const saved = Number(data.batch?.hotItemLimit);
         state.hotLimit = saved >= 1 ? Math.min(saved, MAX_HOT_LIMIT)
                        : Math.min(Math.max(state.items.length, DEFAULT_HOT_LIMIT), MAX_HOT_LIMIT);
@@ -970,6 +997,7 @@
     document.getElementById('biddingEnd').value = state.biddingEnd;
     document.getElementById('hotLimit').value = state.hotLimit;
     renderHotItems();
+    renderBatchItems();
     renderStatusPill();
   }
 
@@ -1057,17 +1085,78 @@
   });
   hotLimitEl.addEventListener('change', () => { hotLimitEl.value = state.hotLimit; });
 
-  // ---------- Picker: Available products only ----------
+  // ---------- Batch Items: the rest of this batch (hot items are included automatically) ----------
+  function renderBatchItems(){
+    const n = state.batchItems.length, hot = state.items.length;
+    document.getElementById('batchCount').textContent = String(n);
+    document.getElementById('batchSummary').innerHTML =
+      `<strong>${hot + n}</strong> item${hot + n === 1 ? '' : 's'} on the shop's batch page: <strong>${hot}</strong> hot item${hot === 1 ? '' : 's'} (included automatically) + <strong>${n}</strong> more.`;
+
+    const warnings = [];
+    const gone = state.batchItems.filter(i => i.missing).length;
+    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you publish.`);
+    const claimed = state.batchItems.filter(i => !i.missing && i.status === 'Claimed').length;
+    if (claimed) warnings.push(`${claimed} item${claimed === 1 ? ' is' : 's are'} now Claimed. ${claimed === 1 ? 'It stays' : 'They stay'} on the batch page marked as claimed.`);
+    const warn = document.getElementById('batchWarn');
+    warn.style.display = warnings.length ? 'block' : 'none';
+    warn.innerHTML = warnings.map(w => `<div>${esc(w)}</div>`).join('');
+
+    const c = document.getElementById('batchContainer');
+    if (!n){
+      c.innerHTML = `<div class="hot-empty">No extra items yet. Click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
+    } else {
+      c.innerHTML = state.batchItems.map((it, i) => `
+        <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-bi="${i}">
+          ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
+          <div class="hot-info">
+            <div class="hot-line1">
+              <span class="code-chip">${esc(it.code || 'NO SKU')}</span>
+              <strong>${esc(it.brand || 'Untitled')}</strong>
+              ${statusPill(it.status || 'Available')}
+              ${it.missing ? '<span class="hot-flag bad">Deleted from Products</span>' : ''}
+            </div>
+            <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
+          </div>
+          <div class="hot-actions">
+            <button type="button" class="btn btn-outline btn-danger-outline" data-batch-remove="${i}" style="padding:8px 14px; font-size:0.78rem;">Remove</button>
+          </div>
+        </div>`).join('');
+    }
+    document.getElementById('clearBatchBtn').disabled = n === 0;
+  }
+
+  document.getElementById('batchContainer').addEventListener('click', (e) => {
+    const rm = e.target.closest('[data-batch-remove]');
+    if (!rm) return;
+    state.batchItems.splice(Number(rm.dataset.batchRemove), 1);
+    renderBatchItems();
+  });
+  document.getElementById('clearBatchBtn').addEventListener('click', () => {
+    if (!state.batchItems.length) return;
+    if (!confirm(`Remove all ${state.batchItems.length} extra items from this batch? Hot items are not affected.`)) return;
+    state.batchItems = [];
+    renderBatchItems();
+  });
+
+  // ---------- Picker: Available products only (shared by Hot Items and Batch Items) ----------
   const pickerOverlay = document.getElementById('pickerOverlay');
   let pickerSel = new Set();
+  let pickerMode = 'hot';
 
-  function inBatchIds(){ return new Set(state.items.map(i => i.productId).filter(Boolean)); }
+  function hotIdSet(){ return new Set(state.items.map(i => i.productId).filter(Boolean)); }
+  function batchIdSet(){ return new Set(state.batchItems.map(i => i.productId).filter(Boolean)); }
   function isAvailable(p){ return (p.status || 'Available') === 'Available'; }
   function categoryName(id){ const c = categories.find(x => x.id === id); return c ? c.name : 'Uncategorized'; }
+  function pickerSlots(){ return pickerMode === 'hot' ? state.hotLimit - state.items.length : Infinity; }
+  function lockReason(p){
+    if (hotIdSet().has(p.id)) return 'Already a hot item';
+    if (pickerMode === 'batch' && batchIdSet().has(p.id)) return 'Already in this batch';
+    return '';
+  }
 
-  async function openPicker(){
-    if (state.items.length >= state.hotLimit) return;
-    const btn = document.getElementById('addItemBtn');
+  async function openPicker(mode){
+    if (mode === 'hot' && state.items.length >= state.hotLimit) return;
+    const btn = document.getElementById(mode === 'hot' ? 'addItemBtn' : 'addBatchBtn');
     btn.dataset.loading = 'true';
     try{
       await fetchAllProducts();
@@ -1079,7 +1168,10 @@
     } finally {
       btn.dataset.loading = 'false';
     }
+    pickerMode = mode;
     pickerSel = new Set();
+    document.getElementById('pickerTitle').textContent = mode === 'hot' ? 'Add Hot Items from Products' : 'Add Batch Items from Products';
+    document.getElementById('pickerSelectAll').style.display = mode === 'batch' ? 'inline-flex' : 'none';
     document.getElementById('pickerSearch').value = '';
     const sel = document.getElementById('pickerCategory');
     sel.innerHTML = `<option value="all">All categories</option>` +
@@ -1095,15 +1187,10 @@
     document.body.style.overflow = '';
   }
 
-  function renderPicker(){
-    const slots = state.hotLimit - state.items.length;
-    const left = slots - pickerSel.size;
+  function pickerRows(){
     const q = document.getElementById('pickerSearch').value.trim().toLowerCase();
     const cat = document.getElementById('pickerCategory').value;
-    const taken = inBatchIds();
-
-    const pool = hotProducts.filter(isAvailable);
-    const list = pool.filter(p => {
+    return hotProducts.filter(isAvailable).filter(p => {
       if (cat !== 'all' && p.categoryId !== cat) return false;
       if (!q) return true;
       return [p.sku, p.productName, p.item, p.brand, categoryName(p.categoryId)]
@@ -1111,20 +1198,28 @@
     }).sort((a, b) =>
       categoryName(a.categoryId).localeCompare(categoryName(b.categoryId)) ||
       String(a.sku || '~').localeCompare(String(b.sku || '~'), undefined, { numeric: true }));
+  }
 
-    document.getElementById('pickerSub').textContent =
-      `Only items with status Available are listed · ${slots} slot${slots === 1 ? '' : 's'} open in this batch`;
+  function renderPicker(){
+    const slots = pickerSlots();
+    const left = slots - pickerSel.size;
+    const list = pickerRows();
+    const poolSize = hotProducts.filter(isAvailable).length;
+
+    document.getElementById('pickerSub').textContent = pickerMode === 'hot'
+      ? `Only items with status Available are listed · ${slots} slot${slots === 1 ? '' : 's'} open in the hot items`
+      : 'Only items with status Available are listed · hot items are already part of the batch';
 
     const body = document.getElementById('pickerList');
     if (!list.length){
-      body.innerHTML = `<div class="hot-empty">${pool.length === 0
+      body.innerHTML = `<div class="hot-empty">${poolSize === 0
         ? 'No Available products yet. Add products (or set their status back to Available) in Products.'
         : 'No Available products match your search.'}</div>`;
     } else {
       body.innerHTML = list.map(p => {
-        const already = taken.has(p.id);
+        const reason = lockReason(p);
         const checked = pickerSel.has(p.id);
-        const blocked = already || (!checked && left <= 0);
+        const blocked = !!reason || (!checked && left <= 0);
         const s = computeSize(p.length, p.width);
         const size = (s && s !== 'OVER') ? s : (p.size || '—');
         return `
@@ -1135,7 +1230,7 @@
             <div class="hot-line1">
               <span class="code-chip">${esc(p.sku || 'NO SKU')}</span>
               <strong>${esc(p.productName || p.brand || 'Untitled')}</strong>
-              ${already ? '<span class="hot-flag">Already in this batch</span>' : ''}
+              ${reason ? `<span class="hot-flag">${esc(reason)}</span>` : ''}
             </div>
             <div class="hot-line2">${esc(categoryName(p.categoryId))}${p.brand && p.productName ? ' · ' + esc(p.brand) : ''} · Size ${esc(size)} · ${peso(p.price) || '₱0'}</div>
           </div>
@@ -1143,12 +1238,14 @@
       }).join('');
     }
 
-    document.getElementById('pickerCount').textContent =
-      `${pickerSel.size} selected · ${Math.max(left, 0)} slot${left === 1 ? '' : 's'} left`;
+    document.getElementById('pickerCount').textContent = pickerMode === 'hot'
+      ? `${pickerSel.size} selected · ${Math.max(left, 0)} slot${left === 1 ? '' : 's'} left`
+      : `${pickerSel.size} selected`;
     document.getElementById('pickerAdd').disabled = pickerSel.size === 0;
   }
 
-  document.getElementById('addItemBtn').addEventListener('click', openPicker);
+  document.getElementById('addItemBtn').addEventListener('click', () => openPicker('hot'));
+  document.getElementById('addBatchBtn').addEventListener('click', () => openPicker('batch'));
   document.getElementById('pickerClose').addEventListener('click', closePicker);
   document.getElementById('pickerCancel').addEventListener('click', closePicker);
   pickerOverlay.addEventListener('mousedown', (e) => { if (e.target === pickerOverlay) closePicker(); });
@@ -1159,18 +1256,33 @@
     const id = e.target.dataset.pid;
     if (!id) return;
     if (e.target.checked){
-      if (state.items.length + pickerSel.size >= state.hotLimit){ e.target.checked = false; return; }
+      if (pickerSlots() - pickerSel.size <= 0){ e.target.checked = false; return; }
       pickerSel.add(id);
     } else pickerSel.delete(id);
     renderPicker();
   });
+  document.getElementById('pickerSelectAll').addEventListener('click', () => {
+    pickerRows().forEach(p => { if (!lockReason(p)) pickerSel.add(p.id); });
+    renderPicker();
+  });
   document.getElementById('pickerAdd').addEventListener('click', () => {
-    const room = state.hotLimit - state.items.length;
-    const chosen = hotProducts.filter(p => pickerSel.has(p.id) && isAvailable(p)).slice(0, Math.max(room, 0));
-    chosen.forEach(p => state.items.push(toHotItem(p)));
-    closePicker();
-    renderHotItems();
-    showToast({ type: 'ok', title: 'Hot Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Publish to show ${chosen.length === 1 ? 'it' : 'them'} on the live site.` });
+    const chosen = [...pickerSel].map(id => hotProducts.find(p => p.id === id)).filter(p => p && isAvailable(p));
+    if (pickerMode === 'hot'){
+      const take = chosen.slice(0, Math.max(state.hotLimit - state.items.length, 0));
+      take.forEach(p => state.items.push(toHotItem(p)));
+      // a hot item is already part of the batch, so drop any duplicate from the extra list
+      const hot = hotIdSet();
+      state.batchItems = state.batchItems.filter(i => !hot.has(i.productId));
+      closePicker();
+      renderHotItems();
+      renderBatchItems();
+      showToast({ type: 'ok', title: 'Hot Items Added', message: `${take.length} item${take.length === 1 ? '' : 's'} added. Publish to show ${take.length === 1 ? 'it' : 'them'} on the live site.` });
+    } else {
+      chosen.forEach(p => state.batchItems.push(toHotItem(p)));
+      closePicker();
+      renderBatchItems();
+      showToast({ type: 'ok', title: 'Batch Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Publish to show ${chosen.length === 1 ? 'it' : 'them'} on the shop's batch page.` });
+    }
   });
 
   ['batchNumber','batchName','listingDate','biddingStart','biddingEnd'].forEach(id => {
@@ -1192,6 +1304,13 @@
         hotItemLimit: state.hotLimit
       },
       hotItems: state.items.map(publicHotItem),
+      // Only IDs: the shop page reads each product live, so price, photos and status are always current.
+      batchItemIds: (() => {
+        const hot = hotIdSet();
+        return [...new Set(state.batchItems
+          .filter(i => i.productId && !i.missing && !hot.has(i.productId))
+          .map(i => i.productId))];
+      })(),
       updatedAt: new Date().toISOString()
     };
   }
@@ -1200,18 +1319,36 @@
   async function syncLiveBatchProduct(product, removed){
     try{
       const snap = await getDoc(batchRef);
-      if (!snap.exists()) return false;
-      const list = Array.isArray(snap.data().hotItems) ? snap.data().hotItems : [];
-      if (!list.some(i => i.productId === product.id)) return false;
-      const next = removed
-        ? list.filter(i => i.productId !== product.id)
-        : list.map(i => i.productId === product.id ? publicHotItem(toHotItem(product)) : i);
-      await updateDoc(batchRef, { hotItems: next, updatedAt: new Date().toISOString() });
-      // mirror into the Dashboard's working copy
-      state.items = removed
-        ? state.items.filter(i => i.productId !== product.id)
-        : state.items.map(i => i.productId === product.id ? toHotItem(product) : i);
+      // mirror into the Dashboard's working copy first, whether or not it is published
+      if (removed){
+        state.items = state.items.filter(i => i.productId !== product.id);
+        state.batchItems = state.batchItems.filter(i => i.productId !== product.id);
+      } else {
+        const relink = (i) => i.productId === product.id ? toHotItem(product) : i;
+        state.items = state.items.map(relink);
+        state.batchItems = state.batchItems.map(relink);
+      }
       renderHotItems();
+      renderBatchItems();
+      if (!snap.exists()) return false;
+
+      const data = snap.data();
+      const list = Array.isArray(data.hotItems) ? data.hotItems : [];
+      const ids = Array.isArray(data.batchItemIds) ? data.batchItemIds : [];
+      const inHot = list.some(i => i.productId === product.id);
+      const inBatch = ids.includes(product.id);
+      if (!inHot && !inBatch) return false;
+
+      const patch = { updatedAt: new Date().toISOString() };
+      if (removed){
+        if (inHot) patch.hotItems = list.filter(i => i.productId !== product.id);
+        if (inBatch) patch.batchItemIds = ids.filter(id => id !== product.id);
+      } else if (inHot){
+        patch.hotItems = list.map(i => i.productId === product.id ? publicHotItem(toHotItem(product)) : i);
+      } else {
+        return false;   // batch-only items are read live by the shop page — nothing to copy
+      }
+      await updateDoc(batchRef, patch);
       return true;
     } catch(err){
       console.error('Live batch sync failed:', err);
@@ -1264,16 +1401,20 @@
       const gone = refreshHotSnapshots();
       if (gone.length){
         state.items = state.items.filter(i => !i.missing);
+        state.batchItems = state.batchItems.filter(i => !i.missing);
         renderHotItems();
+        renderBatchItems();
         showToast({ type: 'err', title: 'Items Removed', message: `${gone.length} item${gone.length === 1 ? ' was' : 's were'} deleted from Products and dropped from this batch. Review the list, then publish again.`, duration: 8000 });
         return;
       }
       renderHotItems();
-      await setDoc(batchRef, buildPayload());
+      renderBatchItems();
+      const payload = buildPayload();
+      await setDoc(batchRef, payload);
       showToast({
         type: 'ok',
         title: 'Published',
-        message: `${state.items.length} hot item${state.items.length === 1 ? '' : 's'} are live. Only these appear on the public site.`
+        message: `${payload.hotItems.length} hot item${payload.hotItems.length === 1 ? '' : 's'} on the home page · ${payload.hotItems.length + payload.batchItemIds.length} item${payload.hotItems.length + payload.batchItemIds.length === 1 ? '' : 's'} on the shop's batch page.`
       });
     } catch(err){
       console.error(err);
