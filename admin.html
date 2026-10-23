@@ -379,11 +379,121 @@
   .media-empty{ font-size:0.8rem; color:rgba(20,32,28,0.5); font-weight:300; margin:0 0 14px; }
   .media-status{ display:block; font-family:'Space Mono',monospace; font-size:0.66rem; color:rgba(20,32,28,0.5); margin:-6px 0 14px; min-height:1em; text-transform:none; letter-spacing:0; }
   .attr-card video{ width:100%; border-radius:10px; background:#000; max-height:320px; margin-bottom:12px; }
+
+  /* ===== Hot Items (picked from Products) ===== */
+  .hot-head{ display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
+  .hot-head h2{ margin:0; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .count-pill{
+    font-family:'Space Mono',monospace; font-size:0.74rem; font-weight:700; letter-spacing:0.04em;
+    padding:4px 12px; border-radius:999px; background:var(--green-deep); color:var(--cream-soft);
+  }
+  .count-pill.over{ background:var(--danger); }
+  .limit-box{ display:flex; align-items:center; gap:10px; }
+  .limit-box label{ margin:0; }
+  .limit-box input{ width:84px; margin:0; text-align:center; }
+  .hot-note{ font-size:0.84rem; color:rgba(20,32,28,0.62); font-weight:300; margin:0 0 18px; }
+  .hot-warn{
+    background:#fff3e0; border:1px solid #e0b878; color:#6b4a12; border-radius:10px;
+    padding:12px 16px; font-size:0.82rem; line-height:1.5; margin-bottom:16px;
+  }
+  .hot-warn div + div{ margin-top:4px; }
+  .hot-empty{
+    padding:30px 20px; text-align:center; border:1px dashed var(--line); border-radius:12px;
+    color:rgba(20,32,28,0.55); font-weight:300; font-size:0.88rem; margin-bottom:14px; background:var(--paper);
+  }
+  .hot-row{
+    display:flex; align-items:center; gap:14px; padding:12px; border:1px solid var(--line);
+    border-radius:12px; background:var(--paper); margin-bottom:10px;
+  }
+  .hot-row.is-missing{ border-color:var(--danger); background:#fff4f1; }
+  .hot-thumb{ width:52px; height:65px; object-fit:cover; border-radius:6px; border:1px solid var(--line); background:var(--cream-soft); flex-shrink:0; }
+  .hot-thumb.none{
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Space Mono',monospace; font-size:0.54rem; color:rgba(20,32,28,0.4); line-height:1.2; padding:4px;
+  }
+  .hot-info{ flex:1; min-width:0; }
+  .hot-line1{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .hot-line1 strong{ font-family:'Fraunces',serif; font-weight:600; color:var(--green-deep); }
+  .hot-line2{ font-size:0.82rem; color:rgba(20,32,28,0.6); margin-top:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hot-flag{ font-family:'Space Mono',monospace; font-size:0.64rem; letter-spacing:0.03em; color:#6b4a12; }
+  .hot-flag.bad{ color:var(--danger); font-weight:700; }
+  .hot-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:#fff;
+    cursor:pointer; font-size:0.7rem; color:var(--ink); display:inline-flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover:not(:disabled){ border-color:var(--gold); }
+  .icon-btn:disabled{ opacity:0.3; cursor:not-allowed; }
+  .btn-add:disabled{ opacity:0.55; cursor:not-allowed; background:rgba(20,32,28,0.06); }
+  @media (max-width:640px){
+    .hot-row{ flex-wrap:wrap; }
+    .hot-actions{ width:100%; justify-content:flex-end; }
+    .hot-line2{ white-space:normal; }
+  }
+
+  .overlay{
+    position:fixed; inset:0; z-index:900; display:none; align-items:center; justify-content:center;
+    background:rgba(15,36,28,0.55); padding:20px; backdrop-filter:blur(2px);
+  }
+  .overlay.open{ display:flex; }
+  .picker{
+    background:#fff; width:100%; max-width:720px; max-height:88vh; border-radius:18px;
+    display:flex; flex-direction:column; box-shadow:0 30px 70px -20px rgba(0,0,0,0.55); overflow:hidden;
+  }
+  .picker-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:22px 24px 12px; }
+  .picker-head h2{ font-size:1.25rem; margin:0 0 4px; color:var(--green-deep); }
+  .picker-head p{ margin:0; font-size:0.8rem; color:rgba(20,32,28,0.55); font-weight:300; }
+  .picker-filters{ display:flex; gap:10px; padding:0 24px 14px; }
+  .picker-filters input,.picker-filters select{ margin:0; }
+  .picker-filters select{ width:200px; flex-shrink:0; }
+  .picker-list{ flex:1; overflow:auto; padding:4px 24px 16px; border-top:1px solid var(--line); min-height:180px; }
+  .pick-row{
+    display:flex; align-items:center; gap:14px; padding:10px 12px; margin:10px 0 0; border:1px solid var(--line); border-radius:12px;
+    cursor:pointer; background:var(--paper); text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif;
+    font-size:0.9rem; color:var(--ink);
+  }
+  .pick-row:hover:not(.blocked){ border-color:var(--gold); }
+  .pick-row.checked{ background:rgba(201,164,104,0.2); border-color:var(--gold); }
+  .pick-row.blocked{ opacity:0.5; cursor:not-allowed; }
+  .pick-row input[type=checkbox]{ width:18px; height:18px; margin:0; padding:0; flex-shrink:0; accent-color:var(--green-deep); }
+  .picker-foot{
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:14px 24px; border-top:1px solid var(--line); background:var(--paper);
+  }
+  .picker-foot .mono{ font-size:0.72rem; color:rgba(20,32,28,0.6); }
+  .picker-foot-btns{ display:flex; gap:10px; }
+  .picker-foot .btn{ padding:10px 20px; font-size:0.84rem; }
+  @media (max-width:640px){ .picker-filters{ flex-direction:column; } .picker-filters select{ width:100%; } }
 </style>
 </head>
 <body>
 
 <div id="toastLayer"></div>
+
+<div class="overlay" id="pickerOverlay" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+  <div class="picker">
+    <div class="picker-head">
+      <div>
+        <h2 id="pickerTitle">Add Hot Items from Products</h2>
+        <p id="pickerSub"></p>
+      </div>
+      <button type="button" class="icon-btn" id="pickerClose" aria-label="Close">✕</button>
+    </div>
+    <div class="picker-filters">
+      <input type="search" id="pickerSearch" placeholder="Search SKU, name or brand…" autocomplete="off" aria-label="Search products">
+      <select id="pickerCategory" aria-label="Filter by category"></select>
+    </div>
+    <div class="picker-list" id="pickerList"></div>
+    <div class="picker-foot">
+      <span class="mono" id="pickerCount"></span>
+      <div class="picker-foot-btns">
+        <button type="button" class="btn btn-outline" id="pickerCancel">Cancel</button>
+        <button type="button" class="btn btn-gold" id="pickerAdd" disabled>Add selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div id="loginGate">
   <div class="login-box">
@@ -477,9 +587,17 @@
           </div>
 
           <div class="card">
-            <h2>Hot Items — This Batch</h2>
+            <div class="hot-head">
+              <h2>Hot Items — This Batch <span class="count-pill" id="hotCount">0 / 3</span></h2>
+              <div class="limit-box">
+                <label for="hotLimit">Max hot items</label>
+                <input type="number" id="hotLimit" min="1" max="30" step="1" value="3">
+              </div>
+            </div>
+            <p class="hot-note">Pick from your Products — only items with status <strong>Available</strong> can be added. Only the items listed here appear on the live site.</p>
+            <div class="hot-warn" id="hotWarn" style="display:none;"></div>
             <div id="itemsContainer"></div>
-            <button class="btn btn-add" id="addItemBtn">+ Add Item</button>
+            <button class="btn btn-add" id="addItemBtn">+ Add from Products</button>
           </div>
 
           <div class="card">
@@ -735,6 +853,7 @@
       const viewName = item.dataset.view;
       switchView(viewName);
       if (viewName === 'products') refreshCategoriesView();
+      if (viewName === 'dashboard') refreshHotFromProducts();
     });
   });
 
@@ -744,13 +863,77 @@
     document.getElementById('categorySubNav').classList.toggle('open');
   });
 
-  function uid(){ return Math.random().toString(36).slice(2,9); }
-  function defaultItem(){ return { id: uid(), brand:'', item:'', code:'', size:'', price:'', status:'Available', image:'' }; }
+  // =====================================================================
+  //  Hot Items — chosen from Products, never typed in by hand.
+  //  Only items whose status is Available can be added. Each pick is stored as a
+  //  small PUBLIC snapshot (vestige/liveBatch is world-readable), so private fields
+  //  such as investment price, buyer name and waybill are never copied into it.
+  // =====================================================================
+  const DEFAULT_HOT_LIMIT = 3;
+  const MAX_HOT_LIMIT = 30;
 
   let state = {
     batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
-    items: [defaultItem()]
+    hotLimit: DEFAULT_HOT_LIMIT,
+    items: []
   };
+  let hotProducts = [];   // fresh copy of every product (statuses, picker list)
+
+  function toHotItem(p){
+    const s = computeSize(p.length, p.width);
+    return {
+      productId: p.id,
+      code: p.sku || '',
+      brand: p.brand || p.productName || '',
+      item: p.item || (p.brand ? p.productName : '') || '',
+      size: (s && s !== 'OVER') ? s : (p.size || ''),
+      price: Number(p.price) || 0,
+      status: p.status || 'Available',
+      image: (p.images && p.images[0]) || ''
+    };
+  }
+
+  // The only shape that ever reaches the public page.
+  function publicHotItem(it){
+    return {
+      productId: it.productId || '',
+      code: it.code || '',
+      brand: it.brand || '',
+      item: it.item || '',
+      size: it.size || '—',
+      price: Number(it.price) || 0,
+      status: it.status || 'Available',
+      image: it.image || ''
+    };
+  }
+
+  async function fetchAllProducts(){
+    const snap = await getDocs(productsCol);
+    hotProducts = snap.docs.map(d => normalizeProduct(d.id, d.data()));
+    return hotProducts;
+  }
+
+  // Re-reads each linked item from Products. Returns the items whose product no longer exists.
+  function refreshHotSnapshots(){
+    const gone = [];
+    state.items = state.items.map(it => {
+      if (!it.productId) return it;
+      const p = hotProducts.find(x => x.id === it.productId);
+      if (!p){ gone.push(it); return { ...it, missing: true }; }
+      return toHotItem(p);
+    });
+    return gone;
+  }
+
+  async function refreshHotFromProducts(){
+    try{
+      await fetchAllProducts();
+      refreshHotSnapshots();
+      renderHotItems();
+    } catch(err){
+      console.error('Could not refresh hot items:', err);
+    }
+  }
 
   async function loadCurrentBatch(){
     try{
@@ -762,11 +945,19 @@
         state.listingDate = (data.batch?.listingDate || '').slice(0,16);
         state.biddingStart = (data.batch?.biddingStart || '').slice(0,16);
         state.biddingEnd = (data.batch?.biddingEnd || '').slice(0,16);
-        state.items = (data.hotItems || []).map(it => ({ id: uid(), ...it }));
-        if (state.items.length === 0) state.items = [defaultItem()];
+        state.items = (data.hotItems || []).map(it => ({ ...it }));
+        const saved = Number(data.batch?.hotItemLimit);
+        state.hotLimit = saved >= 1 ? Math.min(saved, MAX_HOT_LIMIT)
+                       : Math.min(Math.max(state.items.length, DEFAULT_HOT_LIMIT), MAX_HOT_LIMIT);
       }
     } catch(err){
       console.error('Could not load current batch:', err);
+    }
+    try{
+      await fetchAllProducts();
+      refreshHotSnapshots();
+    } catch(err){
+      console.error('Could not load products for hot items:', err);
     }
     renderFields();
   }
@@ -777,7 +968,8 @@
     document.getElementById('listingDate').value = state.listingDate;
     document.getElementById('biddingStart').value = state.biddingStart;
     document.getElementById('biddingEnd').value = state.biddingEnd;
-    renderItems();
+    document.getElementById('hotLimit').value = state.hotLimit;
+    renderHotItems();
     renderStatusPill();
   }
 
@@ -795,92 +987,190 @@
     pill.className = 'status-pill ' + cls;
   }
 
-  function renderItems(){
-    const c = document.getElementById('itemsContainer');
-    c.innerHTML = '';
-    state.items.forEach((it, idx) => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <button class="remove-btn" data-idx="${idx}">REMOVE</button>
-        <div class="grid2">
-          <div><label>Brand</label><input type="text" data-field="brand" data-idx="${idx}" value="${it.brand}" placeholder="Fila Heritage"></div>
-          <div><label>Item Description</label><input type="text" data-field="item" data-idx="${idx}" value="${it.item}" placeholder="Embroidered crewneck · Black/Gold"></div>
-        </div>
-        <div>
-          <label>Product Photo</label>
-          <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-            <img data-preview="${idx}" src="${it.image || ''}" style="width:64px;height:80px;object-fit:cover;border-radius:6px;background:var(--cream-soft);border:1px solid var(--line);display:${it.image ? 'block' : 'none'};">
-            <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-              ${it.image ? 'Replace Photo' : 'Upload Photo'}
-              <input type="file" accept="image/*" data-upload-idx="${idx}" style="display:none;">
-            </label>
-            <button type="button" class="btn btn-outline" data-remove-photo-idx="${idx}" style="display:${it.image ? 'inline-flex' : 'none'}; color:var(--danger); border-color:var(--danger);">Remove</button>
-            <span data-upload-status="${idx}" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.5);"></span>
-          </div>
-        </div>
-        <div class="grid3">
-          <div><label>Item Code</label><input type="text" data-field="code" data-idx="${idx}" value="${it.code}" placeholder="VG-014"></div>
-          <div><label>Size</label><input type="text" data-field="size" data-idx="${idx}" value="${it.size}" placeholder="M"></div>
-          <div><label>Starting Price (₱)</label><input type="number" min="0" data-field="price" data-idx="${idx}" value="${it.price}" placeholder="199"></div>
-        </div>
-        <div>
-          <label>Status</label>
-          <select data-field="status" data-idx="${idx}">
-            <option value="Available" ${it.status==='Available'?'selected':''}>Available</option>
-            <option value="1 Left" ${it.status==='1 Left'?'selected':''}>1 Left</option>
-            <option value="Claimed" ${it.status==='Claimed'?'selected':''}>Claimed</option>
-          </select>
-        </div>`;
-      c.appendChild(row);
-    });
+  function renderHotItems(){
+    const n = state.items.length, limit = state.hotLimit;
+    const pill = document.getElementById('hotCount');
+    pill.textContent = `${n} / ${limit}`;
+    pill.classList.toggle('over', n > limit);
 
-    c.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('input', (e) => {
-        const idx = Number(e.target.dataset.idx);
-        state.items[idx][e.target.dataset.field] = e.target.value;
-      });
-    });
-    c.querySelectorAll('[data-upload-idx]').forEach(fileInput => {
-      fileInput.addEventListener('change', async (e) => {
-        const idx = Number(e.target.dataset.uploadIdx);
-        const file = e.target.files[0];
-        if (!file) return;
-        const statusEl = c.querySelector(`[data-upload-status="${idx}"]`);
-        const previewEl = c.querySelector(`[data-preview="${idx}"]`);
-        statusEl.textContent = 'Uploading…';
-        try{
-          const url = await uploadToCloudinary(file);
-          state.items[idx].image = url;
-          previewEl.src = url;
-          previewEl.style.display = 'block';
-          statusEl.textContent = 'Uploaded ✓';
-          setTimeout(() => { statusEl.textContent = ''; }, 3000);
-          renderItems();
-        } catch(err){
-          console.error(err);
-          statusEl.textContent = 'Upload failed';
-        }
-      });
-    });
-    c.querySelectorAll('[data-remove-photo-idx]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.removePhotoIdx);
-        state.items[idx].image = '';
-        renderItems();
-      });
-    });
-    c.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        state.items.splice(Number(e.target.dataset.idx), 1);
-        renderItems();
-      });
-    });
+    const warnings = [];
+    if (n > limit) warnings.push(`You have ${n} items but the limit is ${limit}. Remove ${n - limit} before publishing.`);
+    const gone = state.items.filter(i => i.missing).length;
+    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you publish.`);
+    const claimed = state.items.filter(i => !i.missing && i.status === 'Claimed').length;
+    if (claimed) warnings.push(`${claimed} item${claimed === 1 ? ' is' : 's are'} now Claimed. The live site shows ${claimed === 1 ? 'it' : 'them'} as claimed; remove ${claimed === 1 ? 'it' : 'them'} to free the slot${claimed === 1 ? '' : 's'}.`);
+    const legacy = state.items.filter(i => !i.productId).length;
+    if (legacy) warnings.push(`${legacy} item${legacy === 1 ? ' was' : 's were'} typed in before and ${legacy === 1 ? 'isn\'t' : 'aren\'t'} linked to Products. Remove and re-add from Products to keep ${legacy === 1 ? 'it' : 'them'} in sync.`);
+    const warn = document.getElementById('hotWarn');
+    warn.style.display = warnings.length ? 'block' : 'none';
+    warn.innerHTML = warnings.map(w => `<div>${esc(w)}</div>`).join('');
+
+    const c = document.getElementById('itemsContainer');
+    if (!n){
+      c.innerHTML = `<div class="hot-empty">No hot items yet. Click “+ Add from Products” to choose from your Available items.</div>`;
+    } else {
+      c.innerHTML = state.items.map((it, i) => {
+        const flag = it.missing ? '<span class="hot-flag bad">Deleted from Products</span>'
+                   : !it.productId ? '<span class="hot-flag">Not linked to Products</span>' : '';
+        return `
+        <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-i="${i}">
+          ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
+          <div class="hot-info">
+            <div class="hot-line1">
+              ${it.code ? `<span class="code-chip">${esc(it.code)}</span>` : '<span class="code-chip">NO SKU</span>'}
+              <strong>${esc(it.brand || 'Untitled')}</strong>
+              ${statusPill(it.status || 'Available')}
+              ${flag}
+            </div>
+            <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
+          </div>
+          <div class="hot-actions">
+            <button type="button" class="icon-btn" data-hot-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
+            <button type="button" class="icon-btn" data-hot-down="${i}" ${i === n - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
+            <button type="button" class="btn btn-outline btn-danger-outline" data-hot-remove="${i}" style="padding:8px 14px; font-size:0.78rem;">Remove</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    const add = document.getElementById('addItemBtn');
+    const full = n >= limit;
+    add.disabled = full;
+    add.textContent = full ? `Limit reached (${n} / ${limit}) — remove one or raise the limit` : '+ Add from Products';
   }
 
-  document.getElementById('addItemBtn').addEventListener('click', () => {
-    state.items.push(defaultItem());
-    renderItems();
+  document.getElementById('itemsContainer').addEventListener('click', (e) => {
+    const rm = e.target.closest('[data-hot-remove]');
+    const up = e.target.closest('[data-hot-up]');
+    const dn = e.target.closest('[data-hot-down]');
+    if (rm){ state.items.splice(Number(rm.dataset.hotRemove), 1); }
+    else if (up){ const i = Number(up.dataset.hotUp); if (i > 0) [state.items[i-1], state.items[i]] = [state.items[i], state.items[i-1]]; }
+    else if (dn){ const i = Number(dn.dataset.hotDown); if (i < state.items.length - 1) [state.items[i+1], state.items[i]] = [state.items[i], state.items[i+1]]; }
+    else return;
+    renderHotItems();
+  });
+
+  const hotLimitEl = document.getElementById('hotLimit');
+  hotLimitEl.addEventListener('input', () => {
+    const v = parseInt(hotLimitEl.value, 10);
+    if (v >= 1 && v <= MAX_HOT_LIMIT){ state.hotLimit = v; renderHotItems(); }
+  });
+  hotLimitEl.addEventListener('change', () => { hotLimitEl.value = state.hotLimit; });
+
+  // ---------- Picker: Available products only ----------
+  const pickerOverlay = document.getElementById('pickerOverlay');
+  let pickerSel = new Set();
+
+  function inBatchIds(){ return new Set(state.items.map(i => i.productId).filter(Boolean)); }
+  function isAvailable(p){ return (p.status || 'Available') === 'Available'; }
+  function categoryName(id){ const c = categories.find(x => x.id === id); return c ? c.name : 'Uncategorized'; }
+
+  async function openPicker(){
+    if (state.items.length >= state.hotLimit) return;
+    const btn = document.getElementById('addItemBtn');
+    btn.dataset.loading = 'true';
+    try{
+      await fetchAllProducts();
+      if (!categories.length) await refreshCategoriesView();
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could Not Load Products', message: 'Check your connection and Firestore rules, then try again.' });
+      return;
+    } finally {
+      btn.dataset.loading = 'false';
+    }
+    pickerSel = new Set();
+    document.getElementById('pickerSearch').value = '';
+    const sel = document.getElementById('pickerCategory');
+    sel.innerHTML = `<option value="all">All categories</option>` +
+      categories.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    pickerOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderPicker();
+    document.getElementById('pickerSearch').focus();
+  }
+
+  function closePicker(){
+    pickerOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function renderPicker(){
+    const slots = state.hotLimit - state.items.length;
+    const left = slots - pickerSel.size;
+    const q = document.getElementById('pickerSearch').value.trim().toLowerCase();
+    const cat = document.getElementById('pickerCategory').value;
+    const taken = inBatchIds();
+
+    const pool = hotProducts.filter(isAvailable);
+    const list = pool.filter(p => {
+      if (cat !== 'all' && p.categoryId !== cat) return false;
+      if (!q) return true;
+      return [p.sku, p.productName, p.item, p.brand, categoryName(p.categoryId)]
+        .some(v => String(v || '').toLowerCase().includes(q));
+    }).sort((a, b) =>
+      categoryName(a.categoryId).localeCompare(categoryName(b.categoryId)) ||
+      String(a.sku || '~').localeCompare(String(b.sku || '~'), undefined, { numeric: true }));
+
+    document.getElementById('pickerSub').textContent =
+      `Only items with status Available are listed · ${slots} slot${slots === 1 ? '' : 's'} open in this batch`;
+
+    const body = document.getElementById('pickerList');
+    if (!list.length){
+      body.innerHTML = `<div class="hot-empty">${pool.length === 0
+        ? 'No Available products yet. Add products (or set their status back to Available) in Products.'
+        : 'No Available products match your search.'}</div>`;
+    } else {
+      body.innerHTML = list.map(p => {
+        const already = taken.has(p.id);
+        const checked = pickerSel.has(p.id);
+        const blocked = already || (!checked && left <= 0);
+        const s = computeSize(p.length, p.width);
+        const size = (s && s !== 'OVER') ? s : (p.size || '—');
+        return `
+        <label class="pick-row ${blocked ? 'blocked' : ''} ${checked ? 'checked' : ''}">
+          <input type="checkbox" data-pid="${esc(p.id)}" ${checked ? 'checked' : ''} ${blocked ? 'disabled' : ''}>
+          ${(p.images && p.images[0]) ? `<img class="hot-thumb" src="${esc(p.images[0])}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
+          <div class="hot-info">
+            <div class="hot-line1">
+              <span class="code-chip">${esc(p.sku || 'NO SKU')}</span>
+              <strong>${esc(p.productName || p.brand || 'Untitled')}</strong>
+              ${already ? '<span class="hot-flag">Already in this batch</span>' : ''}
+            </div>
+            <div class="hot-line2">${esc(categoryName(p.categoryId))}${p.brand && p.productName ? ' · ' + esc(p.brand) : ''} · Size ${esc(size)} · ${peso(p.price) || '₱0'}</div>
+          </div>
+        </label>`;
+      }).join('');
+    }
+
+    document.getElementById('pickerCount').textContent =
+      `${pickerSel.size} selected · ${Math.max(left, 0)} slot${left === 1 ? '' : 's'} left`;
+    document.getElementById('pickerAdd').disabled = pickerSel.size === 0;
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', openPicker);
+  document.getElementById('pickerClose').addEventListener('click', closePicker);
+  document.getElementById('pickerCancel').addEventListener('click', closePicker);
+  pickerOverlay.addEventListener('mousedown', (e) => { if (e.target === pickerOverlay) closePicker(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pickerOverlay.classList.contains('open')) closePicker(); });
+  document.getElementById('pickerSearch').addEventListener('input', renderPicker);
+  document.getElementById('pickerCategory').addEventListener('change', renderPicker);
+  document.getElementById('pickerList').addEventListener('change', (e) => {
+    const id = e.target.dataset.pid;
+    if (!id) return;
+    if (e.target.checked){
+      if (state.items.length + pickerSel.size >= state.hotLimit){ e.target.checked = false; return; }
+      pickerSel.add(id);
+    } else pickerSel.delete(id);
+    renderPicker();
+  });
+  document.getElementById('pickerAdd').addEventListener('click', () => {
+    const room = state.hotLimit - state.items.length;
+    const chosen = hotProducts.filter(p => pickerSel.has(p.id) && isAvailable(p)).slice(0, Math.max(room, 0));
+    chosen.forEach(p => state.items.push(toHotItem(p)));
+    closePicker();
+    renderHotItems();
+    showToast({ type: 'ok', title: 'Hot Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Publish to show ${chosen.length === 1 ? 'it' : 'them'} on the live site.` });
   });
 
   ['batchNumber','batchName','listingDate','biddingStart','biddingEnd'].forEach(id => {
@@ -898,14 +1188,36 @@
         name: state.batchName,
         listingDate: state.listingDate ? state.listingDate + ":00+08:00" : "",
         biddingStart: state.biddingStart ? state.biddingStart + ":00+08:00" : "",
-        biddingEnd: state.biddingEnd ? state.biddingEnd + ":00+08:00" : ""
+        biddingEnd: state.biddingEnd ? state.biddingEnd + ":00+08:00" : "",
+        hotItemLimit: state.hotLimit
       },
-      hotItems: state.items.map(it => ({
-        brand: it.brand, item: it.item, code: it.code, size: it.size,
-        price: Number(it.price) || 0, status: it.status, image: it.image || ''
-      })),
+      hotItems: state.items.map(publicHotItem),
       updatedAt: new Date().toISOString()
     };
+  }
+
+  // Keeps the live batch in step when a product that's in it is edited or deleted.
+  async function syncLiveBatchProduct(product, removed){
+    try{
+      const snap = await getDoc(batchRef);
+      if (!snap.exists()) return false;
+      const list = Array.isArray(snap.data().hotItems) ? snap.data().hotItems : [];
+      if (!list.some(i => i.productId === product.id)) return false;
+      const next = removed
+        ? list.filter(i => i.productId !== product.id)
+        : list.map(i => i.productId === product.id ? publicHotItem(toHotItem(product)) : i);
+      await updateDoc(batchRef, { hotItems: next, updatedAt: new Date().toISOString() });
+      // mirror into the Dashboard's working copy
+      state.items = removed
+        ? state.items.filter(i => i.productId !== product.id)
+        : state.items.map(i => i.productId === product.id ? toHotItem(product) : i);
+      renderHotItems();
+      return true;
+    } catch(err){
+      console.error('Live batch sync failed:', err);
+      showToast({ type: 'err', title: 'Live Batch Not Updated', message: 'The product was saved, but the live batch could not be updated. Open the Dashboard and publish again.', duration: 8000 });
+      return false;
+    }
   }
 
   function showToast({ type = 'ok', title, message, duration = 4500 }){
@@ -934,13 +1246,34 @@
 
   document.getElementById('publishBtn').addEventListener('click', async () => {
     const btn = document.getElementById('publishBtn');
+
+    const limit = state.hotLimit;
+    if (!(limit >= 1)){
+      showToast({ type: 'err', title: 'Set a Hot Items Limit', message: 'Enter how many hot items this batch can show (1 or more).' });
+      return;
+    }
+    if (state.items.length > limit){
+      showToast({ type: 'err', title: 'Too Many Hot Items', message: `This batch is limited to ${limit}. Remove ${state.items.length - limit} item${state.items.length - limit === 1 ? '' : 's'} or raise the limit.`, duration: 7000 });
+      return;
+    }
+
     btn.dataset.loading = 'true';
     try{
+      // Re-read Products so the live page never gets stale prices, photos or statuses.
+      await fetchAllProducts();
+      const gone = refreshHotSnapshots();
+      if (gone.length){
+        state.items = state.items.filter(i => !i.missing);
+        renderHotItems();
+        showToast({ type: 'err', title: 'Items Removed', message: `${gone.length} item${gone.length === 1 ? ' was' : 's were'} deleted from Products and dropped from this batch. Review the list, then publish again.`, duration: 8000 });
+        return;
+      }
+      renderHotItems();
       await setDoc(batchRef, buildPayload());
       showToast({
         type: 'ok',
         title: 'Published',
-        message: 'Your live site is updated — visitors will see the new batch now.'
+        message: `${state.items.length} hot item${state.items.length === 1 ? '' : 's'} are live. Only these appear on the public site.`
       });
     } catch(err){
       console.error(err);
@@ -1679,7 +2012,8 @@
       draft = cloneProduct(saved);
       dirty = false;
       renderAttribute();
-      showToast({ type: 'ok', title: 'Product Saved', message: `${saved.sku || saved.productName || 'Product'} updated successfully.` });
+      const synced = await syncLiveBatchProduct(saved, false);
+      showToast({ type: 'ok', title: 'Product Saved', message: `${saved.sku || saved.productName || 'Product'} updated successfully.${synced ? ' The live batch was updated too.' : ''}` });
     } catch(err){
       console.error(err);
       showToast({ type: 'err', title: 'Save Failed', message: 'Check your Firestore rules and try again.' });
@@ -1700,7 +2034,8 @@
       dirty = false;
       setProductView('folder');
       renderFolder();
-      showToast({ type: 'ok', title: 'Product Deleted', message: 'Removed from this category.' });
+      const synced = await syncLiveBatchProduct(d, true);
+      showToast({ type: 'ok', title: 'Product Deleted', message: `Removed from this category.${synced ? ' It was also removed from the live batch.' : ''}` });
     } catch(err){
       console.error(err);
       showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' });
