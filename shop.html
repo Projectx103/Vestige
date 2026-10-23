@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Vestige Thrift Shop</title>
-<meta name="description" content="Browse Vestige's curated, authenticated branded jackets, hoodies, and crewnecks by category.">
+<meta name="description" content="Browse Vestige's curated, authenticated branded jackets, hoodies, and crewnecks by category — or see everything in this week's batch.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{transition-duration:0.01ms !important;} }
   body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; font-weight:400; line-height:1.5; -webkit-font-smoothing:antialiased; }
   h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
   .mono{ font-family:'Space Mono',monospace; }
@@ -43,6 +44,7 @@
   .nav-links a.active{ color:var(--gold); opacity:1; }
   .nav-cta{ font-size:0.78rem; letter-spacing:0.05em; border:1px solid currentColor; padding:9px 18px; border-radius:999px; text-decoration:none; white-space:nowrap; }
   @media (max-width:820px){ .nav-links{ display:none; } }
+  @media (max-width:480px){ .nav{ padding:14px 16px; } .nav-logo{ font-size:1rem; letter-spacing:0.1em; } .nav-cta{ padding:8px 12px; font-size:0.72rem; } .wrap{ padding:0 16px; } .shop-header{ padding:48px 0 36px; } }
 
   /* ---------- Shop header ---------- */
   .shop-header{
@@ -62,28 +64,32 @@
     padding:50px 0 100px;
     align-items:flex-start;
   }
-  @media (max-width:900px){ .shop-layout{ grid-template-columns:1fr; } }
+  .shop-layout > *{ min-width:0; }   /* lets the chip row scroll instead of stretching the page */
+  @media (max-width:900px){ .shop-layout{ grid-template-columns:minmax(0,1fr); gap:20px; } }
 
-  /* Category sidebar (desktop) */
-  .cat-sidebar{
-    position:sticky; top:90px;
-  }
+  /* Sidebar (desktop) */
+  .cat-sidebar{ position:sticky; top:90px; }
   .cat-sidebar h3{
     font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase;
     color:rgba(20,32,28,0.45); margin:0 0 16px; font-weight:400;
   }
+  .cat-sidebar h3.spaced{ margin-top:28px; }
   .cat-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
   .cat-item{
     padding:10px 14px; border-radius:8px; cursor:pointer;
     font-size:0.92rem; color:rgba(20,32,28,0.62);
-    display:flex; justify-content:space-between; align-items:center;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
     transition:background .2s, color .2s;
   }
   .cat-item:hover{ background:var(--cream-soft); color:var(--ink); }
   .cat-item.active{ background:var(--green-deep); color:var(--cream-soft); }
   .cat-item .cnt{ font-family:'Space Mono',monospace; font-size:0.7rem; opacity:0.6; }
+  .cat-item.batch-item{ border:1px solid rgba(201,164,104,0.55); background:rgba(201,164,104,0.12); color:var(--green-deep); font-weight:500; }
+  .cat-item.batch-item:hover{ background:rgba(201,164,104,0.22); }
+  .cat-item.batch-item.active{ background:var(--green-deep); border-color:var(--green-deep); color:var(--cream-soft); }
+  .cat-item:focus-visible,.chip:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 
-  /* Category chips (mobile) */
+  /* Chips (mobile) */
   .cat-chips{
     display:none; gap:10px; overflow-x:auto; padding:4px 0 18px;
     -webkit-overflow-scrolling:touch;
@@ -98,6 +104,8 @@
     font-size:0.82rem; white-space:nowrap; cursor:pointer; color:rgba(20,32,28,0.62);
   }
   .chip.active{ background:var(--green-deep); border-color:var(--green-deep); color:var(--cream-soft); }
+  .chip.batch-chip{ border-color:rgba(201,164,104,0.7); background:rgba(201,164,104,0.14); color:var(--green-deep); font-weight:500; }
+  .chip.batch-chip.active{ background:var(--green-deep); border-color:var(--green-deep); color:var(--cream-soft); }
 
   /* Product grid */
   .product-grid{
@@ -108,31 +116,67 @@
     background:#fff; border-radius:14px; overflow:hidden;
     border:1px solid var(--line);
     transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+    text-decoration:none; color:inherit;
   }
-  .product-card:hover{ transform:translateY(-4px); box-shadow:0 20px 34px -18px rgba(15,36,28,0.28); }
+  a.product-card:hover{ transform:translateY(-4px); box-shadow:0 20px 34px -18px rgba(15,36,28,0.28); }
   .product-photo{
     position:relative; width:100%; aspect-ratio:4/5; background:var(--cream-soft);
     overflow:hidden;
   }
   .product-photo img{ width:100%; height:100%; object-fit:cover; }
+  .product-card.is-sold .product-photo img{ filter:grayscale(0.7); opacity:0.7; }
   .product-photo .no-photo{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     color:rgba(20,32,28,0.28); font-family:'Space Mono',monospace; font-size:0.7rem;
   }
+  .product-badges{ position:absolute; top:12px; left:12px; display:flex; gap:6px; flex-wrap:wrap; }
   .product-badge{
-    position:absolute; top:12px; left:12px;
     font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.05em;
     padding:5px 10px; border-radius:999px; background:var(--green-deep); color:var(--gold-soft);
   }
-  .product-badge.sold{ background:rgba(20,32,28,0.75); color:#fff; }
+  .product-badge.sold{ background:rgba(20,32,28,0.78); color:#fff; }
+  .product-badge.hot{ background:var(--gold); color:var(--green-deep); font-weight:700; }
   .product-info{ padding:16px 16px 18px; }
+  .product-meta{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.04em; color:rgba(20,32,28,0.48); margin:0 0 6px; }
   .product-brand{ font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; margin:0 0 3px; }
   .product-desc{ font-size:0.82rem; color:rgba(20,32,28,0.58); margin:0 0 10px; font-weight:300; line-height:1.4; }
   .product-price{ font-family:'Space Mono',monospace; font-weight:700; font-size:1rem; color:var(--green-deep); }
+  .product-card.is-sold .product-price{ text-decoration:line-through; opacity:0.55; }
 
   .empty-state{
     padding:80px 24px; text-align:center; color:rgba(20,32,28,0.5); font-weight:300;
   }
+
+  /* ---------- This Week's Batch view ---------- */
+  .batch-banner{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(700px 300px at 100% 0%, rgba(201,164,104,0.2), transparent 60%),
+      linear-gradient(135deg, var(--green-deep), var(--green));
+    color:var(--cream-soft); border-radius:20px; padding:32px clamp(22px,4vw,40px); margin-bottom:40px;
+    display:flex; justify-content:space-between; align-items:flex-end; gap:26px; flex-wrap:wrap;
+  }
+  .batch-banner .b-eyebrow{
+    font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--gold-soft);
+    display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;
+  }
+  .status-pill{
+    font-family:'Space Mono',monospace; font-size:0.64rem; letter-spacing:0.08em; padding:4px 11px; border-radius:999px;
+    background:rgba(239,227,200,0.14); color:var(--cream-soft); text-transform:uppercase;
+  }
+  .status-pill.live{ background:var(--gold); color:var(--green-deep); font-weight:700; }
+  .batch-banner h2{ font-size:clamp(1.7rem,3.6vw,2.5rem); margin:0 0 10px; font-weight:600; line-height:1.1; }
+  .b-dates{ font-size:0.86rem; color:rgba(239,227,200,0.72); font-weight:300; margin:0; max-width:520px; }
+  .b-side{ text-align:right; }
+  .b-count{ font-family:'Fraunces',serif; font-size:2.4rem; font-weight:600; line-height:1; display:block; }
+  .b-count-label{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-soft); display:block; margin-top:6px; }
+  .b-countdown{ font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--gold-soft); margin-top:12px; display:block; min-height:1.2em; }
+  @media (max-width:640px){ .b-side{ text-align:left; } }
+
+  .batch-section + .batch-section{ margin-top:52px; }
+  .section-title{ font-size:1.5rem; font-weight:600; margin:0 0 4px; color:var(--green-deep); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .section-title .n{ font-family:'Space Mono',monospace; font-size:0.72rem; color:rgba(20,32,28,0.45); font-weight:400; }
+  .section-sub{ font-size:0.9rem; color:rgba(20,32,28,0.58); font-weight:300; margin:0 0 22px; }
 
   footer{ padding:50px 0 40px; color:rgba(20,32,28,0.6); border-top:1px solid var(--line); }
   .footer-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; padding-bottom:26px; }
@@ -150,8 +194,8 @@
     VESTIGE
   </a>
   <ul class="nav-links">
-    <li><a href="shop.html" class="active">Shop</a></li>
-    <li><a href="home.html#pieces">This Week's Batch</a></li>
+    <li><a href="shop.html" id="navShop" class="active">Shop</a></li>
+    <li><a href="shop.html#batch" id="navBatch">This Week's Batch</a></li>
     <li><a href="home.html#how">How It Works</a></li>
     <li><a href="home.html#regulars">Join Us</a></li>
   </ul>
@@ -163,29 +207,26 @@
 
 <header class="shop-header">
   <div class="wrap">
-    <span class="eyebrow">Full Catalog</span>
-    <h1>Shop</h1>
-    <p>Every curated, authenticated piece we've got — browse by category, no two the same.</p>
+    <span class="eyebrow" id="shopEyebrow">Full Catalog</span>
+    <h1 id="shopTitle">Shop</h1>
+    <p id="shopSub">Every curated, authenticated piece we've got — browse by category, no two the same.</p>
   </div>
 </header>
 
 <main class="wrap">
   <div class="shop-layout">
 
-    <aside class="cat-sidebar">
-      <h3>Categories</h3>
-      <ul class="cat-list" id="catList">
-        <li class="cat-item active" data-cat-id="all">All Items <span class="cnt" id="countAll">0</span></li>
-      </ul>
-    </aside>
+    <aside class="cat-sidebar" id="catSidebar" aria-label="Shop navigation"></aside>
 
     <div>
-      <div class="cat-chips" id="catChips">
-        <div class="chip active" data-cat-id="all">All Items</div>
+      <div class="cat-chips" id="catChips"></div>
+
+      <div id="catalogView">
+        <div class="product-grid" id="productGrid"></div>
+        <div class="empty-state" id="emptyState" style="display:none;">No products here yet — check back soon.</div>
       </div>
 
-      <div class="product-grid" id="productGrid"></div>
-      <div class="empty-state" id="emptyState" style="display:none;">No products here yet — check back soon.</div>
+      <div id="batchView" style="display:none;"></div>
     </div>
 
   </div>
@@ -203,7 +244,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getFirestore, collection, onSnapshot
+    getFirestore, collection, doc, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -211,86 +252,318 @@
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
   const db = getFirestore(app);
 
+  // ---------- state ----------
   let categories = [];
   let products = [];
+  let live = null;                 // vestige/liveBatch (null until published)
+  const ready = { categories: false, products: false, live: false };
+  const failed = { products: false, live: false };
   let activeCategoryId = 'all';
+  let view = location.hash === '#batch' ? 'batch' : 'catalog';
+  let renderedBatchStatus = null;
 
-  function renderCategoryNav(){
-    const counts = { all: products.length };
-    categories.forEach(cat => {
-      counts[cat.id] = products.filter(p => p.categoryId === cat.id).length;
-    });
+  // ---------- helpers ----------
+  function esc(v){
+    return String(v ?? '')
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function money(v){ return '₱' + Number(v || 0).toLocaleString('en-PH'); }
+  function gallery(p){ return Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []); }
+  function titleOf(p){ return p.brand || p.productName || 'Untitled'; }
+  function descOf(p){ return p.item || (p.brand ? p.productName : '') || ''; }
+  // hide blank drafts that were created in the admin but never filled in
+  function isListable(p){ return !!(p.brand || p.productName || p.item); }
+  function isSold(p){ return p.status === 'Claimed'; }
+  function byId(id){ return products.find(p => p.id === id); }
+  function skuNum(p){ return String(p.sku || '~'); }
 
-    const listHtml = [`<li class="cat-item ${activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all">All Items <span class="cnt">${counts.all}</span></li>`]
-      .concat(categories.map(cat => `
-        <li class="cat-item ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name} <span class="cnt">${counts[cat.id] || 0}</span></li>
-      `)).join('');
-    document.getElementById('catList').innerHTML = listHtml;
-
-    const chipsHtml = [`<div class="chip ${activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all">All Items</div>`]
-      .concat(categories.map(cat => `
-        <div class="chip ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">${cat.name}</div>
-      `)).join('');
-    document.getElementById('catChips').innerHTML = chipsHtml;
-
-    document.querySelectorAll('[data-cat-id]').forEach(el => {
-      el.addEventListener('click', () => {
-        activeCategoryId = el.dataset.catId;
-        renderCategoryNav();
-        renderProductGrid();
-      });
-    });
+  // available pieces first, claimed last, then by SKU
+  function sortProducts(list){
+    return list.slice().sort((a, b) =>
+      (isSold(a) ? 1 : 0) - (isSold(b) ? 1 : 0) ||
+      skuNum(a).localeCompare(skuNum(b), undefined, { numeric: true }) ||
+      titleOf(a).localeCompare(titleOf(b)));
   }
 
-  function renderProductGrid(){
-    const grid = document.getElementById('productGrid');
-    const emptyState = document.getElementById('emptyState');
-    const filtered = activeCategoryId === 'all'
-      ? products
-      : products.filter(p => p.categoryId === activeCategoryId);
+  // One card. `p` is a product-shaped object; `linked` = has a product page to open.
+  function cardHtml(p, opts = {}){
+    const sold = isSold(p);
+    const imgs = gallery(p);
+    const photo = imgs.length
+      ? `<img src="${esc(imgs[0])}" alt="${esc(titleOf(p))} ${esc(descOf(p))}" loading="lazy">`
+      : `<div class="no-photo">NO PHOTO YET</div>`;
+    const badges = [
+      opts.hot && !sold ? `<span class="product-badge hot">HOT</span>` : '',
+      sold ? `<span class="product-badge sold">Claimed</span>`
+           : (p.status === '1 Left' ? `<span class="product-badge">1 Left</span>` : '')
+    ].join('');
+    const meta = [p.sku || p.code, p.size && p.size !== '—' ? 'Size ' + p.size : ''].filter(Boolean).join(' · ');
+    const inner = `
+      <div class="product-photo">${photo}<div class="product-badges">${badges}</div></div>
+      <div class="product-info">
+        ${meta ? `<p class="product-meta">${esc(meta)}</p>` : ''}
+        <h3 class="product-brand">${esc(titleOf(p))}</h3>
+        <p class="product-desc">${esc(descOf(p))}</p>
+        <span class="product-price">${money(p.price)}</span>
+      </div>`;
+    const cls = `product-card${sold ? ' is-sold' : ''}`;
+    return opts.linked === false
+      ? `<div class="${cls}">${inner}</div>`
+      : `<a href="product.html?id=${encodeURIComponent(p.id)}" class="${cls}">${inner}</a>`;
+  }
 
-    if (filtered.length === 0){
+  // ---------- this week's batch: hot items + everything the admin selected ----------
+  function batchData(){
+    if (!live || !live.batch) return null;
+    const seen = new Set();
+    const hot = [];
+    (live.hotItems || []).forEach(it => {
+      if (it.productId){
+        const p = byId(it.productId);
+        if (p && !seen.has(p.id)){ hot.push({ p, linked: true }); seen.add(p.id); }
+      } else {
+        // older hot items typed in by hand: no product page, show the saved details
+        hot.push({ p: { ...it, id: '', sku: it.code, images: it.image ? [it.image] : [] }, linked: false });
+      }
+    });
+    const rest = [];
+    (live.batchItemIds || []).forEach(id => {
+      const p = byId(id);
+      if (p && !seen.has(id)){ rest.push(p); seen.add(id); }
+    });
+    return { batch: live.batch, hot, rest: sortProducts(rest) };
+  }
+  function batchCount(){
+    const b = batchData();
+    return b ? b.hot.length + b.rest.length : 0;
+  }
+
+  function batchStatus(batch){
+    const s = new Date(batch.biddingStart), e = new Date(batch.biddingEnd), now = new Date();
+    if (isNaN(s) || isNaN(e)) return 'TBA';
+    if (now < s) return 'UPCOMING';
+    if (now < e) return 'LIVE';
+    return 'ENDED';
+  }
+  const STATUS_LABEL = { LIVE:'Live now', UPCOMING:'Coming soon', ENDED:'Ended', TBA:'Schedule to be announced' };
+  function fmtDate(iso){
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return d.toLocaleString('en-PH', { timeZone:'Asia/Manila', month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  }
+  function datesLine(batch, status){
+    const open = fmtDate(batch.biddingStart), close = fmtDate(batch.biddingEnd);
+    if (status === 'TBA' || !open || !close) return 'Dates for this drop will be announced soon — follow us so you don\'t miss it.';
+    if (status === 'UPCOMING') return `Bidding opens ${open} and closes ${close} (Manila time).`;
+    if (status === 'LIVE') return `Bidding is open now and closes ${close} (Manila time).`;
+    return `This batch's bidding closed ${close} (Manila time).`;
+  }
+  function countdownText(batch, status){
+    const target = status === 'UPCOMING' ? new Date(batch.biddingStart) : status === 'LIVE' ? new Date(batch.biddingEnd) : null;
+    if (!target) return '';
+    const diff = target - new Date();
+    if (diff <= 0) return '';
+    const d = Math.floor(diff / 86400000), h = Math.floor(diff / 3600000) % 24, m = Math.floor(diff / 60000) % 60, s = Math.floor(diff / 1000) % 60;
+    const t = `${d ? d + 'd ' : ''}${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    return (status === 'UPCOMING' ? 'Bidding opens in ' : 'Bidding closes in ') + t;
+  }
+
+  // ---------- rendering ----------
+  function renderNav(){
+    const isBatch = view === 'batch';
+    document.getElementById('navShop').classList.toggle('active', !isBatch);
+    document.getElementById('navBatch').classList.toggle('active', isBatch);
+
+    const bc = batchCount();
+    const counts = { all: products.filter(isListable).length };
+    categories.forEach(c => { counts[c.id] = products.filter(p => isListable(p) && p.categoryId === c.id).length; });
+
+    document.getElementById('catSidebar').innerHTML = `
+      <h3>This week</h3>
+      <ul class="cat-list">
+        <li class="cat-item batch-item ${isBatch ? 'active' : ''}" data-view="batch" tabindex="0" role="button">This Week's Batch <span class="cnt">${bc}</span></li>
+      </ul>
+      <h3 class="spaced">Categories</h3>
+      <ul class="cat-list">
+        <li class="cat-item ${!isBatch && activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all" tabindex="0" role="button">All Items <span class="cnt">${counts.all}</span></li>
+        ${categories.map(c => `
+          <li class="cat-item ${!isBatch && activeCategoryId === c.id ? 'active' : ''}" data-cat-id="${esc(c.id)}" tabindex="0" role="button">${esc(c.name)} <span class="cnt">${counts[c.id] || 0}</span></li>`).join('')}
+      </ul>`;
+
+    document.getElementById('catChips').innerHTML =
+      `<div class="chip batch-chip ${isBatch ? 'active' : ''}" data-view="batch" tabindex="0" role="button">★ This Week's Batch</div>` +
+      `<div class="chip ${!isBatch && activeCategoryId === 'all' ? 'active' : ''}" data-cat-id="all" tabindex="0" role="button">All Items</div>` +
+      categories.map(c => `<div class="chip ${!isBatch && activeCategoryId === c.id ? 'active' : ''}" data-cat-id="${esc(c.id)}" tabindex="0" role="button">${esc(c.name)}</div>`).join('');
+  }
+
+  function renderHeader(){
+    const isBatch = view === 'batch';
+    document.getElementById('shopEyebrow').textContent = isBatch ? 'Weekly Drop' : 'Full Catalog';
+    document.getElementById('shopTitle').textContent = isBatch ? "This Week's Batch" : 'Shop';
+    document.getElementById('shopSub').textContent = isBatch
+      ? 'Every piece selected for this drop — our hot picks first, then the rest of the batch.'
+      : "Every curated, authenticated piece we've got — browse by category, no two the same.";
+    document.title = (isBatch ? "This Week's Batch" : 'Shop') + ' — Vestige Thrift Shop';
+  }
+
+  function renderCatalog(){
+    const grid = document.getElementById('productGrid');
+    const empty = document.getElementById('emptyState');
+    if (failed.products){
       grid.innerHTML = '';
-      emptyState.style.display = 'block';
+      empty.textContent = "We couldn't load the catalog right now. Please refresh in a moment.";
+      empty.style.display = 'block';
       return;
     }
-    emptyState.style.display = 'none';
-
-    grid.innerHTML = filtered.map(p => {
-      const isSold = p.status === 'Claimed';
-      const gallery = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
-      const photoHtml = gallery.length
-        ? `<img src="${gallery[0]}" alt="${p.brand || ''} ${p.item || ''}">`
-        : `<div class="no-photo">NO PHOTO YET</div>`;
-      const badge = isSold
-        ? `<span class="product-badge sold">Claimed</span>`
-        : (p.status === '1 Left' ? `<span class="product-badge">1 Left</span>` : '');
-      return `
-        <a href="product.html?id=${p.id}" class="product-card" style="text-decoration:none; color:inherit;">
-          <div class="product-photo">
-            ${photoHtml}
-            ${badge}
-          </div>
-          <div class="product-info">
-            <h3 class="product-brand">${p.brand || 'Untitled'}</h3>
-            <p class="product-desc">${p.item || ''}</p>
-            <span class="product-price">₱${Number(p.price || 0).toLocaleString()}</span>
-          </div>
-        </a>`;
-    }).join('');
+    if (!ready.products){
+      grid.innerHTML = '';
+      empty.textContent = 'Loading the catalog…';
+      empty.style.display = 'block';
+      return;
+    }
+    const list = sortProducts(products.filter(p => isListable(p) && (activeCategoryId === 'all' || p.categoryId === activeCategoryId)));
+    if (!list.length){
+      grid.innerHTML = '';
+      empty.textContent = 'No products here yet — check back soon.';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    grid.innerHTML = list.map(p => cardHtml(p)).join('');
   }
 
+  function renderBatch(){
+    const el = document.getElementById('batchView');
+    if (failed.live || failed.products){
+      el.innerHTML = `<div class="empty-state">We couldn't load this week's batch right now. Please refresh in a moment.</div>`;
+      return;
+    }
+    if (!ready.live || !ready.products){
+      el.innerHTML = `<div class="empty-state">Loading this week's batch…</div>`;
+      return;
+    }
+    const b = batchData();
+    if (!b){
+      renderedBatchStatus = null;
+      el.innerHTML = `<div class="empty-state">No batch has been published yet — check back soon.</div>`;
+      return;
+    }
+    const status = batchStatus(b.batch);
+    renderedBatchStatus = status;
+    const total = b.hot.length + b.rest.length;
+    const stillAvailable = b.hot.filter(h => !isSold(h.p)).length + b.rest.filter(p => !isSold(p)).length;
+
+    let html = `
+      <section class="batch-banner" aria-label="Batch details">
+        <div>
+          <div class="b-eyebrow">This Week's Batch <span class="status-pill ${status === 'LIVE' ? 'live' : ''}">${esc(STATUS_LABEL[status])}</span></div>
+          <h2>${esc(b.batch.name || 'Current batch')}</h2>
+          <p class="b-dates">${esc(datesLine(b.batch, status))}</p>
+        </div>
+        <div class="b-side">
+          <span class="b-count">${total}</span>
+          <span class="b-count-label">${total === 1 ? 'piece' : 'pieces'} · ${stillAvailable} still available</span>
+          <span class="b-countdown" id="batchCountdown">${esc(countdownText(b.batch, status))}</span>
+        </div>
+      </section>`;
+
+    if (!total){
+      html += `<div class="empty-state">No items have been selected for this batch yet — check back soon.</div>`;
+    } else {
+      if (b.hot.length){
+        html += `
+        <section class="batch-section">
+          <h2 class="section-title">Hot Picks <span class="n">${b.hot.length} ${b.hot.length === 1 ? 'piece' : 'pieces'}</span></h2>
+          <p class="section-sub">The standouts of this drop — these go first.</p>
+          <div class="product-grid">${b.hot.map(h => cardHtml(h.p, { hot: true, linked: h.linked })).join('')}</div>
+        </section>`;
+      }
+      if (b.rest.length){
+        html += `
+        <section class="batch-section">
+          <h2 class="section-title">${b.hot.length ? 'More in this batch' : 'In this batch'} <span class="n">${b.rest.length} ${b.rest.length === 1 ? 'piece' : 'pieces'}</span></h2>
+          <p class="section-sub">${b.hot.length ? 'The rest of the drop — ' : ''}first to message gets first pick.</p>
+          <div class="product-grid">${b.rest.map(p => cardHtml(p)).join('')}</div>
+        </section>`;
+      }
+    }
+    el.innerHTML = html;
+  }
+
+  function render(){
+    const isBatch = view === 'batch';
+    renderHeader();
+    renderNav();
+    document.getElementById('catalogView').style.display = isBatch ? 'none' : 'block';
+    document.getElementById('batchView').style.display = isBatch ? 'block' : 'none';
+    if (isBatch) renderBatch(); else renderCatalog();
+  }
+
+  // ---------- navigation ----------
+  function setView(v){
+    view = v;
+    const url = v === 'batch' ? '#batch' : location.pathname + location.search;
+    history.replaceState(null, '', url);
+    render();
+  }
+  function handleNavActivate(e){
+    const batchEl = e.target.closest('[data-view="batch"]');
+    if (batchEl){ setView('batch'); return; }
+    const catEl = e.target.closest('[data-cat-id]');
+    if (catEl){ activeCategoryId = catEl.dataset.catId; setView('catalog'); }
+  }
+  ['catSidebar', 'catChips'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('click', handleNavActivate);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handleNavActivate(e); }
+    });
+  });
+  // header link "This Week's Batch" (and deep links like shop.html#batch)
+  window.addEventListener('hashchange', () => {
+    view = location.hash === '#batch' ? 'batch' : 'catalog';
+    render();
+    window.scrollTo({ top: 0 });
+  });
+
+  // live countdown + automatic flip when the bidding window opens/closes
+  setInterval(() => {
+    if (view !== 'batch' || !live || !live.batch) return;
+    if (batchStatus(live.batch) !== renderedBatchStatus){ renderBatch(); return; }
+    const el = document.getElementById('batchCountdown');
+    if (el) el.textContent = countdownText(live.batch, renderedBatchStatus);
+  }, 1000);
+
+  // ---------- live data ----------
   onSnapshot(collection(db, 'categories'), (snap) => {
-    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCategoryNav();
-    renderProductGrid();
+    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+    ready.categories = true;
+    render();
   }, (err) => console.error('Categories listener error:', err));
 
   onSnapshot(collection(db, 'products'), (snap) => {
     products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCategoryNav();
-    renderProductGrid();
-  }, (err) => console.error('Products listener error:', err));
+    ready.products = true; failed.products = false;
+    render();
+  }, (err) => {
+    console.error('Products listener error:', err);
+    failed.products = true;
+    render();
+  });
+
+  onSnapshot(doc(db, 'vestige', 'liveBatch'), (snap) => {
+    live = snap.exists() ? snap.data() : null;
+    ready.live = true; failed.live = false;
+    render();
+  }, (err) => {
+    console.error('Batch listener error:', err);
+    failed.live = true;
+    render();
+  });
+
+  render();
 </script>
 
 <script type="module">
