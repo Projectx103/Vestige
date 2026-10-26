@@ -496,11 +496,106 @@
   .status-ended{ background:#e4e0d8; color:#4a4a46; }
   .field-err{ color:var(--danger); font-size:0.74rem; margin:-12px 0 14px; line-height:1.4; }
   .field-err:empty{ display:none; }
-  .field-hint{ font-size:0.72rem; color:rgba(20,32,28,0.55); margin:0 0 14px; line-height:1.4; }
+  .fld-note{ font-size:0.72rem; color:rgba(20,32,28,0.55); margin:0 0 14px; line-height:1.4; }
   .grid3 .span-2{ grid-column:span 2; }
   @media (max-width:640px){ .grid3 .span-2{ grid-column:auto; } }
   .rules-snip{ background:#fff; border:1px solid #e0b878; border-radius:8px; padding:10px 14px; font-family:'Space Mono',monospace; font-size:0.74rem; margin:10px 0 0; overflow:auto; }
   .kbd{ font-family:'Space Mono',monospace; font-size:0.62rem; opacity:.65; border:1px solid currentColor; border-radius:5px; padding:1px 6px; margin-left:8px; }
+
+  /* ===== Layout refresh: shell, tiles, sticky save bar, responsive ===== */
+  .wrap{ max-width:1180px; padding:32px 36px 40px; }
+  .wrap.wide{ max-width:1480px; }
+  h1{ font-size:1.75rem; letter-spacing:-0.01em; }
+  .lead{ margin-bottom:24px; }
+  .dash-head{ margin-bottom:22px; }
+  .dash-head .lead{ margin:0; }
+  .card{ padding:24px 26px; margin-bottom:20px; box-shadow:0 1px 0 rgba(20,32,28,0.03); }
+  .card h2{ margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .card h2 .status-pill{ margin-left:0; }
+  .btn{ min-height:44px; justify-content:center; transition:filter .15s, transform .1s; }
+  .btn:hover:not([disabled]){ filter:brightness(1.04); }
+  .btn:active:not([disabled]){ transform:translateY(1px); }
+  .btn:focus-visible, .nav-item:focus-visible, .dots-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .btn-outline:hover:not([disabled]){ background:rgba(20,32,28,0.04); }
+  .btn-danger-outline:hover:not([disabled]){ background:#fdf0ec; }
+  .hot-note{ max-width:70ch; }
+  input, select{ min-height:46px; }
+  input[type=checkbox], input[type=radio], input[type=file]{ min-height:0; }
+
+  .tiles{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+  .tile{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; min-width:0; }
+  .tile .t-label{ font-family:'Space Mono',monospace; font-size:0.64rem; letter-spacing:0.06em; text-transform:uppercase; color:rgba(20,32,28,0.5); }
+  .tile .t-value{ font-family:'Fraunces',serif; font-size:1.7rem; color:var(--green-deep); line-height:1.15; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .t-sub{ font-size:0.74rem; color:rgba(20,32,28,0.55); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile.accent{ background:var(--green-deep); border-color:var(--green-deep); }
+  .tile.accent .t-label, .tile.accent .t-sub{ color:rgba(239,227,200,0.7); }
+  .tile.accent .t-value{ color:var(--cream-soft); }
+
+  .save-bar{
+    position:sticky; bottom:0; z-index:30; margin:8px -12px 0; padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background:rgba(250,246,238,0.92); backdrop-filter:blur(8px);
+    border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 -8px 24px -14px rgba(15,36,28,0.35);
+  }
+  .save-info{ display:flex; align-items:center; gap:12px; min-width:0; flex-wrap:wrap; }
+  .save-info p{ margin:0; font-size:0.82rem; color:rgba(20,32,28,0.65); font-weight:300; line-height:1.4; }
+  .save-info .dirty-badge{ margin-left:0; }
+  .save-bar .btn{ flex-shrink:0; padding:12px 28px; }
+
+  .sidebar-nav .nav-item.is-soon{ opacity:.5; cursor:default; }
+  .soon-tag{ display:none; margin-left:auto; font-family:'Space Mono',monospace; font-size:0.56rem; letter-spacing:.06em; text-transform:uppercase; border:1px solid rgba(239,227,200,.3); border-radius:999px; padding:1px 7px; }
+  .sidebar.expanded .soon-tag{ display:inline-block; }
+
+  .mobile-bar, .drawer-backdrop{ display:none; }
+
+  .folder-card{ overflow:hidden; }
+  .folder-toolbar > *{ min-width:0; }
+  .batch-bar select{ flex:1 1 280px; }
+
+  @media (max-width:1000px){
+    .tiles{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width:760px){
+    .wrap{ padding:20px 16px 24px; }
+    .wrap.wide{ padding:20px 16px 24px; }
+    h1{ font-size:1.5rem; }
+    .card{ padding:18px 16px; border-radius:14px; }
+    .dash-head{ flex-direction:column; align-items:stretch; }
+    .dash-head .btn{ width:100%; }
+    .cat-head{ flex-direction:column; }
+    .tiles{ gap:10px; }
+    .tile{ padding:12px 14px; }
+    .tile .t-value{ font-size:1.35rem; }
+    .batch-bar select{ width:100%; flex-basis:100%; min-width:0; }
+    .save-bar{ margin:8px -4px 0; flex-direction:column; align-items:stretch; gap:10px; padding:12px; }
+    .save-info p{ display:none; }
+    .save-bar .btn{ width:100%; }
+    .tb-left, .tb-right{ width:100%; }
+    .tb-left input, .tb-left select{ width:100%; flex:1 1 100%; }
+    .tb-right .btn{ flex:1 1 auto; }
+    .folder-toolbar{ padding:0 14px 12px; }
+    .folder-stats, .folder-hint{ margin-left:14px; margin-right:14px; padding-left:0; padding-right:0; }
+    .view-tabs{ width:100%; }
+    .view-tab{ flex:1; padding:10px 8px; }
+    .add-category-row{ flex-direction:column; }
+    .add-category-row .btn{ width:100%; }
+
+    .mobile-bar{ display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:40; padding:10px 14px; background:var(--green-deep); color:var(--cream-soft); }
+    .hamburger{ width:44px; height:44px; border:none; background:transparent; color:inherit; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer; }
+    .hamburger:hover{ background:rgba(239,227,200,0.1); }
+    .mobile-title{ font-family:'Fraunces',serif; font-size:1.05rem; }
+    .sidebar{ position:fixed; left:0; top:0; z-index:60; height:100vh; width:var(--sidebar-expanded); transform:translateX(-100%); transition:transform .28s cubic-bezier(.22,.8,.32,1); overflow-y:auto; }
+    .sidebar.mobile-open{ transform:none; box-shadow:0 0 40px rgba(0,0,0,.4); }
+    .sidebar-toggle{ display:none; }
+    .drawer-backdrop{ position:fixed; inset:0; z-index:55; background:rgba(15,36,28,.5); }
+    .drawer-backdrop.open{ display:block; }
+    .admin-shell{ display:block; }
+  }
+  @media (max-width:420px){
+    .tiles{ grid-template-columns:1fr 1fr; }
+    .btn{ padding-left:16px; padding-right:16px; }
+  }
 </style>
 </head>
 <body>
@@ -551,6 +646,7 @@
 <div id="adminApp">
   <div class="admin-shell">
 
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="avatar-circle" id="avatarCircle">V</div>
@@ -575,13 +671,13 @@
           <svg class="nav-chevron" id="productsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
         <div class="nav-sublist" id="categorySubNav"></div>
-        <div class="nav-item" data-view="batches">
+        <div class="nav-item is-soon" data-soon="Batch search is coming next" title="Coming soon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span class="nav-label">Batches</span>
+          <span class="nav-label">Batch Search</span><span class="soon-tag">Soon</span>
         </div>
-        <div class="nav-item" data-view="settings">
+        <div class="nav-item is-soon" data-soon="Settings is coming soon" title="Coming soon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-          <span class="nav-label">Settings</span>
+          <span class="nav-label">Settings</span><span class="soon-tag">Soon</span>
         </div>
       </div>
 
@@ -598,6 +694,12 @@
     </nav>
 
     <div class="main-content">
+      <header class="mobile-bar">
+        <button type="button" class="hamburger" id="hamburger" aria-label="Open menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <span class="mobile-title">Vestige Admin</span>
+      </header>
       <div class="wrap">
 
         <div class="view active" id="view-dashboard">
@@ -621,9 +723,11 @@ match /counters/{id} {
             <button type="button" class="btn btn-gold" id="newBatchBtn">+ Add New Batch</button>
           </div>
 
+          <div class="tiles" id="dashTiles" aria-label="Summary"></div>
+
           <div class="card">
             <div class="batch-bar">
-              <h2 style="margin:0;">Batch Schedule <span id="batchStatusPill" class="status-pill status-upcoming">IN PROCESS</span> <span class="dirty-badge" id="batchDirtyBadge" style="display:none;">Unsaved changes</span></h2>
+              <h2 style="margin:0;">Batch Schedule <span id="batchStatusPill" class="status-pill status-upcoming">IN PROCESS</span></h2>
               <select id="batchSwitch" aria-label="Open a saved batch"></select>
             </div>
             <div class="grid3">
@@ -641,7 +745,7 @@ match /counters/{id} {
                     <button type="button" data-set-status="Closed">Closed</button>
                   </div>
                 </div>
-                <p class="field-hint" id="statusHint"></p>
+                <p class="fld-note" id="statusHint"></p>
               </div>
             </div>
             <div class="grid3">
@@ -682,23 +786,27 @@ match /counters/{id} {
             <button class="btn btn-add" id="addBatchBtn">+ Add from Products</button>
           </div>
 
-          <div class="card">
-            <h2>Save Batch</h2>
-            <p class="lead" style="margin-bottom:16px;" id="saveNote"></p>
-            <div class="actions">
-              <button class="btn btn-gold" id="saveBatchBtn">
-                <span class="btn-spinner"></span>
-                <span class="btn-label-default"><span id="saveBatchLabel">Save Batch</span> <span class="kbd">Ctrl+S</span></span>
-                <span class="btn-spinner-label">Saving…</span>
-              </button>
+          <div class="save-bar" role="region" aria-label="Save batch">
+            <div class="save-info">
+              <span class="dirty-badge" id="batchDirtyBadge" style="display:none;">Unsaved changes</span>
+              <p id="saveNote"></p>
             </div>
+            <button class="btn btn-gold" id="saveBatchBtn">
+              <span class="btn-spinner"></span>
+              <span class="btn-label-default"><span id="saveBatchLabel">Save Batch</span> <span class="kbd">Ctrl+S</span></span>
+              <span class="btn-spinner-label">Saving…</span>
+            </button>
           </div>
 
         </div>
 
         <div class="view" id="view-products">
-          <h1>Products</h1>
-          <p class="lead">Organize your catalog into categories. Click a category to manage its products.</p>
+          <div class="dash-head">
+            <div>
+              <h1>Products</h1>
+              <p class="lead" style="margin:0;">Organize your catalog into categories. Click a category to manage its products.</p>
+            </div>
+          </div>
 
           <div class="card">
             <h2>Categories</h2>
@@ -936,8 +1044,23 @@ match /counters/{id} {
       switchView(viewName);
       if (viewName === 'products') refreshCategoriesView();
       if (viewName === 'dashboard') refreshHotFromProducts();
+      setDrawer(false);
     });
   });
+
+  // mobile drawer
+  const drawerBackdrop = document.getElementById('drawerBackdrop');
+  function setDrawer(open){
+    sidebar.classList.toggle('mobile-open', open);
+    if (open) sidebar.classList.add('expanded');
+    drawerBackdrop.classList.toggle('open', open);
+  }
+  document.getElementById('hamburger').addEventListener('click', () => setDrawer(!sidebar.classList.contains('mobile-open')));
+  drawerBackdrop.addEventListener('click', () => setDrawer(false));
+  document.querySelectorAll('.nav-item[data-soon]').forEach(el => el.addEventListener('click', () => {
+    showToast({ type: 'ok', title: 'Coming soon', message: el.dataset.soon + '.' });
+    setDrawer(false);
+  }));
 
   document.getElementById('productsChevron').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1256,7 +1379,22 @@ match /counters/{id} {
         : `Saving updates Control No. ${fmtControl(state.controlNo)} on your live site.`;
   }
 
+  function renderTiles(){
+    const total = hotProducts.length;
+    const avail = hotProducts.filter(p => (p.status || 'Available') === 'Available').length;
+    const claimed = hotProducts.filter(p => p.status === 'Claimed').length;
+    const inBatch = state.items.length + state.batchItems.length;
+    const tile = (label, value, sub, accent) => `<div class="tile${accent ? ' accent' : ''}"><div class="t-label">${esc(label)}</div><div class="t-value">${value}</div><div class="t-sub">${sub}</div></div>`;
+    const cur = allBatches.find(b => b.status === 'Active');
+    document.getElementById('dashTiles').innerHTML =
+      tile('Live batch', cur ? 'Control ' + esc(fmtControl(cur.controlNo)) : 'None', cur ? esc(cur.batchName || '') : 'No Active batch', true) +
+      tile('Available', String(avail), `of ${total} product${total === 1 ? '' : 's'}`) +
+      tile('Claimed', String(claimed), 'sold or reserved') +
+      tile('In this batch', String(inBatch), `${state.items.length} hot · ${state.batchItems.length} more`);
+  }
+
   function renderAll(){
+    renderTiles();
     renderBatchForm();
     renderHotItems();
     renderBatchItems();
@@ -1648,6 +1786,7 @@ match /counters/{id} {
     const full = n >= limit;
     add.disabled = full;
     add.textContent = full ? `Limit reached (${n} / ${limit}) — remove one or raise the limit` : '+ Add from Products';
+    renderTiles();
   }
 
   document.getElementById('itemsContainer').addEventListener('click', (e) => {
@@ -1707,6 +1846,7 @@ match /counters/{id} {
         </div>`).join('');
     }
     document.getElementById('clearBatchBtn').disabled = n === 0;
+    renderTiles();
   }
 
   document.getElementById('batchContainer').addEventListener('click', (e) => {
