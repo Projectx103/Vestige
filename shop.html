@@ -255,9 +255,10 @@
   // ---------- state ----------
   let categories = [];
   let products = [];
-  let live = null;                 // vestige/liveBatch (null until published)
-  const ready = { categories: false, products: false, live: false };
-  const failed = { products: false, live: false };
+  let liveDoc = null;              // vestige/liveBatch — the older single-batch copy (fallback only)
+  let batches = [];                // batches collection (one record per drop, with a Control No.)
+  const ready = { categories: false, products: false, live: false, batches: false };
+  const failed = { products: false, live: false, batches: false };
   let activeCategoryId = 'all';
   let view = location.hash === '#batch' ? 'batch' : 'catalog';
   let renderedBatchStatus = null;
@@ -313,8 +314,41 @@
       : `<a href="product.html?id=${encodeURIComponent(p.id)}" class="${cls}">${inner}</a>`;
   }
 
+  // ---------- batches ----------
+  // Batch mode: the `batches` collection has at least one record. Otherwise the old single liveBatch is used.
+  function batchMode(){ return ready.batches && !failed.batches && batches.length > 0; }
+  function activeBatches(){ return batches.filter(b => b.status === 'Active').sort((a, b) => (b.controlNo || 0) - (a.controlNo || 0)); }
+  // "This Week's Batch" = the newest Active batch, in the same shape the old liveBatch had
+  function currentLive(){
+    if (!batchMode()){ return liveDoc; }
+    const cur = activeBatches()[0];
+    if (!cur) return null;
+    return {
+      batch: { number: cur.batchNumber, name: cur.batchName, biddingStart: cur.biddingStart, biddingEnd: cur.biddingEnd, controlNo: cur.controlNo },
+      hotItems: (cur.hotItemIds || []).map(id => ({ productId: id })),
+      batchItemIds: cur.batchItemIds || []
+    };
+  }
+  // Catalog / category counts in batch mode: items of the newest Active batch (even if claimed),
+  // plus items still Available from older Active batches. Closed batches contribute nothing.
+  function catalogProducts(){
+    const base = products.filter(isListable);
+    if (!batchMode()) return base;
+    const act = activeBatches();
+    const ids = new Set();
+    act.forEach((b, i) => {
+      [...(b.hotItemIds || []), ...(b.batchItemIds || [])].forEach(id => {
+        const p = byId(id);
+        if (!p) return;
+        if (i === 0 || !isSold(p)) ids.add(id);
+      });
+    });
+    return base.filter(p => ids.has(p.id));
+  }
+
   // ---------- this week's batch: hot items + everything the admin selected ----------
   function batchData(){
+    const live = currentLive();
     if (!live || !live.batch) return null;
     const seen = new Set();
     const hot = [];
@@ -376,8 +410,9 @@
     document.getElementById('navBatch').classList.toggle('active', isBatch);
 
     const bc = batchCount();
-    const counts = { all: products.filter(isListable).length };
-    categories.forEach(c => { counts[c.id] = products.filter(p => isListable(p) && p.categoryId === c.id).length; });
+    const cat = catalogProducts();
+    const counts = { all: cat.length };
+    categories.forEach(c => { counts[c.id] = cat.filter(p => p.categoryId === c.id).length; });
 
     document.getElementById('catSidebar').innerHTML = `
       <h3>This week</h3>
@@ -422,7 +457,13 @@
       empty.style.display = 'block';
       return;
     }
-    const list = sortProducts(products.filter(p => isListable(p) && (activeCategoryId === 'all' || p.categoryId === activeCategoryId)));
+    if (!ready.batches){
+      grid.innerHTML = '';
+      empty.textContent = 'Loading the catalog…';
+      empty.style.display = 'block';
+      return;
+    }
+    const list = sortProducts(catalogProducts().filter(p => activeCategoryId === 'all' || p.categoryId === activeCategoryId));
     if (!list.length){
       grid.innerHTML = '';
       empty.textContent = 'No products here yet — check back soon.';
@@ -435,18 +476,18 @@
 
   function renderBatch(){
     const el = document.getElementById('batchView');
-    if (failed.live || failed.products){
+    if ((!batchMode() && failed.live && ready.batches) || failed.products){
       el.innerHTML = `<div class="empty-state">We couldn't load this week's batch right now. Please refresh in a moment.</div>`;
       return;
     }
-    if (!ready.live || !ready.products){
+    if (!ready.batches || (!batchMode() && !ready.live) || !ready.products){
       el.innerHTML = `<div class="empty-state">Loading this week's batch…</div>`;
       return;
     }
     const b = batchData();
     if (!b){
       renderedBatchStatus = null;
-      el.innerHTML = `<div class="empty-state">No batch has been published yet — check back soon.</div>`;
+      el.innerHTML = `<div class="empty-state">There's no batch open right now — check back soon.</div>`;
       return;
     }
     const status = batchStatus(b.batch);
@@ -529,6 +570,7 @@
 
   // live countdown + automatic flip when the bidding window opens/closes
   setInterval(() => {
+    const live = currentLive();
     if (view !== 'batch' || !live || !live.batch) return;
     if (batchStatus(live.batch) !== renderedBatchStatus){ renderBatch(); return; }
     const el = document.getElementById('batchCountdown');
@@ -553,8 +595,20 @@
     render();
   });
 
+  onSnapshot(collection(db, 'batches'), (snap) => {
+    batches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ready.batches = true; failed.batches = false;
+    render();
+  }, (err) => {
+    // rules not published yet (or offline): fall back to the single live batch
+    console.error('Batches listener error:', err);
+    batches = [];
+    ready.batches = true; failed.batches = true;
+    render();
+  });
+
   onSnapshot(doc(db, 'vestige', 'liveBatch'), (snap) => {
-    live = snap.exists() ? snap.data() : null;
+    liveDoc = snap.exists() ? snap.data() : null;
     ready.live = true; failed.live = false;
     render();
   }, (err) => {
