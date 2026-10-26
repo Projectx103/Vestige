@@ -471,6 +471,36 @@
   }
   .picker-foot-left{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .picker-foot-left .btn{ padding:8px 16px; font-size:0.78rem; }
+
+  /* ===== Batch manager ===== */
+  .dirty-badge{ display:inline-flex; align-items:center; font-family:'Space Mono',monospace; font-size:0.66rem; padding:4px 10px; border-radius:999px; background:#fff3e0; color:#6b4a12; border:1px solid #e0b878; margin-left:8px; vertical-align:middle; }
+  .dash-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+  .batch-bar{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+  .batch-bar select{ width:auto; max-width:100%; margin:0; min-width:260px; }
+  .ro-box{ min-height:46px; display:flex; align-items:center; padding:0 14px; border:1px solid var(--line); border-radius:10px; background:rgba(20,32,28,0.04); font-size:0.9rem; margin-bottom:18px; gap:8px; flex-wrap:wrap; }
+  .ro-box.empty{ color:rgba(20,32,28,0.45); font-family:'Work Sans',sans-serif; font-size:0.8rem; }
+  .muted-inline{ color:rgba(20,32,28,0.45); font-size:0.72rem; font-family:'Work Sans',sans-serif; }
+  .status-field{ position:relative; display:flex; gap:8px; align-items:flex-start; }
+  .status-field .status-box{ flex:1; margin-bottom:6px; }
+  .status-box .status-pill{ margin-left:0; }
+  .pending-tag{ font-family:'Space Mono',monospace; font-size:0.62rem; color:#6b4a12; background:#fff3e0; border:1px solid #e0b878; padding:2px 8px; border-radius:999px; }
+  .dots-btn{ width:46px; height:46px; border:1px solid var(--line); background:#fff; border-radius:10px; cursor:pointer; color:var(--green-deep); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dots-btn:hover:not(:disabled){ background:rgba(201,164,104,0.18); }
+  .dots-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .status-menu{ position:absolute; right:0; top:50px; z-index:20; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 16px 32px -12px rgba(15,36,28,0.35); padding:6px; min-width:150px; }
+  .status-menu[hidden]{ display:none; }
+  .status-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; border-radius:8px; font-family:'Work Sans',sans-serif; font-size:0.86rem; cursor:pointer; }
+  .status-menu button:hover{ background:rgba(201,164,104,0.18); }
+  .status-menu button.current{ font-weight:700; color:var(--green-deep); }
+  .status-menu button.current::after{ content:' ✓'; }
+  .status-ended{ background:#e4e0d8; color:#4a4a46; }
+  .field-err{ color:var(--danger); font-size:0.74rem; margin:-12px 0 14px; line-height:1.4; }
+  .field-err:empty{ display:none; }
+  .field-hint{ font-size:0.72rem; color:rgba(20,32,28,0.55); margin:0 0 14px; line-height:1.4; }
+  .grid3 .span-2{ grid-column:span 2; }
+  @media (max-width:640px){ .grid3 .span-2{ grid-column:auto; } }
+  .rules-snip{ background:#fff; border:1px solid #e0b878; border-radius:8px; padding:10px 14px; font-family:'Space Mono',monospace; font-size:0.74rem; margin:10px 0 0; overflow:auto; }
+  .kbd{ font-family:'Space Mono',monospace; font-size:0.62rem; opacity:.65; border:1px solid currentColor; border-radius:5px; padding:1px 6px; margin-left:8px; }
 </style>
 </head>
 <body>
@@ -572,28 +602,58 @@
 
         <div class="view active" id="view-dashboard">
 
-          <div class="warn-banner">
-            <strong>How this works:</strong> Changes you save here write directly to your live Firestore database and appear
-            on <code>home.html</code> in real time — no file uploads, no HTML editing. Only accounts you create in the
-            Firebase console can sign in here; make sure your Firestore Security Rules require authentication for writes.
+          <div class="warn-banner" id="rulesBanner" style="display:none;">
+            <strong>One-time setup:</strong> add these two blocks inside <code>match /databases/{database}/documents</code> in your Firestore Rules, then click Publish:
+            <pre class="rules-snip">match /batches/{batchId} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
+match /counters/{id} {
+  allow read, write: if isAdmin();
+}</pre>
           </div>
 
-          <h1>Batch &amp; Listing Manager</h1>
-          <p class="lead">Set your next drop's schedule and hot items, then publish to your live site.</p>
+          <div class="dash-head">
+            <div>
+              <h1>Batch &amp; Listing Manager</h1>
+              <p class="lead" style="margin:0;">Every drop is its own batch with a Control No. Create one, add its items, and save to go live.</p>
+            </div>
+            <button type="button" class="btn btn-gold" id="newBatchBtn">+ Add New Batch</button>
+          </div>
 
           <div class="card">
-            <h2>Batch Schedule <span id="status-pill" class="status-pill status-upcoming">UPCOMING</span></h2>
+            <div class="batch-bar">
+              <h2 style="margin:0;">Batch Schedule <span id="batchStatusPill" class="status-pill status-upcoming">IN PROCESS</span> <span class="dirty-badge" id="batchDirtyBadge" style="display:none;">Unsaved changes</span></h2>
+              <select id="batchSwitch" aria-label="Open a saved batch"></select>
+            </div>
             <div class="grid3">
-              <div><label>Batch Number</label><input type="text" id="batchNumber" placeholder="014"></div>
-              <div><label>Batch Name</label><input type="text" id="batchName" placeholder="Batch No. 014"></div>
+              <div><label>Control No.</label><div class="ro-box mono" id="controlNoBox">01</div></div>
+              <div><label for="batchNumber">Batch Number</label><input type="text" id="batchNumber" placeholder="004" autocomplete="off"><p class="field-err" id="err-batchNumber"></p></div>
+              <div>
+                <label>Status</label>
+                <div class="status-field">
+                  <div class="ro-box status-box" id="statusBox"></div>
+                  <button type="button" class="dots-btn" id="statusMenuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Change status">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                  </button>
+                  <div class="status-menu" id="statusMenu" hidden>
+                    <button type="button" data-set-status="Active">Active</button>
+                    <button type="button" data-set-status="Closed">Closed</button>
+                  </div>
+                </div>
+                <p class="field-hint" id="statusHint"></p>
+              </div>
+            </div>
+            <div class="grid3">
+              <div class="span-2"><label for="batchName">Batch Name</label><input type="text" id="batchName" placeholder="Vestige Archive Batch 09" autocomplete="off"><p class="field-err" id="err-batchName"></p></div>
               <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
             </div>
             <div class="grid3">
-              <div><label>Listing Date &amp; Time</label><input type="datetime-local" id="listingDate"></div>
-              <div><label>Bidding Start</label><input type="datetime-local" id="biddingStart"></div>
-              <div><label>Bidding End</label><input type="datetime-local" id="biddingEnd"></div>
+              <div><label>Listing Date &amp; Time</label><div class="ro-box mono" id="listingBox"></div></div>
+              <div><label for="biddingStart">Bidding Start</label><input type="datetime-local" id="biddingStart"><p class="field-err" id="err-biddingStart"></p></div>
+              <div><label for="biddingEnd">Bidding End</label><input type="datetime-local" id="biddingEnd"><p class="field-err" id="err-biddingEnd"></p></div>
             </div>
-            <p class="lead" style="margin:0;">Status is calculated automatically on the public site from these times.</p>
+            <p class="lead" style="margin:0;">Listing Date &amp; Time is stamped automatically when the batch is first saved (Manila time). Bidding Start can't be earlier than it, and Bidding Start/End can't cross each other.</p>
           </div>
 
           <div class="card">
@@ -623,13 +683,13 @@
           </div>
 
           <div class="card">
-            <h2>Publish</h2>
-            <p class="lead" style="margin-bottom:16px;">Saves directly to the live database — your public site updates immediately.</p>
+            <h2>Save Batch</h2>
+            <p class="lead" style="margin-bottom:16px;" id="saveNote"></p>
             <div class="actions">
-              <button class="btn btn-gold" id="publishBtn">
+              <button class="btn btn-gold" id="saveBatchBtn">
                 <span class="btn-spinner"></span>
-                <span class="btn-label-default">Publish to Live Site</span>
-                <span class="btn-spinner-label">Publishing…</span>
+                <span class="btn-label-default"><span id="saveBatchLabel">Save Batch</span> <span class="kbd">Ctrl+S</span></span>
+                <span class="btn-spinner-label">Saving…</span>
               </button>
             </div>
           </div>
@@ -851,7 +911,7 @@
     const email = user.email || 'Admin';
     document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
     document.getElementById('profileName').textContent = email;
-    loadCurrentBatch();
+    initBatches();
     refreshCategoriesView();
   });
 
@@ -868,7 +928,7 @@
 
   document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     item.addEventListener('click', (e) => {
-      if (!confirmDiscard()) return;
+      if (!confirmDiscard() || !confirmDiscardBatch()) return;
       document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
@@ -886,22 +946,72 @@
   });
 
   // =====================================================================
-  //  Hot Items — chosen from Products, never typed in by hand.
-  //  Only items whose status is Available can be added. Each pick is stored as a
-  //  small PUBLIC snapshot (vestige/liveBatch is world-readable), so private fields
-  //  such as investment price, buyer name and waybill are never copied into it.
+  //  Batches — every drop is its own record with an automatic Control No.
+  //
+  //  batches/{id}        one document per batch. Holds IDs only (no private data), so it is public-readable.
+  //  counters/batches    { next, numbers:{}, names:{} } — the Control No. counter AND the unique
+  //                      Batch-Number / Batch-Name index. It is changed in the SAME transaction as the
+  //                      batch itself, so a duplicate can never slip through.
+  //  vestige/liveBatch   a copy of the CURRENT batch (newest Active) in the old shape, so home.html
+  //                      keeps working unchanged.
+  //
+  //  Status rules
+  //    In Process  a new batch that has not been saved yet (never stored)
+  //    Active      saved; its Available items show on the shop. Newest Active = "This Week's Batch"
+  //    Closed      its items leave the shop and become available for new batches again
+  //  An item can sit in only ONE Active batch at a time.
   // =====================================================================
   const DEFAULT_HOT_LIMIT = 3;
   const MAX_HOT_LIMIT = 30;
+  const TZ = 'Asia/Manila';
+  const batchesCol = collection(db, 'batches');
+  const counterRef = doc(db, 'counters', 'batches');
+  const STATUS_CLASS = { 'In Process': 'status-upcoming', 'Active': 'status-live', 'Closed': 'status-ended' };
 
-  let state = {
-    batchNumber: '', batchName: '', listingDate: '', biddingStart: '', biddingEnd: '',
-    hotLimit: DEFAULT_HOT_LIMIT,
-    items: [],          // Hot Items (featured on home.html)
-    batchItems: []      // extra items that belong to this batch (shown on the shop's batch page)
-  };
-  let hotProducts = [];   // fresh copy of every product (statuses, picker list)
+  function blankBatch(){
+    return {
+      id: null, controlNo: null, status: 'In Process', savedStatus: null,
+      batchNumber: '', batchName: '', listingAt: '', biddingStart: '', biddingEnd: '',
+      hotLimit: DEFAULT_HOT_LIMIT,
+      items: [],          // Hot Items (featured on home.html)
+      batchItems: []      // the rest of this batch (shown on the shop's batch page)
+    };
+  }
+  let state = blankBatch();
+  let allBatches = [];          // saved batches, newest Control No. first
+  let hotProducts = [];         // fresh copy of every product
+  let batchDirty = false;       // unsaved edits on the Dashboard
+  let nextControlPreview = 1;   // what the next Control No. will most likely be (shown before saving)
+  let batchesBlocked = false;   // true when the Firestore rules for batches are missing
+  let saving = false;
 
+  // ---------- small helpers ----------
+  function fmtControl(n){ return n == null ? '—' : String(n).padStart(2, '0'); }
+  function batchDocId(n){ return 'control-' + String(n).padStart(2, '0'); }
+  function manilaParts(d){
+    const f = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const o = {}; f.formatToParts(d).forEach(p => { o[p.type] = p.value; }); return o;
+  }
+  function nowLocalInput(){ const o = manilaParts(new Date()); return `${o.year}-${o.month}-${o.day}T${o.hour}:${o.minute}`; }
+  function nowListingIso(){ return nowLocalInput() + ':00+08:00'; }             // to the minute, Manila time
+  function localToDate(v){ return v ? new Date(v + ':00+08:00') : null; }        // datetime-local value -> Date
+  function isoToLocal(s){ return String(s || '').slice(0, 16); }
+  function fmtManila(iso){                                                      // 13/08/2026 04:58 PM
+    const d = new Date(iso);
+    if (!iso || isNaN(d)) return '—';
+    const f = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true });
+    const o = {}; f.formatToParts(d).forEach(p => { o[p.type] = p.value; });
+    return `${o.day}/${o.month}/${o.year} ${o.hour}:${o.minute} ${String(o.dayPeriod || '').toUpperCase()}`;
+  }
+  // "004" and "4" are the same batch number; names ignore case and extra spaces.
+  function normNumber(s){ const t = String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); return /^\d+$/.test(t) ? String(Number(t)) : t; }
+  function normName(s){ return String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  function regKey(k){ return 'k' + encodeURIComponent(k); }
+  function codeErr(code){ const e = new Error(code); e.batchCode = code; return e; }
+
+  // ---------- products (for hot / batch items) ----------
   function toHotItem(p){
     const s = computeSize(p.length, p.width);
     return {
@@ -916,7 +1026,7 @@
     };
   }
 
-  // The only shape that ever reaches the public page.
+  // The only shape that ever reaches the public home page.
   function publicHotItem(it){
     return {
       productId: it.productId || '',
@@ -950,9 +1060,115 @@
     return gone;
   }
 
+  // ---------- batches: load / index ----------
+  async function fetchBatches(){
+    const snap = await getDocs(batchesCol);
+    allBatches = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.controlNo || 0) - (a.controlNo || 0));
+    return allBatches;
+  }
+  function itemIdsOf(b){ return [...(b.hotItemIds || []), ...(b.batchItemIds || [])]; }
+
+  // productId -> the OTHER Active batch that already holds it
+  function lockedElsewhere(){
+    const m = new Map();
+    allBatches.forEach(b => {
+      if (b.status === 'Active' && b.id !== state.id) itemIdsOf(b).forEach(id => { if (!m.has(id)) m.set(id, b); });
+    });
+    return m;
+  }
+  function lockFlag(productId){
+    if (state.status === 'Closed') return '';
+    const b = lockedElsewhere().get(productId);
+    return b ? `<span class="hot-flag bad">In Batch ${esc(b.batchNumber || '—')} · Control No. ${esc(fmtControl(b.controlNo))}</span>` : '';
+  }
+
+  async function refreshControlPreview(){
+    let next = 1;
+    try{ const s = await getDoc(counterRef); if (s.exists()) next = Number(s.data().next) || 1; } catch(e){ /* preview only */ }
+    const maxC = allBatches.reduce((m, b) => Math.max(m, b.controlNo || 0), 0);
+    nextControlPreview = Math.max(next, maxC + 1);
+  }
+
+  // One-time import of the single batch you had before this feature (vestige/liveBatch) as Control No. 01.
+  async function migrateLegacyBatch(){
+    if (allBatches.length) return null;
+    const [cSnap, lSnap] = await Promise.all([getDoc(counterRef), getDoc(batchRef)]);
+    if (cSnap.exists() || !lSnap.exists()) return null;
+    const old = lSnap.data(), b = old.batch || {};
+    const number = String(b.number || '').trim(), name = String(b.name || '').trim();
+    if (!number && !name) return null;
+    const hotIds = [...new Set((old.hotItems || []).map(i => i.productId).filter(Boolean))];
+    const skipped = (old.hotItems || []).filter(i => !i.productId).length;
+    const batchIds = [...new Set((old.batchItemIds || []).filter(id => id && !hotIds.includes(id)))];
+    const id = batchDocId(1);
+    const now = new Date().toISOString();
+    const data = {
+      controlNo: 1, batchNumber: number, batchName: name, status: 'Active', timezone: TZ,
+      listingAt: b.listingDate || nowListingIso(),
+      biddingStart: b.biddingStart || '', biddingEnd: b.biddingEnd || '',
+      hotItemLimit: Number(b.hotItemLimit) >= 1 ? Math.min(Number(b.hotItemLimit), MAX_HOT_LIMIT) : Math.min(Math.max(hotIds.length, DEFAULT_HOT_LIMIT), MAX_HOT_LIMIT),
+      hotItemIds: hotIds, batchItemIds: batchIds, createdAt: now, updatedAt: now
+    };
+    await runTransaction(db, async (tx) => {
+      const c = await tx.get(counterRef);
+      if (c.exists()) throw codeErr('already-migrated');
+      tx.set(doc(db, 'batches', id), data);
+      tx.set(counterRef, {
+        next: 2,
+        numbers: number ? { [regKey(normNumber(number))]: id } : {},
+        names: name ? { [regKey(normName(name))]: id } : {}
+      });
+    });
+    return { skipped };
+  }
+
+  function loadBatchIntoState(b){
+    const lim = Number(b.hotItemLimit);
+    state = {
+      id: b.id, controlNo: b.controlNo, status: b.status || 'Active', savedStatus: b.status || 'Active',
+      batchNumber: b.batchNumber || '', batchName: b.batchName || '', listingAt: b.listingAt || '',
+      biddingStart: isoToLocal(b.biddingStart), biddingEnd: isoToLocal(b.biddingEnd),
+      hotLimit: lim >= 1 ? Math.min(lim, MAX_HOT_LIMIT) : DEFAULT_HOT_LIMIT,
+      items: (b.hotItemIds || []).map(id => ({ productId: id })),
+      batchItems: (b.batchItemIds || []).map(id => ({ productId: id }))
+    };
+    refreshHotSnapshots();
+    batchDirty = false;
+    clearFieldErrors();
+    renderAll();
+  }
+
+  async function initBatches(){
+    document.getElementById('rulesBanner').style.display = 'none';
+    batchesBlocked = false;
+    try{ await fetchAllProducts(); } catch(err){ console.error('Could not load products:', err); }
+    try{
+      await fetchBatches();
+      if (!allBatches.length){
+        const r = await migrateLegacyBatch();
+        if (r){
+          await fetchBatches();
+          showToast({ type: 'ok', title: 'Existing Batch Imported', message: `Your current batch was imported as Control No. 01 (Active).${r.skipped ? ` ${r.skipped} hand-typed hot item${r.skipped === 1 ? ' was' : 's were'} left out — re-add ${r.skipped === 1 ? 'it' : 'them'} from Products.` : ''}`, duration: 9000 });
+        }
+      }
+    } catch(err){
+      console.error('Could not load batches:', err);
+      if (err && err.code === 'permission-denied'){
+        batchesBlocked = true;
+        document.getElementById('rulesBanner').style.display = 'block';
+      } else {
+        showToast({ type: 'err', title: 'Could Not Load Batches', message: 'Check your connection, then reload the page.' });
+      }
+    }
+    await refreshControlPreview();
+    if (allBatches.length) loadBatchIntoState(allBatches[0]);
+    else { state = blankBatch(); batchDirty = false; renderAll(); }
+  }
+
   async function refreshHotFromProducts(){
     try{
-      await fetchAllProducts();
+      await Promise.all([fetchAllProducts(), fetchBatches()]);
       refreshHotSnapshots();
       renderHotItems();
       renderBatchItems();
@@ -961,59 +1177,426 @@
     }
   }
 
-  async function loadCurrentBatch(){
-    try{
-      const snap = await getDoc(batchRef);
-      if (snap.exists()){
-        const data = snap.data();
-        state.batchNumber = data.batch?.number || '';
-        state.batchName = data.batch?.name || '';
-        state.listingDate = (data.batch?.listingDate || '').slice(0,16);
-        state.biddingStart = (data.batch?.biddingStart || '').slice(0,16);
-        state.biddingEnd = (data.batch?.biddingEnd || '').slice(0,16);
-        state.items = (data.hotItems || []).map(it => ({ ...it }));
-        state.batchItems = (Array.isArray(data.batchItemIds) ? data.batchItemIds : []).filter(Boolean).map(id => ({ productId: id }));
-        const saved = Number(data.batch?.hotItemLimit);
-        state.hotLimit = saved >= 1 ? Math.min(saved, MAX_HOT_LIMIT)
-                       : Math.min(Math.max(state.items.length, DEFAULT_HOT_LIMIT), MAX_HOT_LIMIT);
-      }
-    } catch(err){
-      console.error('Could not load current batch:', err);
-    }
-    try{
-      await fetchAllProducts();
-      refreshHotSnapshots();
-    } catch(err){
-      console.error('Could not load products for hot items:', err);
-    }
-    renderFields();
+  // ---------- Dashboard form ----------
+  function markBatchDirty(){
+    batchDirty = true;
+    const b = document.getElementById('batchDirtyBadge');
+    if (b) b.style.display = 'inline-flex';
+  }
+  function confirmDiscardBatch(){
+    if (!batchDirty) return true;
+    if (confirm('You have unsaved changes to this batch. Discard them?')){ batchDirty = false; return true; }
+    return false;
   }
 
-  function renderFields(){
+  function setFieldError(field, msg){
+    const p = document.getElementById('err-' + field), inp = document.getElementById(field);
+    if (p) p.textContent = msg || '';
+    if (inp) inp.classList.toggle('invalid', !!msg);
+  }
+  function clearFieldError(field){ setFieldError(field, ''); }
+  function clearFieldErrors(){ ['batchNumber', 'batchName', 'biddingStart', 'biddingEnd'].forEach(clearFieldError); }
+
+  function updateDateLimits(){
+    const listingLocal = state.id ? isoToLocal(state.listingAt) : nowLocalInput();
+    const bs = document.getElementById('biddingStart'), be = document.getElementById('biddingEnd');
+    bs.min = listingLocal;
+    if (state.biddingEnd) bs.max = state.biddingEnd; else bs.removeAttribute('max');
+    be.min = state.biddingStart || listingLocal;
+  }
+
+  function renderBatchForm(){
+    const isNew = !state.id;
     document.getElementById('batchNumber').value = state.batchNumber;
     document.getElementById('batchName').value = state.batchName;
-    document.getElementById('listingDate').value = state.listingDate;
     document.getElementById('biddingStart').value = state.biddingStart;
     document.getElementById('biddingEnd').value = state.biddingEnd;
     document.getElementById('hotLimit').value = state.hotLimit;
-    renderHotItems();
-    renderBatchItems();
-    renderStatusPill();
+
+    document.getElementById('controlNoBox').innerHTML = isNew
+      ? `${esc(fmtControl(nextControlPreview))} <span class="muted-inline">· assigned on save</span>`
+      : esc(fmtControl(state.controlNo));
+    const lb = document.getElementById('listingBox');
+    lb.textContent = isNew ? 'Set automatically when you save' : fmtManila(state.listingAt);
+    lb.classList.toggle('empty', isNew);
+
+    const pending = !isNew && state.status !== state.savedStatus;
+    document.getElementById('statusBox').innerHTML =
+      `<span class="status-pill ${STATUS_CLASS[state.status] || ''}">${esc(state.status)}</span>${pending ? '<span class="pending-tag">unsaved change</span>' : ''}`;
+    const pill = document.getElementById('batchStatusPill');
+    pill.textContent = state.status.toUpperCase();
+    pill.className = 'status-pill ' + (STATUS_CLASS[state.status] || '');
+    document.getElementById('statusHint').textContent =
+      isNew ? 'Shows In Process until you save. Saving makes it Active.'
+      : state.status === 'Closed' ? "Closed: this batch's items are hidden from the shop and free to use in new batches."
+      : "Active: this batch's Available items show on the shop.";
+    const menuBtn = document.getElementById('statusMenuBtn');
+    menuBtn.disabled = isNew || batchesBlocked;
+    menuBtn.title = isNew ? 'Save the batch first to change its status' : 'Change status';
+    closeStatusMenu();
+    document.querySelectorAll('#statusMenu [data-set-status]').forEach(b => {
+      b.classList.toggle('current', b.dataset.setStatus === state.status);
+    });
+
+    updateDateLimits();
+    document.getElementById('batchDirtyBadge').style.display = batchDirty ? 'inline-flex' : 'none';
+
+    const sw = document.getElementById('batchSwitch');
+    sw.innerHTML = (isNew ? `<option value="__new__">New batch · Control No. ${esc(fmtControl(nextControlPreview))} (In Process)</option>` : '') +
+      allBatches.map(b => `<option value="${esc(b.id)}">Control No. ${esc(fmtControl(b.controlNo))} · ${esc(b.batchNumber || '—')} · ${esc(b.batchName || 'Untitled')} — ${esc(b.status)}</option>`).join('');
+    sw.value = isNew ? '__new__' : state.id;
+
+    const btn = document.getElementById('saveBatchBtn');
+    btn.disabled = batchesBlocked;
+    document.getElementById('saveBatchLabel').textContent = isNew ? 'Save Batch' : 'Save Changes';
+    document.getElementById('saveNote').textContent = isNew
+      ? `Saving creates Control No. ${fmtControl(nextControlPreview)}, stamps the Listing Date & Time, and makes the batch Active on your live site.`
+      : state.status === 'Closed'
+        ? `Control No. ${fmtControl(state.controlNo)} is Closed. Saving keeps it Closed — its items stay off the shop.`
+        : `Saving updates Control No. ${fmtControl(state.controlNo)} on your live site.`;
   }
 
-  function renderStatusPill(){
-    const pill = document.getElementById('status-pill');
-    const now = new Date();
-    const bidStart = state.biddingStart ? new Date(state.biddingStart) : null;
-    const bidEnd = state.biddingEnd ? new Date(state.biddingEnd) : null;
-    let status = 'UPCOMING', cls = 'status-upcoming';
-    if (bidStart && bidEnd){
-      if (now >= bidStart && now < bidEnd){ status = 'LIVE'; cls = 'status-live'; }
-      else if (now >= bidEnd){ status = 'ENDED'; cls = 'status-ended'; }
-    }
-    pill.textContent = status;
-    pill.className = 'status-pill ' + cls;
+  function renderAll(){
+    renderBatchForm();
+    renderHotItems();
+    renderBatchItems();
   }
+
+  // ---------- status menu (the three dots) ----------
+  const statusMenu = document.getElementById('statusMenu');
+  const statusMenuBtn = document.getElementById('statusMenuBtn');
+  function closeStatusMenu(){ statusMenu.hidden = true; statusMenuBtn.setAttribute('aria-expanded', 'false'); }
+  statusMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (statusMenuBtn.disabled) return;
+    const open = statusMenu.hidden;
+    statusMenu.hidden = !open;
+    statusMenuBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.status-field')) closeStatusMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeStatusMenu(); });
+  statusMenu.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-set-status]');
+    if (!b || !state.id) return;
+    const v = b.dataset.setStatus;
+    closeStatusMenu();
+    if (v === state.status) return;
+    state.status = v;
+    markBatchDirty();
+    renderAll();
+  });
+
+  // ---------- field handlers ----------
+  const batchNumberEl = document.getElementById('batchNumber');
+  const batchNameEl = document.getElementById('batchName');
+  function findDup(field){
+    const mine = state.id;
+    if (field === 'batchNumber'){
+      const k = normNumber(state.batchNumber);
+      return k ? (allBatches.find(b => b.id !== mine && normNumber(b.batchNumber) === k) || null) : null;
+    }
+    const k = normName(state.batchName);
+    return k ? (allBatches.find(b => b.id !== mine && normName(b.batchName) === k) || null) : null;
+  }
+  function dupMessage(field, other){
+    return field === 'batchNumber'
+      ? `Batch Number already exists — ${other.batchNumber} is used by Control No. ${fmtControl(other.controlNo)} (${other.batchName || 'untitled'}).`
+      : `Batch Name already exists — “${other.batchName}” is used by Control No. ${fmtControl(other.controlNo)} (Batch ${other.batchNumber || '—'}).`;
+  }
+  function reportDup(field){
+    const other = findDup(field);
+    if (!other) return false;
+    const msg = dupMessage(field, other);
+    setFieldError(field, msg);
+    showToast({ type: 'err', title: field === 'batchNumber' ? 'Batch Number already exists' : 'Batch Name already exists', message: msg, duration: 7000 });
+    return true;
+  }
+  batchNumberEl.addEventListener('input', () => { state.batchNumber = batchNumberEl.value; clearFieldError('batchNumber'); markBatchDirty(); });
+  batchNameEl.addEventListener('input', () => { state.batchName = batchNameEl.value; clearFieldError('batchName'); markBatchDirty(); });
+  batchNumberEl.addEventListener('change', () => reportDup('batchNumber'));
+  batchNameEl.addEventListener('change', () => reportDup('batchName'));
+
+  // Date rules: Bidding Start is never earlier than the Listing Date & Time, never later than Bidding End;
+  // Bidding End is never earlier than Bidding Start.
+  function listingBoundary(){ return state.id ? new Date(state.listingAt) : localToDate(nowLocalInput()); }
+  function listingLabel(){ return state.id ? fmtManila(state.listingAt) : 'the moment you save'; }
+  function dateProblem(field, val, start = state.biddingStart, end = state.biddingEnd){
+    if (!val) return '';
+    const d = localToDate(val), listing = listingBoundary();
+    if (field === 'biddingStart'){
+      if (d < listing) return `Bidding Start can't be earlier than the Listing Date & Time (${listingLabel()}).`;
+      if (end && d > localToDate(end)) return "Bidding Start can't be later than Bidding End.";
+    } else {
+      if (start && d < localToDate(start)) return "Bidding End can't be earlier than Bidding Start.";
+      if (d < listing) return `Bidding End can't be earlier than the Listing Date & Time (${listingLabel()}).`;
+    }
+    return '';
+  }
+  ['biddingStart', 'biddingEnd'].forEach(field => {
+    const el = document.getElementById(field);
+    el.addEventListener('change', () => {
+      const msg = dateProblem(field, el.value);
+      if (msg){
+        el.value = state[field];            // put back the last valid value
+        setFieldError(field, msg);
+        showToast({ type: 'err', title: 'Date not allowed', message: msg, duration: 7000 });
+        return;
+      }
+      state[field] = el.value;
+      clearFieldError('biddingStart'); clearFieldError('biddingEnd');
+      markBatchDirty();
+      updateDateLimits();
+    });
+  });
+
+  // ---------- new batch / switch batch ----------
+  async function startNewBatch(){
+    if (!confirmDiscardBatch()) return;
+    try{ await Promise.all([fetchBatches(), fetchAllProducts()]); } catch(err){ console.error(err); }
+    await refreshControlPreview();
+    state = blankBatch();
+    batchDirty = false;
+    clearFieldErrors();
+    renderAll();
+    batchNumberEl.focus();
+  }
+  document.getElementById('newBatchBtn').addEventListener('click', startNewBatch);
+  document.getElementById('batchSwitch').addEventListener('change', (e) => {
+    const v = e.target.value;
+    if (v === '__new__') return;
+    if (!confirmDiscardBatch()){ renderBatchForm(); return; }
+    const b = allBatches.find(x => x.id === v);
+    if (b) loadBatchIntoState(b);
+  });
+
+  // ---------- live copy for home.html ----------
+  async function publishLiveMirror(){
+    const cur = allBatches.find(b => b.status === 'Active');     // newest Active (list is newest-first)
+    let payload;
+    if (cur){
+      const hotIds = new Set(cur.hotItemIds || []);
+      payload = {
+        shop: { name: "Vestige Thrift Shop", timezone: TZ, currency: "PHP" },
+        batch: {
+          number: cur.batchNumber || '', name: cur.batchName || '', listingDate: cur.listingAt || '',
+          biddingStart: cur.biddingStart || '', biddingEnd: cur.biddingEnd || '',
+          hotItemLimit: cur.hotItemLimit || DEFAULT_HOT_LIMIT, controlNo: cur.controlNo
+        },
+        hotItems: (cur.hotItemIds || []).map(id => hotProducts.find(p => p.id === id)).filter(Boolean)
+          .map(p => publicHotItem(toHotItem(p))),
+        batchItemIds: (cur.batchItemIds || []).filter(id => !hotIds.has(id)),
+        controlNo: cur.controlNo,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      // no Active batch: tell home.html the drop is over rather than leaving a stale one up
+      payload = {
+        shop: { name: "Vestige Thrift Shop", timezone: TZ, currency: "PHP" },
+        batch: { number: '', name: 'Last batch', listingDate: '', biddingStart: '', biddingEnd: '', hotItemLimit: DEFAULT_HOT_LIMIT, controlNo: null },
+        hotItems: [], batchItemIds: [], controlNo: null, updatedAt: new Date().toISOString()
+      };
+    }
+    await setDoc(batchRef, payload);
+  }
+
+  // Keeps the live copy and the batch records in step when a product is edited or deleted.
+  async function syncLiveBatchProduct(product, removed){
+    try{
+      if (removed) hotProducts = hotProducts.filter(p => p.id !== product.id);
+      else { const i = hotProducts.findIndex(p => p.id === product.id); if (i >= 0) hotProducts[i] = product; else hotProducts.push(product); }
+      // mirror into the Dashboard's working copy first, whether or not it is saved
+      if (removed){
+        state.items = state.items.filter(i => i.productId !== product.id);
+        state.batchItems = state.batchItems.filter(i => i.productId !== product.id);
+      } else {
+        const relink = (i) => i.productId === product.id ? toHotItem(product) : i;
+        state.items = state.items.map(relink);
+        state.batchItems = state.batchItems.map(relink);
+      }
+      renderHotItems();
+      renderBatchItems();
+
+      await fetchBatches();
+      const affected = allBatches.filter(b => itemIdsOf(b).includes(product.id));
+      if (!affected.length) return false;
+      if (removed){
+        for (const b of affected){
+          await updateDoc(doc(db, 'batches', b.id), {
+            hotItemIds: (b.hotItemIds || []).filter(id => id !== product.id),
+            batchItemIds: (b.batchItemIds || []).filter(id => id !== product.id),
+            updatedAt: new Date().toISOString()
+          });
+        }
+        await fetchBatches();
+      }
+      const touchesLive = affected.some(b => b.status === 'Active');
+      if (touchesLive) await publishLiveMirror();
+      return touchesLive;
+    } catch(err){
+      console.error('Live batch sync failed:', err);
+      showToast({ type: 'err', title: 'Live Batch Not Updated', message: 'The product was saved, but the live batch could not be updated. Open the Dashboard and save the batch again.', duration: 8000 });
+      return false;
+    }
+  }
+
+  // ---------- save ----------
+  function validateFields(){
+    const problems = [];
+    if (!state.batchNumber.trim()) problems.push(['batchNumber', 'Batch Number is required.']);
+    if (!state.batchName.trim()) problems.push(['batchName', 'Batch Name is required.']);
+    ['batchNumber', 'batchName'].forEach(f => {
+      const other = (state[f].trim()) ? findDup(f) : null;
+      if (other) problems.push([f, dupMessage(f, other)]);
+    });
+    if (state.status !== 'Closed'){
+      if (!state.biddingStart) problems.push(['biddingStart', 'Bidding Start is required.']);
+      if (!state.biddingEnd) problems.push(['biddingEnd', 'Bidding End is required.']);
+      const ps = dateProblem('biddingStart', state.biddingStart); if (ps) problems.push(['biddingStart', ps]);
+      const pe = dateProblem('biddingEnd', state.biddingEnd); if (pe) problems.push(['biddingEnd', pe]);
+    }
+    return problems;
+  }
+
+  async function persistBatch(){
+    const isNew = !state.id;
+    const status = isNew ? 'Active' : state.status;
+    const hotIds = [...new Set(state.items.filter(i => i.productId && !i.missing).map(i => i.productId))];
+    const hotSet = new Set(hotIds);
+    const batchIds = [...new Set(state.batchItems.filter(i => i.productId && !i.missing && !hotSet.has(i.productId)).map(i => i.productId))];
+    const clientMax = allBatches.reduce((m, b) => Math.max(m, b.controlNo || 0), 0);
+    let result = null;
+    await runTransaction(db, async (tx) => {
+      const cSnap = await tx.get(counterRef);
+      const reg = cSnap.exists() ? cSnap.data() : {};
+      const numbers = { ...(reg.numbers || {}) }, names = { ...(reg.names || {}) };
+      let controlNo = state.controlNo, id = state.id, existing = null;
+      if (isNew){
+        controlNo = Math.max(Number(reg.next) || 1, clientMax + 1);
+        id = batchDocId(controlNo);
+        const ex = await tx.get(doc(db, 'batches', id));
+        if (ex.exists()) throw codeErr('control-conflict');
+      } else {
+        const ex = await tx.get(doc(db, 'batches', id));
+        existing = ex.exists() ? ex.data() : null;
+      }
+      const nk = regKey(normNumber(state.batchNumber)), mk = regKey(normName(state.batchName));
+      if (numbers[nk] && numbers[nk] !== id) throw codeErr('dup-number');
+      if (names[mk] && names[mk] !== id) throw codeErr('dup-name');
+      Object.keys(numbers).forEach(k => { if (numbers[k] === id) delete numbers[k]; });
+      Object.keys(names).forEach(k => { if (names[k] === id) delete names[k]; });
+      numbers[nk] = id; names[mk] = id;
+      const now = new Date().toISOString();
+      const data = {
+        ...(existing || {}),
+        controlNo, batchNumber: state.batchNumber.trim(), batchName: state.batchName.trim(),
+        status, timezone: TZ,
+        listingAt: existing && existing.listingAt ? existing.listingAt : (state.listingAt || nowListingIso()),
+        biddingStart: state.biddingStart ? state.biddingStart + ':00+08:00' : '',
+        biddingEnd: state.biddingEnd ? state.biddingEnd + ':00+08:00' : '',
+        hotItemLimit: state.hotLimit, hotItemIds: hotIds, batchItemIds: batchIds,
+        createdAt: (existing && existing.createdAt) || now, updatedAt: now
+      };
+      if (status === 'Closed') data.closedAt = (existing && existing.status === 'Closed' && existing.closedAt) || now;
+      else delete data.closedAt;
+      tx.set(doc(db, 'batches', id), data);
+      tx.set(counterRef, { next: isNew ? controlNo + 1 : (Number(reg.next) || clientMax + 1), numbers, names });
+      result = { id, controlNo, status };
+    });
+    return result;
+  }
+
+  async function saveBatch(){
+    if (saving || batchesBlocked) return;
+    clearFieldErrors();
+
+    const problems = validateFields();
+    if (problems.length){
+      problems.forEach(([f, m]) => setFieldError(f, m));
+      const dupOnly = problems.every(([f, m]) => /already exists/.test(m));
+      showToast({ type: 'err', title: dupOnly ? 'Batch already exists' : 'Check the batch details', message: problems[0][1], duration: 8000 });
+      return;
+    }
+    if (state.status !== 'Closed'){
+      if (!(state.hotLimit >= 1)){
+        showToast({ type: 'err', title: 'Set a Hot Items Limit', message: 'Enter how many hot items this batch can show (1 or more).' });
+        return;
+      }
+      if (state.items.length > state.hotLimit){
+        const over = state.items.length - state.hotLimit;
+        showToast({ type: 'err', title: 'Too Many Hot Items', message: `This batch is limited to ${state.hotLimit}. Remove ${over} item${over === 1 ? '' : 's'} or raise the limit.`, duration: 7000 });
+        return;
+      }
+    }
+
+    saving = true;
+    const btn = document.getElementById('saveBatchBtn');
+    btn.dataset.loading = 'true';
+    try{
+      // fresh data: other tabs / other edits may have changed products or batches
+      await Promise.all([fetchAllProducts(), fetchBatches()]);
+      const again = validateFields().filter(([f, m]) => /already exists/.test(m));
+      if (again.length){
+        again.forEach(([f, m]) => setFieldError(f, m));
+        showToast({ type: 'err', title: 'Batch already exists', message: again[0][1], duration: 8000 });
+        return;
+      }
+      const gone = refreshHotSnapshots();
+      if (state.status !== 'Closed'){
+        if (gone.length){
+          state.items = state.items.filter(i => !i.missing);
+          state.batchItems = state.batchItems.filter(i => !i.missing);
+          renderAll();
+          showToast({ type: 'err', title: 'Items Removed', message: `${gone.length} item${gone.length === 1 ? ' was' : 's were'} deleted from Products and dropped from this batch. Review the list, then save again.`, duration: 8000 });
+          return;
+        }
+        const locked = lockedElsewhere();
+        const clash = [...state.items, ...state.batchItems].filter(i => i.productId && locked.has(i.productId));
+        if (clash.length){
+          renderAll();
+          const names = clash.slice(0, 3).map(i => i.code || i.brand || 'item').join(', ');
+          showToast({ type: 'err', title: 'Items already in another batch', message: `${clash.length} item${clash.length === 1 ? ' is' : 's are'} already in an Active batch (${names}${clash.length > 3 ? '…' : ''}). Remove ${clash.length === 1 ? 'it' : 'them'}, or Close the other batch first.`, duration: 9000 });
+          return;
+        }
+      }
+      const wasNew = !state.id, prevStatus = state.savedStatus;
+      const saved = await persistBatch();
+      await fetchBatches();
+      let mirrored = true;
+      try{ await publishLiveMirror(); } catch(err){ console.error('Live copy failed:', err); mirrored = false; }
+      const fresh = allBatches.find(b => b.id === saved.id);
+      await refreshControlPreview();
+      if (fresh) loadBatchIntoState(fresh);
+      const n = fmtControl(saved.controlNo);
+      const msg = wasNew ? `Control No. ${n} saved as Active — its items are live on the shop and the home page.`
+        : saved.status === 'Closed' && prevStatus !== 'Closed' ? `Control No. ${n} is now Closed. Its items left the shop and can be added to new batches.`
+        : saved.status === 'Active' && prevStatus === 'Closed' ? `Control No. ${n} is Active again — its Available items are back on the shop.`
+        : `Control No. ${n} updated.`;
+      showToast({ type: mirrored ? 'ok' : 'err', title: mirrored ? 'Batch Saved' : 'Saved, but home page not updated',
+        message: mirrored ? msg : msg + ' The home-page copy could not be written — check your Firestore rules for vestige/liveBatch.', duration: mirrored ? 6000 : 9000 });
+    } catch(err){
+      console.error(err);
+      if (err && err.batchCode === 'dup-number'){ const o = allBatches.find(b => normNumber(b.batchNumber) === normNumber(state.batchNumber)); const m = o ? dupMessage('batchNumber', o) : 'Batch Number already exists.'; setFieldError('batchNumber', m); showToast({ type: 'err', title: 'Batch Number already exists', message: m, duration: 8000 }); }
+      else if (err && err.batchCode === 'dup-name'){ const o = allBatches.find(b => normName(b.batchName) === normName(state.batchName)); const m = o ? dupMessage('batchName', o) : 'Batch Name already exists.'; setFieldError('batchName', m); showToast({ type: 'err', title: 'Batch Name already exists', message: m, duration: 8000 }); }
+      else if (err && err.batchCode === 'control-conflict'){ showToast({ type: 'err', title: 'Control No. already used', message: 'Another save took this Control No. at the same moment. Click Save again to get the next one.', duration: 8000 }); }
+      else if (err && err.code === 'permission-denied'){ document.getElementById('rulesBanner').style.display = 'block'; showToast({ type: 'err', title: 'Firestore rules needed', message: 'Add the rules for batches and counters (shown at the top of this page), publish them, then save again.', duration: 9000 }); }
+      else showToast({ type: 'err', title: 'Save Failed', message: 'Could not save the batch. Check your connection and Firestore rules, then try again.', duration: 7000 });
+    } finally {
+      saving = false;
+      btn.dataset.loading = 'false';
+    }
+  }
+  document.getElementById('saveBatchBtn').addEventListener('click', saveBatch);
+
+  // Ctrl + S (Cmd + S on Mac) saves the batch while the Dashboard is open
+  document.addEventListener('keydown', (e) => {
+    if (!((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 's')) return;
+    if (document.getElementById('adminApp').style.display === 'none') return;
+    if (!document.getElementById('view-dashboard').classList.contains('active')) return;
+    e.preventDefault();
+    const a = document.activeElement;
+    if (a && typeof a.blur === 'function') a.blur();     // commit a half-typed field first
+    saveBatch();
+  });
 
   function renderHotItems(){
     const n = state.items.length, limit = state.hotLimit;
@@ -1022,9 +1605,9 @@
     pill.classList.toggle('over', n > limit);
 
     const warnings = [];
-    if (n > limit) warnings.push(`You have ${n} items but the limit is ${limit}. Remove ${n - limit} before publishing.`);
+    if (n > limit) warnings.push(`You have ${n} items but the limit is ${limit}. Remove ${n - limit} before saving.`);
     const gone = state.items.filter(i => i.missing).length;
-    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you publish.`);
+    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you save.`);
     const claimed = state.items.filter(i => !i.missing && i.status === 'Claimed').length;
     if (claimed) warnings.push(`${claimed} item${claimed === 1 ? ' is' : 's are'} now Claimed. The live site shows ${claimed === 1 ? 'it' : 'them'} as claimed; remove ${claimed === 1 ? 'it' : 'them'} to free the slot${claimed === 1 ? '' : 's'}.`);
     const legacy = state.items.filter(i => !i.productId).length;
@@ -1075,13 +1658,14 @@
     else if (up){ const i = Number(up.dataset.hotUp); if (i > 0) [state.items[i-1], state.items[i]] = [state.items[i], state.items[i-1]]; }
     else if (dn){ const i = Number(dn.dataset.hotDown); if (i < state.items.length - 1) [state.items[i+1], state.items[i]] = [state.items[i], state.items[i+1]]; }
     else return;
+    markBatchDirty();
     renderHotItems();
   });
 
   const hotLimitEl = document.getElementById('hotLimit');
   hotLimitEl.addEventListener('input', () => {
     const v = parseInt(hotLimitEl.value, 10);
-    if (v >= 1 && v <= MAX_HOT_LIMIT){ state.hotLimit = v; renderHotItems(); }
+    if (v >= 1 && v <= MAX_HOT_LIMIT){ state.hotLimit = v; markBatchDirty(); renderHotItems(); }
   });
   hotLimitEl.addEventListener('change', () => { hotLimitEl.value = state.hotLimit; });
 
@@ -1094,7 +1678,7 @@
 
     const warnings = [];
     const gone = state.batchItems.filter(i => i.missing).length;
-    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you publish.`);
+    if (gone) warnings.push(`${gone} item${gone === 1 ? ' was' : 's were'} deleted from Products and will be dropped when you save.`);
     const claimed = state.batchItems.filter(i => !i.missing && i.status === 'Claimed').length;
     if (claimed) warnings.push(`${claimed} item${claimed === 1 ? ' is' : 's are'} now Claimed. ${claimed === 1 ? 'It stays' : 'They stay'} on the batch page marked as claimed.`);
     const warn = document.getElementById('batchWarn');
@@ -1129,12 +1713,14 @@
     const rm = e.target.closest('[data-batch-remove]');
     if (!rm) return;
     state.batchItems.splice(Number(rm.dataset.batchRemove), 1);
+    markBatchDirty();
     renderBatchItems();
   });
   document.getElementById('clearBatchBtn').addEventListener('click', () => {
     if (!state.batchItems.length) return;
     if (!confirm(`Remove all ${state.batchItems.length} extra items from this batch? Hot items are not affected.`)) return;
     state.batchItems = [];
+    markBatchDirty();
     renderBatchItems();
   });
 
@@ -1151,6 +1737,10 @@
   function lockReason(p){
     if (hotIdSet().has(p.id)) return 'Already a hot item';
     if (pickerMode === 'batch' && batchIdSet().has(p.id)) return 'Already in this batch';
+    if (state.status !== 'Closed'){
+      const b = lockedElsewhere().get(p.id);
+      if (b) return `In Batch ${b.batchNumber || '—'} · Control No. ${fmtControl(b.controlNo)}`;
+    }
     return '';
   }
 
@@ -1266,7 +1856,7 @@
     renderPicker();
   });
   document.getElementById('pickerAdd').addEventListener('click', () => {
-    const chosen = [...pickerSel].map(id => hotProducts.find(p => p.id === id)).filter(p => p && isAvailable(p));
+    const chosen = [...pickerSel].map(id => hotProducts.find(p => p.id === id)).filter(p => p && isAvailable(p) && !lockReason(p));
     if (pickerMode === 'hot'){
       const take = chosen.slice(0, Math.max(state.hotLimit - state.items.length, 0));
       take.forEach(p => state.items.push(toHotItem(p)));
@@ -1274,88 +1864,18 @@
       const hot = hotIdSet();
       state.batchItems = state.batchItems.filter(i => !hot.has(i.productId));
       closePicker();
+      if (take.length) markBatchDirty();
       renderHotItems();
       renderBatchItems();
-      showToast({ type: 'ok', title: 'Hot Items Added', message: `${take.length} item${take.length === 1 ? '' : 's'} added. Publish to show ${take.length === 1 ? 'it' : 'them'} on the live site.` });
+      showToast({ type: 'ok', title: 'Hot Items Added', message: `${take.length} item${take.length === 1 ? '' : 's'} added. Save the batch to show ${take.length === 1 ? 'it' : 'them'} on the live site.` });
     } else {
       chosen.forEach(p => state.batchItems.push(toHotItem(p)));
       closePicker();
+      if (chosen.length) markBatchDirty();
       renderBatchItems();
-      showToast({ type: 'ok', title: 'Batch Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Publish to show ${chosen.length === 1 ? 'it' : 'them'} on the shop's batch page.` });
+      showToast({ type: 'ok', title: 'Batch Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Save the batch to show ${chosen.length === 1 ? 'it' : 'them'} on the shop's batch page.` });
     }
   });
-
-  ['batchNumber','batchName','listingDate','biddingStart','biddingEnd'].forEach(id => {
-    document.getElementById(id).addEventListener('input', (e) => {
-      state[id] = e.target.value;
-      renderStatusPill();
-    });
-  });
-
-  function buildPayload(){
-    return {
-      shop: { name: "Vestige Thrift Shop", timezone: "Asia/Manila", currency: "PHP" },
-      batch: {
-        number: state.batchNumber,
-        name: state.batchName,
-        listingDate: state.listingDate ? state.listingDate + ":00+08:00" : "",
-        biddingStart: state.biddingStart ? state.biddingStart + ":00+08:00" : "",
-        biddingEnd: state.biddingEnd ? state.biddingEnd + ":00+08:00" : "",
-        hotItemLimit: state.hotLimit
-      },
-      hotItems: state.items.map(publicHotItem),
-      // Only IDs: the shop page reads each product live, so price, photos and status are always current.
-      batchItemIds: (() => {
-        const hot = hotIdSet();
-        return [...new Set(state.batchItems
-          .filter(i => i.productId && !i.missing && !hot.has(i.productId))
-          .map(i => i.productId))];
-      })(),
-      updatedAt: new Date().toISOString()
-    };
-  }
-
-  // Keeps the live batch in step when a product that's in it is edited or deleted.
-  async function syncLiveBatchProduct(product, removed){
-    try{
-      const snap = await getDoc(batchRef);
-      // mirror into the Dashboard's working copy first, whether or not it is published
-      if (removed){
-        state.items = state.items.filter(i => i.productId !== product.id);
-        state.batchItems = state.batchItems.filter(i => i.productId !== product.id);
-      } else {
-        const relink = (i) => i.productId === product.id ? toHotItem(product) : i;
-        state.items = state.items.map(relink);
-        state.batchItems = state.batchItems.map(relink);
-      }
-      renderHotItems();
-      renderBatchItems();
-      if (!snap.exists()) return false;
-
-      const data = snap.data();
-      const list = Array.isArray(data.hotItems) ? data.hotItems : [];
-      const ids = Array.isArray(data.batchItemIds) ? data.batchItemIds : [];
-      const inHot = list.some(i => i.productId === product.id);
-      const inBatch = ids.includes(product.id);
-      if (!inHot && !inBatch) return false;
-
-      const patch = { updatedAt: new Date().toISOString() };
-      if (removed){
-        if (inHot) patch.hotItems = list.filter(i => i.productId !== product.id);
-        if (inBatch) patch.batchItemIds = ids.filter(id => id !== product.id);
-      } else if (inHot){
-        patch.hotItems = list.map(i => i.productId === product.id ? publicHotItem(toHotItem(product)) : i);
-      } else {
-        return false;   // batch-only items are read live by the shop page — nothing to copy
-      }
-      await updateDoc(batchRef, patch);
-      return true;
-    } catch(err){
-      console.error('Live batch sync failed:', err);
-      showToast({ type: 'err', title: 'Live Batch Not Updated', message: 'The product was saved, but the live batch could not be updated. Open the Dashboard and publish again.', duration: 8000 });
-      return false;
-    }
-  }
 
   function showToast({ type = 'ok', title, message, duration = 4500 }){
     const layer = document.getElementById('toastLayer');
@@ -1380,54 +1900,6 @@
     toast.querySelector('.toast-close').addEventListener('click', dismiss);
     if (duration) setTimeout(dismiss, duration);
   }
-
-  document.getElementById('publishBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('publishBtn');
-
-    const limit = state.hotLimit;
-    if (!(limit >= 1)){
-      showToast({ type: 'err', title: 'Set a Hot Items Limit', message: 'Enter how many hot items this batch can show (1 or more).' });
-      return;
-    }
-    if (state.items.length > limit){
-      showToast({ type: 'err', title: 'Too Many Hot Items', message: `This batch is limited to ${limit}. Remove ${state.items.length - limit} item${state.items.length - limit === 1 ? '' : 's'} or raise the limit.`, duration: 7000 });
-      return;
-    }
-
-    btn.dataset.loading = 'true';
-    try{
-      // Re-read Products so the live page never gets stale prices, photos or statuses.
-      await fetchAllProducts();
-      const gone = refreshHotSnapshots();
-      if (gone.length){
-        state.items = state.items.filter(i => !i.missing);
-        state.batchItems = state.batchItems.filter(i => !i.missing);
-        renderHotItems();
-        renderBatchItems();
-        showToast({ type: 'err', title: 'Items Removed', message: `${gone.length} item${gone.length === 1 ? ' was' : 's were'} deleted from Products and dropped from this batch. Review the list, then publish again.`, duration: 8000 });
-        return;
-      }
-      renderHotItems();
-      renderBatchItems();
-      const payload = buildPayload();
-      await setDoc(batchRef, payload);
-      showToast({
-        type: 'ok',
-        title: 'Published',
-        message: `${payload.hotItems.length} hot item${payload.hotItems.length === 1 ? '' : 's'} on the home page · ${payload.hotItems.length + payload.batchItemIds.length} item${payload.hotItems.length + payload.batchItemIds.length === 1 ? '' : 's'} on the shop's batch page.`
-      });
-    } catch(err){
-      console.error(err);
-      showToast({
-        type: 'err',
-        title: 'Publish Failed',
-        message: 'Could not save changes. Check your Firestore rules allow this account to write, then try again.',
-        duration: 7000
-      });
-    } finally {
-      btn.dataset.loading = 'false';
-    }
-  });
 
   let categories = [];
   let allProductsForCounts = [];
@@ -1646,7 +2118,7 @@
     if (confirm('You have unsaved changes on this product. Discard them?')){ dirty = false; return true; }
     return false;
   }
-  window.addEventListener('beforeunload', (e) => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if (dirty || batchDirty){ e.preventDefault(); e.returnValue = ''; } });
 
   function cloneProduct(p){ return { ...p, images: [...(p.images || [])] }; }
 
