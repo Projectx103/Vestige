@@ -696,6 +696,48 @@
     .im-actions{ width:100%; margin-left:0; } .im-actions .btn{ flex:1; }
     .im-stat{ min-width:0; flex:1 1 40%; }
   }
+
+  /* ===== Import products ===== */
+  .imp-modal{ background:#fff; width:100%; max-width:600px; max-height:92vh; border-radius:18px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 60px -20px rgba(15,36,28,.6); }
+  .imp-modal.wide{ max-width:1180px; }
+  .imp-body{ padding:6px 24px 24px; overflow:auto; }
+  .imp-q{ font-family:'Fraunces',serif; font-size:1.25rem; color:var(--green-deep); margin:10px 0 6px; }
+  .imp-p{ color:rgba(20,32,28,.65); font-size:0.88rem; line-height:1.55; margin:0 0 18px; }
+  .imp-choices{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .imp-choice{ text-align:left; border:1px solid var(--line); background:#fff; border-radius:14px; padding:16px 18px; cursor:pointer; font-family:'Work Sans',sans-serif; transition:border-color .15s, background .15s; }
+  .imp-choice:hover{ border-color:var(--gold); background:rgba(201,164,104,.1); }
+  .imp-choice strong{ display:block; font-size:0.98rem; color:var(--green-deep); margin-bottom:4px; }
+  .imp-choice span{ font-size:0.78rem; color:rgba(20,32,28,.6); font-weight:300; line-height:1.4; }
+  .imp-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; justify-content:flex-end; }
+  .imp-actions .btn{ padding:11px 20px; font-size:0.85rem; }
+  .imp-ok{ display:flex; gap:10px; align-items:center; background:#e6f0e8; color:#1b4a30; border-radius:10px; padding:10px 14px; font-size:0.85rem; margin-bottom:14px; }
+  .imp-guide{ width:100%; border-collapse:collapse; font-size:0.8rem; margin-bottom:6px; }
+  .imp-guide th, .imp-guide td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .imp-guide th{ font-family:'Space Mono',monospace; font-weight:400; font-size:0.62rem; letter-spacing:.05em; text-transform:uppercase; color:rgba(20,32,28,.5); }
+  .imp-guide td:first-child{ font-weight:500; white-space:nowrap; color:var(--green-deep); }
+  .imp-req{ color:var(--danger); font-size:0.7rem; margin-left:4px; }
+  .drop{ border:2px dashed var(--line); border-radius:14px; padding:34px 20px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; background:var(--paper); }
+  .drop:hover, .drop.over{ border-color:var(--gold); background:rgba(201,164,104,.12); }
+  .drop strong{ display:block; color:var(--green-deep); font-size:1rem; margin-bottom:4px; }
+  .drop span{ font-size:0.8rem; color:rgba(20,32,28,.6); }
+  .imp-stats{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .imp-scroll{ max-height:46vh; border:1px solid var(--line); border-radius:10px; }
+  .imp-table tbody tr{ cursor:default; }
+  .imp-table td.notes{ white-space:normal; min-width:220px; max-width:340px; font-size:0.74rem; line-height:1.4; }
+  .imp-table td.notes .e{ color:var(--danger); display:block; } .imp-table td.notes .w{ color:#8a5a00; display:block; }
+  .imp-table tr.bad td{ background:#fff4f1; }
+  .pill-err{ background:#f8d9d1; color:#8a2a14; } .pill-warn{ background:#f6e6bf; color:#6b4a12; }
+  .imp-bar{ height:12px; border-radius:999px; background:rgba(20,32,28,.08); overflow:hidden; margin:18px 0 8px; }
+  .imp-bar > div{ height:100%; width:0; background:var(--gold); transition:width .25s; }
+  .imp-result{ text-align:center; padding:10px 0 4px; }
+  .imp-result .big{ font-family:'Fraunces',serif; font-size:2.4rem; color:var(--green-deep); line-height:1.1; }
+  @media (max-width:760px){
+    #importOverlay{ padding:0; align-items:flex-end; }
+    .imp-modal{ max-height:96vh; border-radius:18px 18px 0 0; }
+    .imp-body{ padding:4px 14px 18px; }
+    .imp-choices{ grid-template-columns:1fr; }
+    .imp-actions .btn{ flex:1 1 auto; }
+  }
 </style>
 </head>
 <body>
@@ -727,6 +769,17 @@
     <p class="folder-hint" id="imHint"></p>
   </div>
 </div>
+
+<div class="overlay" id="importOverlay" role="dialog" aria-modal="true" aria-labelledby="impTitle">
+  <div class="imp-modal" id="impModal">
+    <div class="im-head">
+      <div style="min-width:0;"><h2 id="impTitle">Import products</h2><p id="impSub"></p></div>
+      <button type="button" class="icon-btn" id="impClose" aria-label="Close">✕</button>
+    </div>
+    <div class="imp-body" id="impBody"></div>
+  </div>
+</div>
+<input type="file" id="impFile" accept=".csv,.xlsx,.xls,text/csv" style="display:none;">
 
 <div class="overlay" id="pickerOverlay" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
   <div class="picker">
@@ -1076,6 +1129,7 @@ match /counters/{id} {
               <div class="tb-right">
                 <button type="button" class="btn btn-outline" id="assignSkuBtn" style="display:none;">Assign SKUs</button>
                 <button type="button" class="btn btn-outline" id="openAttrBtn" disabled>Open in Attribute View</button>
+                <button type="button" class="btn btn-outline" id="importBtn">Import Products</button>
                 <button type="button" class="btn btn-gold" id="addProductBtn">+ Add Product</button>
               </div>
             </div>
@@ -3285,6 +3339,372 @@ match /counters/{id} {
       btn.dataset.loading = 'false';
     }
   });
+
+  // =====================================================================
+  //  Import products (CSV / Excel) into the open category — SKUs are always auto-generated
+  // =====================================================================
+  const IMP_MAX_ROWS = 1000, IMP_CHUNK = 100;
+  const IMP_FIELDS = [
+    { key: 'sku', label: 'SKU (leave blank)', aliases: ['sku', 'skuleaveblank', 'productcode'] },
+    { key: 'productName', label: 'Product Name', aliases: ['productname', 'name', 'product', 'title'] },
+    { key: 'brand', label: 'Brand', aliases: ['brand'] },
+    { key: 'item', label: 'Item', aliases: ['item', 'itemdescription', 'description'] },
+    { key: 'length', label: 'Length (in)', aliases: ['lengthin', 'length', 'lengthinches'] },
+    { key: 'width', label: 'Width (in)', aliases: ['widthin', 'width', 'widthinches'] },
+    { key: 'quantity', label: 'Quantity on Hand', aliases: ['quantityonhand', 'quantity', 'qty', 'qtyonhand'] },
+    { key: 'status', label: 'Status', aliases: ['status'] },
+    { key: 'investmentPrice', label: 'Investment Price', aliases: ['investmentprice', 'investment', 'cost', 'costprice'] },
+    { key: 'price', label: 'Starting Bid', aliases: ['startingbid', 'startingbidprice', 'startingprice', 'bid', 'price'] },
+    { key: 'soldTo', label: 'Sold To', aliases: ['soldto', 'buyer'] },
+    { key: 'priceSold', label: 'Price Sold', aliases: ['pricesold', 'soldprice'] },
+    { key: 'waybill', label: 'Waybill No.', aliases: ['waybillno', 'waybill', 'waybillnumber'] },
+    { key: 'remarks', label: 'Remarks', aliases: ['remarks', 'notes', 'note'] }
+  ];
+  const IMP_EXAMPLE = 'EXAMPLE - delete this row';
+  const impOverlay = document.getElementById('importOverlay');
+  const imp = { step: 'ask', fileName: '', rows: [], unknown: [], filter: 'all', progress: 0, result: null, busy: false };
+
+  const impNorm = (h) => String(h == null ? '' : h).toLowerCase().replace(/[^a-z0-9]/g, '');
+  function impParseNum(v){
+    const t = String(v == null ? '' : v).replace(/₱|php|\$|,|\s/gi, '');
+    if (t === '') return null;
+    const n = Number(t);
+    return isNaN(n) ? NaN : n;
+  }
+  // Small RFC-4180 style CSV reader (quotes, escaped quotes, CRLF, BOM, comma / semicolon / tab).
+  function impParseCsv(text){
+    text = String(text).replace(/^﻿/, '');
+    const first = text.split(/\r?\n/).find(l => l.trim()) || '';
+    const delim = [',', ';', '\t'].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+    const rows = []; let row = [], cur = '', q = false;
+    for (let i = 0; i < text.length; i++){
+      const c = text[i];
+      if (q){
+        if (c === '"'){ if (text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c;
+      } else if (c === '"') q = true;
+      else if (c === delim){ row.push(cur); cur = ''; }
+      else if (c === '\n' || c === '\r'){ if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+      else cur += c;
+    }
+    if (cur !== '' || row.length){ row.push(cur); rows.push(row); }
+    return rows;
+  }
+  function impLoadXlsx(){
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    return new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      sc.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error('xlsx'));
+      sc.onerror = () => reject(new Error('xlsx'));
+      document.head.appendChild(sc);
+    });
+  }
+  function impReadFile(file, asBuffer){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result); fr.onerror = () => reject(fr.error || new Error('read'));
+      if (asBuffer) fr.readAsArrayBuffer(file); else fr.readAsText(file);
+    });
+  }
+  async function impFileToMatrix(file){
+    const name = file.name.toLowerCase();
+    if (/\.(xlsx|xls)$/.test(name)){
+      const X = await impLoadXlsx();
+      const wb = X.read(new Uint8Array(await impReadFile(file, true)), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      return X.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+    }
+    if (/\.(csv|txt)$/.test(name) || file.type === 'text/csv') return impParseCsv(await impReadFile(file, false));
+    throw Object.assign(new Error('type'), { impCode: 'type' });
+  }
+
+  function impStatus(v){
+    const k = impNorm(v);
+    if (k === '' || k === 'available') return 'Available';
+    if (k === '1left' || k === 'oneleft' || k === 'lastone') return '1 Left';
+    if (k === 'claimed' || k === 'sold') return 'Claimed';
+    return null;
+  }
+  function impValidate(matrix){
+    let hi = matrix.findIndex(r => r.some(c => String(c).trim() !== ''));
+    if (hi < 0) return { fatal: 'The file is empty.' };
+    const map = {}, unknown = [];
+    matrix[hi].forEach((h, i) => {
+      const f = IMP_FIELDS.find(x => x.aliases.includes(impNorm(h)));
+      if (f && map[f.key] == null) map[f.key] = i; else if (!f && String(h).trim()) unknown.push(String(h).trim());
+    });
+    if (map.productName == null) return { fatal: 'I couldn\'t find a “Product Name” column in the first row. Download the template to see the exact layout.' };
+    const data = matrix.slice(hi + 1).map((r, i) => ({ r, n: hi + i + 2 })).filter(x => x.r.some(c => String(c).trim() !== ''));
+    if (!data.length) return { fatal: 'The file has headers but no product rows.' };
+    if (data.length > IMP_MAX_ROWS) return { fatal: `The file has ${data.length} rows. Import up to ${IMP_MAX_ROWS} at a time — split it into smaller files.` };
+    const existing = new Map();
+    categoryProducts.forEach(p => existing.set([p.productName, p.brand, p.item].map(impNorm).join('|'), p.sku));
+    const seen = new Map(), out = [];
+    data.forEach(({ r, n }) => {
+      const g = (k) => map[k] == null ? '' : String(r[map[k]] == null ? '' : r[map[k]]).trim();
+      const errors = [], warnings = [];
+      const row = { n, errors, warnings, skip: false, p: null };
+      if (g('productName').toLowerCase().startsWith('example')){ row.skip = true; out.push(row); return; }
+      const name = g('productName');
+      if (!name) errors.push('Product Name is required.');
+      const num = (k, label, { int = false, max = Infinity, min = 0 } = {}) => {
+        const v = impParseNum(g(k));
+        if (v === null) return null;
+        if (isNaN(v) || v < min || v > max || (int && !Number.isInteger(v))){ errors.push(`${label} must be ${int ? 'a whole number' : 'a number'}${min >= 0 ? ' ≥ 0' : ''}${max < Infinity ? ` and ≤ ${max}` : ''}.`); return null; }
+        return v;
+      };
+      const length = num('length', 'Length', { max: 200 }), width = num('width', 'Width', { max: 200 });
+      let quantity = num('quantity', 'Quantity on Hand', { int: true });
+      if (g('quantity') === '') quantity = 1;
+      const invest = num('investmentPrice', 'Investment Price'), bid = num('price', 'Starting Bid');
+      if (g('price') === '') warnings.push('Starting Bid is empty — it will be ₱0.');
+      const status = impStatus(g('status'));
+      if (!status) errors.push(`Status “${g('status')}” isn't valid — use Available, 1 Left or Claimed.`);
+      let soldTo = g('soldTo'), priceSold = num('priceSold', 'Price Sold'), waybill = g('waybill');
+      if (status === 'Claimed'){
+        if (!soldTo) errors.push('Sold To is required for Claimed items.');
+        if (priceSold === null && !errors.some(e => e.startsWith('Price Sold'))) errors.push('Price Sold is required for Claimed items.');
+      } else if (status && (soldTo || priceSold !== null || waybill)){
+        warnings.push('Sold To / Price Sold / Waybill ignored — they are only kept for Claimed items.');
+        soldTo = ''; priceSold = null; waybill = '';
+      }
+      if (g('sku')) warnings.push('SKU ignored — it is generated automatically.');
+      const key = [g('productName'), g('brand'), g('item'), g('length'), g('width')].map(impNorm).join('|');
+      if (seen.has(key)) warnings.push(`Looks like a duplicate of row ${seen.get(key)} in this file.`); else seen.set(key, n);
+      const ex = existing.get([g('productName'), g('brand'), g('item')].map(impNorm).join('|'));
+      if (ex) warnings.push(`Same name, brand and item as ${ex || 'an existing product'} in this category.`);
+      const size = computeSize(length, width);
+      row.p = {
+        productName: name, brand: g('brand'), item: g('item'), remarks: g('remarks'),
+        length, width, size: size === 'OVER' ? '' : size, quantity: quantity == null ? 1 : quantity,
+        investmentPrice: invest, price: bid == null ? 0 : bid, status: status || g('status'),
+        soldTo: status === 'Claimed' ? soldTo : '', priceSold: status === 'Claimed' ? priceSold : null,
+        waybill: status === 'Claimed' ? waybill : ''
+      };
+      out.push(row);
+    });
+    const rows = out.filter(x => !x.skip);
+    const skipped = out.length - rows.length;
+    if (!rows.length) return { fatal: 'Only the example row was found. Fill in your products and try again.' };
+    return { rows, unknown, skipped };
+  }
+
+  // ---------- template ----------
+  function impTemplateCsv(){
+    const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+    const head = IMP_FIELDS.map(f => f.label);
+    const ex1 = ['', IMP_EXAMPLE, 'Nike', 'Windbreaker jacket, blue', 26, 19, 1, 'Available', 350, 800, '', '', '', 'Minor wear on cuff'];
+    const ex2 = ['', IMP_EXAMPLE, 'Adidas', 'Track jacket, black', 27, 20, 1, 'Claimed', 300, 900, 'Juan Dela Cruz', 950, '', 'Sold via Messenger'];
+    return '﻿' + [head, ex1, ex2].map(r => r.map(q).join(',')).join('\r\n');
+  }
+  function impDownloadTemplate(){
+    const cat = currentCategory();
+    const blob = new Blob([impTemplateCsv()], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `vestige-product-import-template${cat ? '-' + String(cat.name).toLowerCase().replace(/[^a-z0-9]+/g, '-') : ''}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  // ---------- UI ----------
+  function impSetStep(step){
+    imp.step = step;
+    const cat = currentCategory();
+    impOverlay.querySelector('#impModal').classList.toggle('wide', step === 'preview');
+    document.getElementById('impSub').textContent = cat ? `Importing into ${cat.name} · SKUs are generated automatically (${SKU_PREFIX}-${cat.code || '###'}-####)` : '';
+    renderImport();
+  }
+  function openImport(){
+    if (!currentCategory()) return;
+    imp.rows = []; imp.unknown = []; imp.fileName = ''; imp.result = null; imp.progress = 0; imp.filter = 'all';
+    impOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    impSetStep('ask');
+  }
+  function closeImport(){ if (imp.busy) return; impOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+  function impGuideHtml(){
+    const cat = currentCategory();
+    const rows = [
+      ['SKU', 'Leave blank', `Generated automatically for ${esc(cat ? cat.name : 'this category')} (${SKU_PREFIX}-${esc(cat && cat.code || '###')}-0001, 0002…). Anything typed here is ignored.`],
+      ['Product Name', 'Required', 'The item\'s name.'],
+      ['Brand · Item', 'Optional', 'Brand and a short description.'],
+      ['Length · Width', 'Optional', 'Inches. The Size (XS–XXL) is calculated for you.'],
+      ['Quantity on Hand', 'Optional', 'Whole number. Blank = 1.'],
+      ['Status', 'Optional', 'Available, 1 Left or Claimed. Blank = Available.'],
+      ['Investment Price · Starting Bid', 'Optional', 'Numbers only (₱ and commas are fine).'],
+      ['Sold To · Price Sold', 'Claimed only', 'Required when Status is Claimed.'],
+      ['Waybill No. · Remarks', 'Optional', 'Waybill can be added later.']
+    ];
+    return `<table class="imp-guide"><thead><tr><th>Column</th><th>Needed?</th><th>Notes</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>
+      <p class="imp-p" style="margin:10px 0 0;">Photos and videos are added afterwards in Attribute View. Delete the two EXAMPLE rows (or leave them — they are skipped).</p>`;
+  }
+
+  function renderImport(){
+    const el = document.getElementById('impBody'), cat = currentCategory();
+    if (imp.step === 'ask'){
+      el.innerHTML = `
+        <div class="imp-q">Do you already have your import file ready?</div>
+        <p class="imp-p">Use a CSV or Excel file in the system layout. You'll see a preview and any problems before anything is saved.</p>
+        <div class="imp-choices">
+          <button type="button" class="imp-choice" data-imp="yes"><strong>Yes, I have my file</strong><span>Choose a .csv or .xlsx file and review it before importing.</span></button>
+          <button type="button" class="imp-choice" data-imp="no"><strong>No, I need the template</strong><span>Download a CSV template with every needed column, fill it in, then come back.</span></button>
+        </div>`;
+    } else if (imp.step === 'template'){
+      el.innerHTML = `
+        <div class="imp-ok">✓ Template downloaded — <strong>${esc('vestige-product-import-template.csv')}</strong></div>
+        <div class="imp-q" style="margin-top:0;">Fill it in, then import</div>
+        <p class="imp-p">Open the file in Excel or Google Sheets, add one product per row, and save it as CSV (or Excel). Then click <strong>Import Products</strong> again and answer <strong>Yes</strong>.</p>
+        ${impGuideHtml()}
+        <div class="imp-actions">
+          <button type="button" class="btn btn-outline" data-imp="download">Download again</button>
+          <button type="button" class="btn btn-outline" data-imp="close">Close</button>
+          <button type="button" class="btn btn-gold" data-imp="yes">My file is ready →</button>
+        </div>`;
+    } else if (imp.step === 'pick'){
+      el.innerHTML = `
+        <div class="imp-q">Choose your file</div>
+        <p class="imp-p">CSV or Excel (.xlsx). Up to ${IMP_MAX_ROWS} products per file. Leave the SKU column blank — the system numbers every item for you.</p>
+        <div class="drop" id="impDrop" tabindex="0" role="button"><strong>Click to choose a file</strong><span>or drag and drop it here · .csv .xlsx</span></div>
+        <div class="imp-actions">
+          <button type="button" class="btn btn-outline" data-imp="back">Back</button>
+          <button type="button" class="btn btn-outline" data-imp="no">Need the template?</button>
+        </div>`;
+    } else if (imp.step === 'parsing'){
+      el.innerHTML = `<div class="imp-q">Reading ${esc(imp.fileName)}…</div><div class="imp-bar"><div style="width:60%"></div></div>`;
+    } else if (imp.step === 'preview'){
+      const rows = imp.rows, ok = rows.filter(r => !r.errors.length), bad = rows.length - ok.length, warn = ok.filter(r => r.warnings.length).length;
+      const shown = rows.filter(r => imp.filter === 'all' || (imp.filter === 'ok' ? !r.errors.length : r.errors.length));
+      const next = ((cat && cat.nextSeq) || 1) + categoryProducts.filter(p => !p.sku).length;
+      const range = ok.length ? `${formatSku(cat.code, next)}${ok.length > 1 ? ' → ' + formatSku(cat.code, next + ok.length - 1) : ''}` : '';
+      const stat = (l, v) => `<div class="im-stat"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+      el.innerHTML = `
+        <p class="imp-p" style="margin-bottom:10px;"><strong>${esc(imp.fileName)}</strong>${imp.skipped ? ` · ${imp.skipped} example row skipped` : ''}${imp.unknown.length ? ` · ignored columns: ${esc(imp.unknown.join(', '))}` : ''}</p>
+        <div class="imp-stats">${stat('Rows read', rows.length)}${stat('Ready', ok.length)}${stat('With errors', bad)}${stat('Warnings', warn)}</div>
+        <div class="bs-chips" style="padding:0 0 10px;">${[['all', 'All', rows.length], ['ok', 'Ready', ok.length], ['bad', 'Errors', bad]].map(([k, l, c]) => `<button type="button" class="bs-chip ${imp.filter === k ? 'active' : ''}" data-imp-filter="${k}">${l}<b>${c}</b></button>`).join('')}</div>
+        <div class="table-scroll imp-scroll"><table class="inv-table imp-table"><thead><tr>
+          <th>Row</th><th>Result</th><th>Product Name</th><th>Brand</th><th>Item</th><th class="num">Length</th><th class="num">Width</th><th>Size</th><th class="num">Qty</th><th>Status</th><th class="num">Investment</th><th class="num">Starting Bid</th><th>Sold To</th><th class="num">Price Sold</th><th>Waybill</th><th>Remarks</th><th>Notes</th></tr></thead><tbody>
+          ${shown.map(r => { const p = r.p, e = r.errors.length, c = (v) => v === '' || v == null ? '<td class="muted">—</td>' : `<td>${esc(v)}</td>`, nm = (v, f) => v === '' || v == null ? '<td class="num muted">—</td>' : `<td class="num">${esc(f ? peso(v) : v)}</td>`;
+            return `<tr class="${e ? 'bad' : ''}"><td>${r.n}</td><td><span class="pill ${e ? 'pill-err' : r.warnings.length ? 'pill-warn' : 'pill-available'}">${e ? 'Error' : r.warnings.length ? 'Warning' : 'Ready'}</span></td>
+            ${c(p.productName)}${c(p.brand)}${c(p.item)}${nm(p.length)}${nm(p.width)}${c(p.size)}${nm(p.quantity)}${c(p.status)}${nm(p.investmentPrice, 1)}${nm(p.price, 1)}${c(p.soldTo)}${nm(p.priceSold, 1)}${c(p.waybill)}${c(p.remarks)}
+            <td class="notes">${r.errors.map(x => `<span class="e">✕ ${esc(x)}</span>`).join('')}${r.warnings.map(x => `<span class="w">! ${esc(x)}</span>`).join('')}</td></tr>`; }).join('') || '<tr><td class="empty-state" colspan="17">Nothing to show for this filter.</td></tr>'}
+        </tbody></table></div>
+        <p class="folder-hint" style="margin:10px 0 0;">${ok.length ? `${ok.length} item${ok.length === 1 ? '' : 's'} will be numbered <strong>${esc(range)}</strong>.` : 'Nothing can be imported yet — fix the errors in your file and choose it again.'}${bad ? ` Rows with errors are skipped.` : ''}</p>
+        <div class="imp-actions">
+          ${bad ? '<button type="button" class="btn btn-outline" data-imp="errors">Download error report</button>' : ''}
+          <button type="button" class="btn btn-outline" data-imp="pick">Choose another file</button>
+          <button type="button" class="btn btn-gold" data-imp="run" ${ok.length ? '' : 'disabled'}>Import ${ok.length} item${ok.length === 1 ? '' : 's'}</button>
+        </div>`;
+    } else if (imp.step === 'importing'){
+      el.innerHTML = `<div class="imp-q">Importing…</div><p class="imp-p">Please keep this window open. Numbering SKUs and saving your products.</p><div class="imp-bar"><div id="impBar" style="width:${imp.progress}%"></div></div><p class="imp-p" id="impProg">${imp.progress}%</p>`;
+    } else if (imp.step === 'done'){
+      const r = imp.result;
+      el.innerHTML = `<div class="imp-result"><div class="big">${r.done}</div><div class="imp-q" style="margin-top:4px;">product${r.done === 1 ? '' : 's'} imported</div>
+        ${r.done ? `<p class="imp-p">SKUs <strong>${esc(r.first)}${r.done > 1 ? ' → ' + esc(r.last) : ''}</strong> in ${esc(cat ? cat.name : '')}. Add photos and videos in Attribute View.</p>` : ''}
+        ${r.failed ? `<div class="hot-warn" style="text-align:left;">${r.failed} item${r.failed === 1 ? ' was' : 's were'} not imported: ${esc(r.error)} Nothing was partly saved for ${r.failed === 1 ? 'it' : 'them'} — fix the cause and import ${r.failed === 1 ? 'it' : 'them'} again.</div>` : ''}</div>
+        <div class="imp-actions"><button type="button" class="btn btn-outline" data-imp="again">Import another file</button><button type="button" class="btn btn-gold" data-imp="close">Done</button></div>`;
+    }
+  }
+
+  async function impHandleFile(file){
+    if (!file) return;
+    imp.fileName = file.name; impSetStep('parsing');
+    try{
+      const matrix = await impFileToMatrix(file);
+      const v = impValidate(matrix);
+      if (v.fatal){ impSetStep('pick'); document.getElementById('impBody').insertAdjacentHTML('afterbegin', `<div class="hot-warn" style="margin-bottom:12px;">${esc(v.fatal)}</div>`); return; }
+      Object.assign(imp, { rows: v.rows, unknown: v.unknown, skipped: v.skipped, filter: v.rows.some(r => r.errors.length) ? 'all' : 'all' });
+      impSetStep('preview');
+    } catch(err){
+      console.error(err);
+      impSetStep('pick');
+      const msg = err && err.impCode === 'type' ? 'That file type isn\'t supported. Choose a .csv or .xlsx file.'
+        : err && err.message === 'xlsx' ? 'Couldn\'t load the Excel reader (offline or blocked). In Excel use File → Save As → CSV UTF-8, then choose that file.'
+        : 'Couldn\'t read that file. Try saving it again as CSV UTF-8.';
+      document.getElementById('impBody').insertAdjacentHTML('afterbegin', `<div class="hot-warn" style="margin-bottom:12px;">${esc(msg)}</div>`);
+    }
+  }
+
+  async function impRun(){
+    const cat = currentCategory(), todo = imp.rows.filter(r => !r.errors.length);
+    if (!cat || !todo.length || imp.busy) return;
+    imp.busy = true; imp.progress = 0; impSetStep('importing');
+    const result = { done: 0, failed: 0, first: '', last: '', error: '' };
+    try{
+      await ensureCategoryCode(cat);
+      await assignMissingSkus();                       // keep older un-numbered items first in the sequence
+      const catRef = doc(db, 'categories', cat.id), now = new Date().toISOString();
+      for (let i = 0; i < todo.length; i += IMP_CHUNK){
+        const chunk = todo.slice(i, i + IMP_CHUNK);
+        let skus = [];
+        try{
+          await runTransaction(db, async (tx) => {
+            const snap = await tx.get(catRef);
+            if (!snap.exists()) throw new Error('Category not found.');
+            const cd = snap.data();
+            let seq = cd.nextSeq || 1; skus = [];
+            for (const r of chunk){
+              const sku = formatSku(cd.code, seq);
+              tx.set(doc(productsCol), { ...r.p, categoryId: cat.id, sku, skuSeq: seq, images: [], video: '', createdAt: now, importedAt: now });
+              skus.push(sku); seq++;
+            }
+            tx.update(catRef, { nextSeq: seq });
+          });
+        } catch(err){
+          console.error(err);
+          result.failed = todo.length - result.done;
+          result.error = err && err.code === 'permission-denied' ? 'Firestore rules blocked the write.' : 'The connection failed.';
+          break;
+        }
+        if (!result.first) result.first = skus[0];
+        result.last = skus[skus.length - 1]; result.done += chunk.length;
+        imp.progress = Math.round(result.done / todo.length * 100);
+        const bar = document.getElementById('impBar'); if (bar) bar.style.width = imp.progress + '%';
+        const pr = document.getElementById('impProg'); if (pr) pr.textContent = imp.progress + '%';
+      }
+    } catch(err){
+      console.error(err);
+      result.failed = todo.length - result.done; result.error = 'Could not prepare the category numbering.';
+    }
+    imp.busy = false; imp.result = result;
+    try{ await loadProductsForCategory(currentCategoryId); const c2 = categories.find(c => c.id === cat.id); if (c2) c2.nextSeq = (c2.nextSeq || 1); } catch(e){ /* list refresh is best effort */ }
+    try{ const cs = await getDoc(doc(db, 'categories', cat.id)); if (cs.exists()){ cat.nextSeq = cs.data().nextSeq; } } catch(e){ /* ignore */ }
+    impSetStep('done');
+    if (result.done) showToast({ type: result.failed ? 'err' : 'ok', title: 'Products Imported', message: `${result.done} item${result.done === 1 ? '' : 's'} added to ${cat.name}${result.failed ? `, ${result.failed} failed` : ''}.` });
+  }
+
+  function impErrorReport(){
+    const bad = imp.rows.filter(r => r.errors.length);
+    const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const lines = [['Row', 'Product Name', 'Brand', 'Problems'].map(q).join(',')].concat(bad.map(r => [r.n, r.p.productName, r.p.brand, r.errors.join(' ')].map(q).join(',')));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'vestige-import-errors.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  document.getElementById('importBtn').addEventListener('click', openImport);
+  document.getElementById('impClose').addEventListener('click', closeImport);
+  impOverlay.addEventListener('mousedown', (e) => { if (e.target === impOverlay) closeImport(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && impOverlay.classList.contains('open')) closeImport(); });
+  document.getElementById('impFile').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; impHandleFile(f); });
+  document.getElementById('impBody').addEventListener('click', (e) => {
+    const f = e.target.closest('[data-imp-filter]'); if (f){ imp.filter = f.dataset.impFilter; renderImport(); return; }
+    if (e.target.closest('#impDrop')){ document.getElementById('impFile').click(); return; }
+    const b = e.target.closest('[data-imp]'); if (!b) return;
+    const a = b.dataset.imp;
+    if (a === 'yes' || a === 'pick' || a === 'again') impSetStep('pick');
+    else if (a === 'no'){ impDownloadTemplate(); impSetStep('template'); }
+    else if (a === 'download') impDownloadTemplate();
+    else if (a === 'back') impSetStep('ask');
+    else if (a === 'close') closeImport();
+    else if (a === 'run') impRun();
+    else if (a === 'errors') impErrorReport();
+  });
+  ['dragover', 'dragenter'].forEach(ev => impOverlay.addEventListener(ev, (e) => { if (imp.step !== 'pick') return; e.preventDefault(); const d = document.getElementById('impDrop'); if (d) d.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => impOverlay.addEventListener(ev, (e) => { const d = document.getElementById('impDrop'); if (d) d.classList.remove('over'); }));
+  impOverlay.addEventListener('drop', (e) => { if (imp.step !== 'pick') return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; impHandleFile(f); });
 
   document.getElementById('addProductBtn').addEventListener('click', async (e) => {
     if (!currentCategoryId) return;
