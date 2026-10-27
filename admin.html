@@ -639,6 +639,31 @@
     .bs-toolbar{ padding:0 14px 12px; } .bs-toolbar select, .bs-toolbar .btn{ flex:1 1 auto; }
     .bs-chips{ padding:0 14px 12px; } .bs-bulk{ margin:0 14px 12px; }
   }
+
+  /* ===== Batch Settings ===== */
+  .set-row, .tool-row{ display:flex; align-items:center; justify-content:space-between; gap:20px; padding:14px 0; border-top:1px solid var(--line); }
+  .card h2 + .set-row, .card h2 + .tool-row{ border-top:none; padding-top:0; }
+  .set-title{ font-weight:500; font-size:0.92rem; color:var(--green-deep); }
+  .set-desc{ font-size:0.78rem; color:rgba(20,32,28,0.6); margin-top:3px; max-width:64ch; line-height:1.45; font-weight:300; }
+  .tool-row .btn{ flex-shrink:0; padding:10px 18px; font-size:0.82rem; }
+  .switch{ position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0; margin:0; text-transform:none; letter-spacing:0; }
+  .switch input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; min-height:0; cursor:pointer; z-index:1; }
+  .switch .slider{ position:absolute; inset:0; background:#cfc8b8; border-radius:999px; transition:background .2s; }
+  .switch .slider::before{ content:''; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .switch input:checked + .slider{ background:var(--green-deep); }
+  .switch input:checked + .slider::before{ transform:translateX(20px); }
+  .switch input:focus-visible + .slider{ outline:2px solid var(--gold); outline-offset:2px; }
+  .set-dates{ margin-top:6px; }
+  .set-dates.off{ opacity:.45; pointer-events:none; }
+  .set-preview{ background:var(--paper); border:1px dashed var(--line); border-radius:10px; padding:12px 14px; font-size:0.82rem; line-height:1.6; margin-top:4px; }
+  .set-preview b{ font-family:'Space Mono',monospace; font-weight:400; font-size:0.78rem; }
+  @media (max-width:760px){
+    .set-row, .tool-row{ align-items:flex-start; }
+    .tool-row{ flex-direction:column; align-items:stretch; }
+    .tool-row .btn{ width:100%; }
+    #view-settings .save-bar .bs-bulk-actions{ width:100%; }
+    #view-settings .save-bar .bs-bulk-actions .btn{ flex:1; }
+  }
 </style>
 </head>
 <body>
@@ -718,9 +743,9 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           <span class="nav-label">Batch Search</span>
         </div>
-        <div class="nav-item is-soon" data-soon="Settings is coming soon" title="Coming soon">
+        <div class="nav-item" data-view="settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-          <span class="nav-label">Settings</span><span class="soon-tag">Soon</span>
+          <span class="nav-label">Batch Settings</span>
         </div>
       </div>
 
@@ -885,6 +910,60 @@ match /counters/{id} {
               </table>
             </div>
             <p class="folder-hint" id="bsHint"></p>
+          </div>
+        </div>
+
+        <div class="view" id="view-settings">
+          <div class="dash-head">
+            <div>
+              <h1>Batch Settings</h1>
+              <p class="lead" style="margin:0;">Set your defaults once so every new batch starts ready — then use the tools below to keep things tidy.</p>
+            </div>
+          </div>
+
+          <div class="tiles" id="setTiles" aria-label="Batch overview"></div>
+
+          <div class="card">
+            <h2>New batch defaults</h2>
+            <div class="grid3">
+              <div><label for="setHotLimit">Max hot items per batch</label><input type="number" id="setHotLimit" min="1" max="30" step="1"></div>
+              <div><label for="setPad">Digits in Batch Number</label><select id="setPad"><option value="1">1 (4)</option><option value="2">2 (04)</option><option value="3">3 (004)</option><option value="4">4 (0004)</option></select></div>
+              <div><label for="setTemplate">Batch Name template</label><input type="text" id="setTemplate" maxlength="120" placeholder="Vestige Archive Batch {n}" autocomplete="off"></div>
+            </div>
+            <p class="fld-note" style="margin-top:-6px;">Use <code>{n}</code> for the Batch Number. Leave the template empty to type each name yourself.</p>
+            <div class="set-row"><div><div class="set-title">Suggest the next Batch Number</div><div class="set-desc">New batches start with the next free number (highest existing number + 1). You can still change it.</div></div><label class="switch"><input type="checkbox" id="setAutoNumber"><span class="slider"></span></label></div>
+            <div class="set-row"><div><div class="set-title">Pre-fill bidding dates</div><div class="set-desc">New batches start with Bidding Start and End already filled in from the values below.</div></div><label class="switch"><input type="checkbox" id="setAutoDates"><span class="slider"></span></label></div>
+            <div class="grid3 set-dates" id="setDatesGrid">
+              <div><label for="setOffset">Bidding opens</label><select id="setOffset"></select></div>
+              <div><label for="setStartTime">Start time (Manila)</label><input type="time" id="setStartTime"></div>
+              <div><label for="setHours">Bidding lasts (hours)</label><input type="number" id="setHours" min="1" max="720" step="1"></div>
+            </div>
+            <div class="set-preview" id="setPreview"></div>
+          </div>
+
+          <div class="card">
+            <h2>Behavior</h2>
+            <div class="set-row"><div><div class="set-title">Ask before closing or reactivating a batch</div><div class="set-desc">Shows a confirmation whenever a status is changed from Batch Search.</div></div><label class="switch"><input type="checkbox" id="setConfirm"><span class="slider"></span></label></div>
+            <div class="set-row"><div><div class="set-title">Close batches automatically when bidding ends</div><div class="set-desc">Checked each time you open the admin page. Ended Active batches are closed and their items are released. (Runs when you open the page, not in the background.)</div></div><label class="switch"><input type="checkbox" id="setAutoClose"><span class="slider"></span></label></div>
+          </div>
+
+          <div class="card">
+            <h2>Tools</h2>
+            <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
+            <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
+            <div class="tool-row"><div><div class="set-title">Repair batch index</div><div class="set-desc">Rebuilds the Control No. counter and the Batch Number / Name lookup from your saved batches. Safe to run; it also reports any duplicates.</div></div><button type="button" class="btn btn-outline" id="toolRepair">Repair index</button></div>
+            <div class="tool-row"><div><div class="set-title">Download backup</div><div class="set-desc">Saves all batches, the counter and these settings as a JSON file.</div></div><button type="button" class="btn btn-outline" id="toolBackup">Download JSON</button></div>
+          </div>
+
+          <div class="save-bar" role="region" aria-label="Save settings">
+            <div class="save-info">
+              <span class="dirty-badge" id="setDirtyBadge" style="display:none;">Unsaved changes</span>
+              <p>Settings apply to new batches and to how this admin page behaves. Existing batches are never changed.</p>
+            </div>
+            <div class="bs-bulk-actions">
+              <button type="button" class="btn btn-outline" id="setReset">Reset to defaults</button>
+              <button type="button" class="btn btn-gold" id="setSave"><span class="btn-spinner"></span><span class="btn-label-default">Save Settings <span class="kbd">Ctrl+S</span></span><span class="btn-spinner-label">Saving…</span></button>
+            </div>
           </div>
         </div>
 
@@ -1124,7 +1203,7 @@ match /counters/{id} {
 
   document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     item.addEventListener('click', (e) => {
-      if (!confirmDiscard() || !confirmDiscardBatch()) return;
+      if (!confirmDiscard() || !confirmDiscardBatch() || !confirmDiscardSettings()) return;
       document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
@@ -1133,6 +1212,7 @@ match /counters/{id} {
       if (viewName === 'products') refreshCategoriesView();
       if (viewName === 'dashboard') refreshHotFromProducts();
       if (viewName === 'batches') refreshBatchSearch();
+      if (viewName === 'settings') refreshSettingsView();
       setDrawer(false);
     });
   });
@@ -1189,6 +1269,58 @@ match /counters/{id} {
       batchItems: []      // the rest of this batch (shown on the shop's batch page)
     };
   }
+  // ---------- settings (stored in counters/settings, admin-only — no extra Firestore rules needed) ----------
+  const SETTINGS_DEFAULTS = {
+    hotLimit: DEFAULT_HOT_LIMIT, autoNumber: true, numberPad: 3, nameTemplate: '',
+    autoDates: false, startOffsetDays: 1, startTime: '12:00', durationHours: 72,
+    confirmStatus: true, autoCloseEnded: false
+  };
+  let settings = { ...SETTINGS_DEFAULTS };
+  const settingsRef = doc(db, 'counters', 'settings');
+  function sanitizeSettings(o){
+    const d = SETTINGS_DEFAULTS, n = (v, lo, hi, def) => { v = Math.round(Number(v)); return v >= lo && v <= hi ? v : def; };
+    o = o || {};
+    return {
+      hotLimit: n(o.hotLimit, 1, MAX_HOT_LIMIT, d.hotLimit),
+      autoNumber: o.autoNumber !== false, numberPad: n(o.numberPad, 1, 6, d.numberPad),
+      nameTemplate: String(o.nameTemplate || '').slice(0, 120),
+      autoDates: o.autoDates === true, startOffsetDays: n(o.startOffsetDays, 0, 30, d.startOffsetDays),
+      startTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(o.startTime) ? o.startTime : d.startTime,
+      durationHours: n(o.durationHours, 1, 720, d.durationHours),
+      confirmStatus: o.confirmStatus !== false, autoCloseEnded: o.autoCloseEnded === true
+    };
+  }
+  async function loadSettings(){
+    try{ const s = await getDoc(settingsRef); settings = sanitizeSettings(s.exists() ? s.data() : {}); }
+    catch(err){ console.error('Could not load settings:', err); settings = { ...SETTINGS_DEFAULTS }; }
+  }
+  function nextBatchNumberStr(cfg = settings){
+    let max = 0;
+    allBatches.forEach(b => { const t = String(b.batchNumber || '').trim(); if (/^\d+$/.test(t)) max = Math.max(max, Number(t)); });
+    return String(max + 1).padStart(cfg.numberPad, '0');
+  }
+  function templateName(cfg, number){ return cfg.nameTemplate ? cfg.nameTemplate.replace(/\{n\}/gi, number) : ''; }
+  // Bidding Start/End (Manila, "YYYY-MM-DDTHH:mm") from the defaults; Start is always in the future.
+  function defaultBiddingDates(cfg = settings){
+    const o = manilaParts(new Date());
+    const base = new Date(Date.UTC(Number(o.year), Number(o.month) - 1, Number(o.day)));
+    base.setUTCDate(base.getUTCDate() + cfg.startOffsetDays);
+    const pad = (x) => String(x).padStart(2, '0');
+    const day = () => `${base.getUTCFullYear()}-${pad(base.getUTCMonth() + 1)}-${pad(base.getUTCDate())}`;
+    let start = `${day()}T${cfg.startTime}`;
+    if (localToDate(start) <= new Date()){ base.setUTCDate(base.getUTCDate() + 1); start = `${day()}T${cfg.startTime}`; }
+    const e = manilaParts(new Date(localToDate(start).getTime() + cfg.durationHours * 3600000));
+    return { start, end: `${e.year}-${e.month}-${e.day}T${e.hour}:${e.minute}` };
+  }
+  function newBatchDraft(){
+    const b = blankBatch();
+    b.hotLimit = settings.hotLimit;
+    if (settings.autoNumber) b.batchNumber = nextBatchNumberStr();
+    b.batchName = templateName(settings, b.batchNumber);
+    if (settings.autoDates){ const d = defaultBiddingDates(); b.biddingStart = d.start; b.biddingEnd = d.end; }
+    return b;
+  }
+
   let state = blankBatch();
   let allBatches = [];          // saved batches, newest Control No. first
   let hotProducts = [];         // fresh copy of every product
@@ -1373,9 +1505,11 @@ match /counters/{id} {
         showToast({ type: 'err', title: 'Could Not Load Batches', message: 'Check your connection, then reload the page.' });
       }
     }
+    await loadSettings();
     await refreshControlPreview();
+    if (settings.autoCloseEnded && !batchesBlocked) await closeEndedBatches(true);
     if (allBatches.length) loadBatchIntoState(allBatches[0]);
-    else { state = blankBatch(); batchDirty = false; renderAll(); }
+    else { state = newBatchDraft(); batchDirty = false; renderAll(); }
   }
 
   async function refreshHotFromProducts(){
@@ -1581,7 +1715,7 @@ match /counters/{id} {
     if (!confirmDiscardBatch()) return;
     try{ await Promise.all([fetchBatches(), fetchAllProducts()]); } catch(err){ console.error(err); }
     await refreshControlPreview();
-    state = blankBatch();
+    state = newBatchDraft();
     batchDirty = false;
     clearFieldErrors();
     renderAll();
@@ -1810,7 +1944,7 @@ match /counters/{id} {
 
   // Close / reactivate one or many batches. Reactivating is all-or-nothing and refuses
   // when an item already sits in another Active batch (an item lives in one Active batch only).
-  async function changeBatchStatus(ids, target){
+  async function changeBatchStatus(ids, target, opts = {}){
     if (bsq.busy || !ids.length) return;
     if (state.id && ids.includes(state.id) && batchDirty){
       showToast({ type: 'err', title: 'Unsaved changes', message: `Control No. ${fmtControl(state.controlNo)} has unsaved edits on the Dashboard. Save or discard them first.`, duration: 7000 });
@@ -1845,7 +1979,7 @@ match /counters/{id} {
       }
       const verb = target === 'Closed' ? 'Close' : 'Reactivate';
       const names = chosen.slice(0, 3).map(b => 'Control No. ' + fmtControl(b.controlNo)).join(', ') + (chosen.length > 3 ? ` and ${chosen.length - 3} more` : '');
-      if (!confirm(`${verb} ${names}?${target === 'Closed' ? '\n\nTheir items will leave the shop and become free for new batches.' : '\n\nTheir Available items will show on the shop again.'}`)) return;
+      if (!opts.silent && settings.confirmStatus && !confirm(`${verb} ${names}?${target === 'Closed' ? '\n\nTheir items will leave the shop and become free for new batches.' : '\n\nTheir Available items will show on the shop again.'}`)) return;
 
       const now = new Date().toISOString();
       for (const b of chosen){
@@ -1925,6 +2059,158 @@ match /counters/{id} {
     const t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
     e.preventDefault(); document.getElementById('bsSearch').focus();
   });
+
+  // =====================================================================
+  //  Batch Settings — defaults for new batches, behavior, and maintenance tools
+  // =====================================================================
+  let settingsDirty = false;
+  const $s = (id) => document.getElementById(id);
+  function confirmDiscardSettings(){
+    if (!settingsDirty) return true;
+    if (confirm('You have unsaved changes to your settings. Discard them?')){ settingsDirty = false; fillSettingsForm(settings); return true; }
+    return false;
+  }
+  (function buildOffsetOptions(){
+    $s('setOffset').innerHTML = ['Today', 'Tomorrow'].concat(Array.from({ length: 29 }, (_, i) => `In ${i + 2} days`))
+      .map((t, i) => `<option value="${i}">${t}</option>`).join('');
+  })();
+  function fillSettingsForm(c){
+    $s('setHotLimit').value = c.hotLimit; $s('setPad').value = c.numberPad; $s('setTemplate').value = c.nameTemplate;
+    $s('setAutoNumber').checked = c.autoNumber; $s('setAutoDates').checked = c.autoDates;
+    $s('setOffset').value = c.startOffsetDays; $s('setStartTime').value = c.startTime; $s('setHours').value = c.durationHours;
+    $s('setConfirm').checked = c.confirmStatus; $s('setAutoClose').checked = c.autoCloseEnded;
+    $s('setDirtyBadge').style.display = settingsDirty ? 'inline-flex' : 'none';
+    renderSettingsPreview();
+  }
+  function readSettingsForm(){
+    return {
+      hotLimit: Number($s('setHotLimit').value), numberPad: Number($s('setPad').value), nameTemplate: $s('setTemplate').value.trim(),
+      autoNumber: $s('setAutoNumber').checked, autoDates: $s('setAutoDates').checked,
+      startOffsetDays: Number($s('setOffset').value), startTime: $s('setStartTime').value, durationHours: Number($s('setHours').value),
+      confirmStatus: $s('setConfirm').checked, autoCloseEnded: $s('setAutoClose').checked
+    };
+  }
+  function settingsProblem(c){
+    if (!(c.hotLimit >= 1 && c.hotLimit <= MAX_HOT_LIMIT)) return `Max hot items must be between 1 and ${MAX_HOT_LIMIT}.`;
+    if (c.nameTemplate.length > 120) return 'The Batch Name template is too long (120 characters max).';
+    if (c.autoDates){
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(c.startTime)) return 'Enter a valid start time.';
+      if (!(c.durationHours >= 1 && c.durationHours <= 720)) return 'Bidding length must be between 1 and 720 hours.';
+    }
+    return '';
+  }
+  function renderSettingsPreview(){
+    const c = readSettingsForm();
+    $s('setDatesGrid').classList.toggle('off', !c.autoDates);
+    const cfg = sanitizeSettings({ ...c, startTime: c.startTime || '12:00' });
+    const num = c.autoNumber ? nextBatchNumberStr(cfg) : '(typed by you)';
+    const name = templateName(cfg, c.autoNumber ? nextBatchNumberStr(cfg) : '…') || '(typed by you)';
+    let dates = '<b>(typed by you)</b>';
+    if (c.autoDates && /^([01]\d|2[0-3]):[0-5]\d$/.test(c.startTime) && c.durationHours >= 1){
+      const d = defaultBiddingDates(cfg);
+      dates = `<b>${esc(fmtManila(d.start + ':00+08:00'))}</b> → <b>${esc(fmtManila(d.end + ':00+08:00'))}</b>`;
+    }
+    $s('setPreview').innerHTML = `Your next new batch will start as — Batch Number: <b>${esc(num)}</b> · Name: <b>${esc(name)}</b> · Hot items up to <b>${esc(c.hotLimit || '—')}</b><br>Bidding: ${dates}`;
+  }
+  function renderSettingsOverview(){
+    const act = allBatches.filter(b => b.status === 'Active'), ended = act.filter(b => bidState(b) === 'ended');
+    const t = (label, value, sub, accent) => `<div class="tile${accent ? ' accent' : ''}"><div class="t-label">${esc(label)}</div><div class="t-value">${value}</div><div class="t-sub">${sub}</div></div>`;
+    $s('setTiles').innerHTML =
+      t('Next Control No.', esc(fmtControl(nextControlPreview)), 'assigned on save', true) +
+      t('Batches', String(allBatches.length), 'saved in total') +
+      t('Active', String(act.length), 'items live on the shop') +
+      t('Ended, still Active', String(ended.length), ended.length ? 'ready to close' : 'all up to date');
+    $s('toolEndedInfo').textContent = ended.length
+      ? `${ended.length} Active batch${ended.length === 1 ? ' has' : 'es have'} passed ${ended.length === 1 ? 'its' : 'their'} Bidding End: ${ended.slice(0, 4).map(b => 'Control No. ' + fmtControl(b.controlNo)).join(', ')}${ended.length > 4 ? '…' : ''}. Closing releases their items.`
+      : 'No Active batch has passed its Bidding End.';
+    $s('toolEnded').disabled = !ended.length;
+  }
+  async function refreshSettingsView(){
+    try{ await Promise.all([fetchBatches(), loadSettings()]); await refreshControlPreview(); } catch(err){ console.error(err); }
+    if (!settingsDirty) fillSettingsForm(settings);
+    renderSettingsOverview();
+  }
+  function markSettingsDirty(){ settingsDirty = true; $s('setDirtyBadge').style.display = 'inline-flex'; renderSettingsPreview(); }
+  ['setHotLimit', 'setPad', 'setTemplate', 'setAutoNumber', 'setAutoDates', 'setOffset', 'setStartTime', 'setHours', 'setConfirm', 'setAutoClose'].forEach(id => {
+    $s(id).addEventListener(id === 'setTemplate' || id === 'setHotLimit' || id === 'setHours' ? 'input' : 'change', markSettingsDirty);
+  });
+
+  async function saveSettings(){
+    const c = readSettingsForm();
+    const p = settingsProblem(c);
+    if (p){ showToast({ type: 'err', title: 'Check your settings', message: p, duration: 7000 }); return; }
+    const clean = sanitizeSettings(c), btn = $s('setSave');
+    btn.dataset.loading = 'true';
+    try{
+      await setDoc(settingsRef, { ...clean, updatedAt: new Date().toISOString() });
+      settings = clean; settingsDirty = false;
+      fillSettingsForm(settings);
+      showToast({ type: 'ok', title: 'Settings Saved', message: 'New batches will start with these defaults.' });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Save Failed', message: err && err.code === 'permission-denied' ? 'Firestore rules for counters are missing.' : 'Check your connection and try again.', duration: 7000 });
+    } finally { btn.dataset.loading = 'false'; }
+  }
+  $s('setSave').addEventListener('click', saveSettings);
+  $s('setReset').addEventListener('click', () => { fillSettingsForm({ ...SETTINGS_DEFAULTS }); markSettingsDirty(); });
+  document.addEventListener('keydown', (e) => {
+    if (!((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 's')) return;
+    if (!$s('view-settings').classList.contains('active') || $s('adminApp').style.display === 'none') return;
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    saveSettings();
+  });
+
+  // ---------- tools ----------
+  async function runTool(btnId, fn){
+    const btn = $s(btnId), label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Working…';
+    try{ await fn(); } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Tool failed', message: err && err.code === 'permission-denied' ? 'Firestore rules are missing for this action.' : 'Check your connection and try again.', duration: 7000 });
+    } finally { btn.textContent = label; btn.disabled = false; renderSettingsOverview(); }
+  }
+  async function closeEndedBatches(silent){
+    await fetchBatches();
+    const ids = allBatches.filter(b => b.status === 'Active' && bidState(b) === 'ended').map(b => b.id);
+    if (!ids.length){ if (!silent) showToast({ type: 'ok', title: 'Nothing to close', message: 'No Active batch has passed its Bidding End.' }); return; }
+    await changeBatchStatus(ids, 'Closed', { silent });
+  }
+  $s('toolEnded').addEventListener('click', () => runTool('toolEnded', () => closeEndedBatches(false)));
+  $s('toolSync').addEventListener('click', () => runTool('toolSync', async () => {
+    await Promise.all([fetchAllProducts(), fetchBatches()]);
+    await publishLiveMirror();
+    const cur = allBatches.find(b => b.status === 'Active');
+    showToast({ type: 'ok', title: 'Home page synced', message: cur ? `Now showing Control No. ${fmtControl(cur.controlNo)} — ${cur.batchName}.` : 'No Active batch — the home page shows the drop as over.' });
+  }));
+  $s('toolRepair').addEventListener('click', () => runTool('toolRepair', async () => {
+    await fetchBatches();
+    const numbers = {}, names = {}, dups = [];
+    [...allBatches].sort((a, b) => (a.controlNo || 0) - (b.controlNo || 0)).forEach(b => {
+      const nk = normNumber(b.batchNumber), mk = normName(b.batchName);
+      if (nk){ const k = regKey(nk); if (numbers[k]) dups.push(`Batch Number ${b.batchNumber} (Control No. ${fmtControl(b.controlNo)} and ${fmtControl(allBatches.find(x => x.id === numbers[k]).controlNo)})`); else numbers[k] = b.id; }
+      if (mk){ const k = regKey(mk); if (names[k]) dups.push(`Batch Name “${b.batchName}” (Control No. ${fmtControl(b.controlNo)} and ${fmtControl(allBatches.find(x => x.id === names[k]).controlNo)})`); else names[k] = b.id; }
+    });
+    const cur = await getDoc(counterRef);
+    const maxC = allBatches.reduce((m, b) => Math.max(m, b.controlNo || 0), 0);
+    const next = Math.max(cur.exists() ? Number(cur.data().next) || 1 : 1, maxC + 1);
+    await setDoc(counterRef, { next, numbers, names });
+    await refreshControlPreview();
+    showToast({ type: dups.length ? 'err' : 'ok', title: dups.length ? 'Index repaired — duplicates found' : 'Index repaired',
+      message: dups.length ? `Rename one of each pair: ${dups.slice(0, 2).join('; ')}${dups.length > 2 ? '…' : ''}.` : `Control No. counter is at ${fmtControl(next)} and all ${allBatches.length} batch${allBatches.length === 1 ? '' : 'es'} are indexed.`, duration: dups.length ? 12000 : 5000 });
+  }));
+  $s('toolBackup').addEventListener('click', () => runTool('toolBackup', async () => {
+    await fetchBatches();
+    const c = await getDoc(counterRef);
+    const data = { exportedAt: new Date().toISOString(), settings, counter: c.exists() ? c.data() : null, batches: allBatches };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vestige-batches-backup-' + nowLocalInput().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    showToast({ type: 'ok', title: 'Backup downloaded', message: `${allBatches.length} batch${allBatches.length === 1 ? '' : 'es'} saved to a JSON file.` });
+  }));
 
   // ---------- save ----------
   function validateFields(){
@@ -2607,7 +2893,7 @@ match /counters/{id} {
     if (confirm('You have unsaved changes on this product. Discard them?')){ dirty = false; return true; }
     return false;
   }
-  window.addEventListener('beforeunload', (e) => { if (dirty || batchDirty){ e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if (dirty || batchDirty || settingsDirty){ e.preventDefault(); e.returnValue = ''; } });
 
   function cloneProduct(p){ return { ...p, images: [...(p.images || [])] }; }
 
