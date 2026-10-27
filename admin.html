@@ -596,6 +596,49 @@
     .tiles{ grid-template-columns:1fr 1fr; }
     .btn{ padding-left:16px; padding-right:16px; }
   }
+
+  /* ===== Batch Search ===== */
+  .bs-card{ padding:20px 0 14px; overflow:hidden; }
+  .bs-toolbar{ display:flex; gap:10px; flex-wrap:wrap; padding:0 22px 14px; align-items:center; }
+  .bs-search{ position:relative; flex:1 1 320px; min-width:0; }
+  .bs-search svg{ position:absolute; left:13px; top:14px; color:rgba(20,32,28,0.45); pointer-events:none; }
+  .bs-search input{ margin:0; padding-left:40px; }
+  .bs-toolbar select{ width:auto; margin:0; flex:0 0 auto; }
+  .bs-toolbar .btn{ padding:10px 18px; font-size:0.82rem; }
+  .bs-chips{ display:flex; gap:8px; flex-wrap:wrap; padding:0 22px 14px; }
+  .bs-chip{ border:1px solid var(--line); background:#fff; border-radius:999px; padding:8px 16px; font-family:'Work Sans',sans-serif; font-size:0.82rem; cursor:pointer; color:var(--ink); min-height:38px; }
+  .bs-chip b{ font-family:'Space Mono',monospace; font-weight:400; font-size:0.7rem; margin-left:6px; opacity:.65; }
+  .bs-chip.active{ background:var(--green-deep); color:var(--cream-soft); border-color:var(--green-deep); }
+  .bs-bulk{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 22px 12px; padding:10px 14px; background:rgba(201,164,104,0.16); border:1px solid rgba(201,164,104,0.4); border-radius:10px; font-size:0.84rem; }
+  .bs-bulk[hidden]{ display:none; }
+  .bs-bulk-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bs-bulk .btn{ padding:8px 14px; font-size:0.78rem; min-height:38px; }
+  .bs-scroll{ max-height:none; }
+  .bs-table td, .bs-table th{ vertical-align:middle; }
+  .bs-table tbody tr{ cursor:default; }
+  .bs-table td.chk, .bs-table th.chk{ width:40px; text-align:center; cursor:default; padding-left:14px; padding-right:6px; }
+  .bs-chk{ width:18px !important; height:18px; margin:0 !important; min-height:0 !important; accent-color:var(--green-deep); cursor:pointer; }
+  .bs-table td.nm{ max-width:280px; white-space:normal; }
+  .bs-table td.nm small{ display:block; color:rgba(20,32,28,0.5); font-size:0.7rem; margin-top:2px; }
+  .bs-table td .status-pill{ margin-left:0; }
+  .bs-table td .bid-tag{ display:block; font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:.04em; text-transform:uppercase; margin-top:4px; color:rgba(20,32,28,.5); }
+  .bs-table td .bid-tag.live{ color:#1b6a3f; font-weight:700; }
+  .bs-table{ min-width:960px; }
+  .bs-table tbody td, .bs-table thead th{ padding-left:10px; padding-right:10px; }
+  .bs-actions{ display:flex; gap:6px; justify-content:flex-start; flex-wrap:nowrap; }
+  .bs-actions .btn{ padding:7px 11px; font-size:0.74rem; min-height:36px; white-space:nowrap; }
+  .bs-table td:last-child{ min-width:236px; }
+  .bs-table td.nm{ min-width:150px; }
+  .bs-table tr.detail td{ background:var(--paper); white-space:normal; max-width:none; padding:14px 18px 16px 58px; }
+  .bs-items{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px 18px; margin:0; padding:0; list-style:none; font-size:0.8rem; }
+  .bs-items li{ display:flex; gap:8px; align-items:center; min-width:0; }
+  .bs-items li span.t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bs-items .hotdot{ font-family:'Space Mono',monospace; font-size:0.58rem; background:var(--gold); color:var(--green-deep); border-radius:999px; padding:1px 7px; }
+  .bs-table th[data-sort]{ cursor:pointer; }
+  @media (max-width:760px){
+    .bs-toolbar{ padding:0 14px 12px; } .bs-toolbar select, .bs-toolbar .btn{ flex:1 1 auto; }
+    .bs-chips{ padding:0 14px 12px; } .bs-bulk{ margin:0 14px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -671,9 +714,9 @@
           <svg class="nav-chevron" id="productsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
         <div class="nav-sublist" id="categorySubNav"></div>
-        <div class="nav-item is-soon" data-soon="Batch search is coming next" title="Coming soon">
+        <div class="nav-item" data-view="batches">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span class="nav-label">Batch Search</span><span class="soon-tag">Soon</span>
+          <span class="nav-label">Batch Search</span>
         </div>
         <div class="nav-item is-soon" data-soon="Settings is coming soon" title="Coming soon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
@@ -798,6 +841,51 @@ match /counters/{id} {
             </button>
           </div>
 
+        </div>
+
+        <div class="view" id="view-batches">
+          <div class="dash-head">
+            <div>
+              <h1>Batch Search</h1>
+              <p class="lead" style="margin:0;">Find any batch by Control No., Batch Number or Batch Name — then open it, or close / reactivate it right here.</p>
+            </div>
+            <button type="button" class="btn btn-gold" id="bsNewBtn">+ Add New Batch</button>
+          </div>
+
+          <div class="warn-banner" id="bsBlocked" style="display:none;">Batches can't be read yet. Publish the Firestore rules for <code>batches</code> and <code>counters</code> (shown on the Dashboard), then reload.</div>
+
+          <div class="card bs-card">
+            <div class="bs-toolbar">
+              <div class="bs-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+                <input type="search" id="bsSearch" placeholder="Search Control No., Batch Number or Name…  ( press / )" autocomplete="off" aria-label="Search batches">
+              </div>
+              <select id="bsWhen" aria-label="Filter by bidding schedule">
+                <option value="any">Any schedule</option>
+                <option value="live">Bidding live now</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ended">Ended</option>
+              </select>
+              <button type="button" class="btn btn-outline" id="bsExport">Export CSV</button>
+              <button type="button" class="btn btn-outline" id="bsReload" aria-label="Reload">↻ Reload</button>
+            </div>
+            <div class="bs-chips" id="bsChips" role="tablist" aria-label="Filter by status"></div>
+            <div class="bs-bulk" id="bsBulk" hidden>
+              <span id="bsBulkText"></span>
+              <div class="bs-bulk-actions">
+                <button type="button" class="btn btn-outline" id="bsBulkClose">Close selected</button>
+                <button type="button" class="btn btn-outline" id="bsBulkOpen">Reactivate selected</button>
+                <button type="button" class="btn btn-outline" id="bsBulkClear">Clear</button>
+              </div>
+            </div>
+            <div class="table-scroll bs-scroll">
+              <table class="inv-table bs-table">
+                <thead><tr id="bsHead"></tr></thead>
+                <tbody id="bsBody"></tbody>
+              </table>
+            </div>
+            <p class="folder-hint" id="bsHint"></p>
+          </div>
         </div>
 
         <div class="view" id="view-products">
@@ -1044,6 +1132,7 @@ match /counters/{id} {
       switchView(viewName);
       if (viewName === 'products') refreshCategoriesView();
       if (viewName === 'dashboard') refreshHotFromProducts();
+      if (viewName === 'batches') refreshBatchSearch();
       setDrawer(false);
     });
   });
@@ -1576,6 +1665,266 @@ match /counters/{id} {
       return false;
     }
   }
+
+  // =====================================================================
+  //  Batch Search — find any batch, open it, or close / reactivate it (one or many)
+  // =====================================================================
+  const bsq = { q: '', status: 'all', when: 'any', sort: 'controlNo', dir: 'desc', sel: new Set(), open: new Set(), busy: false, loaded: false };
+  const BID_LABEL = { tba: 'No dates', upcoming: 'Upcoming', live: 'Bidding live', ended: 'Ended' };
+  function bidState(b){
+    const st = new Date(b.biddingStart), en = new Date(b.biddingEnd), now = new Date();
+    if (isNaN(st) || isNaN(en)) return 'tba';
+    return now < st ? 'upcoming' : now < en ? 'live' : 'ended';
+  }
+  // Understands "control 3", "batch 004", "#4", plain words (name) and numbers.
+  // A number with 3+ digits and a leading zero (004) is treated as a Batch Number, not a Control No.
+  function batchMatches(b, q){
+    q = q.trim().toLowerCase();
+    if (!q) return true;
+    const ctl = q.match(/control(?:\s*no\.?)?\s*#?\s*(\d+)/);
+    if (ctl){ if (String(b.controlNo) !== String(Number(ctl[1]))) return false; q = q.replace(ctl[0], ' '); }
+    const bat = q.match(/batch(?:\s*(?:no\.?|number))?\s*#?\s*(\d+)/);
+    if (bat){ if (normNumber(b.batchNumber) !== String(Number(bat[1]))) return false; q = q.replace(bat[0], ' '); }
+    return q.split(/\s+/).every(tok => {
+      const t = tok.replace(/^#/, '');
+      if (!t || t === 'control' || t === 'batch') return true;
+      if (/^\d+$/.test(t)){
+        const n = String(Number(t));
+        const batchHit = normNumber(b.batchNumber) === n || String(b.batchNumber || '').toLowerCase().includes(t);
+        if (t.length >= 3 && t[0] === '0') return batchHit;
+        return String(b.controlNo) === n || batchHit || normName(b.batchName).includes(t);
+      }
+      return normName(b.batchName).includes(t) || String(b.batchNumber || '').toLowerCase().includes(t) ||
+             String(b.status).toLowerCase().startsWith(t);
+    });
+  }
+  const BS_COLS = [
+    { key: 'controlNo', label: 'Control No.', get: b => b.controlNo || 0 },
+    { key: 'batchNumber', label: 'Batch No.', get: b => String(b.batchNumber || '') },
+    { key: 'batchName', label: 'Batch Name', get: b => normName(b.batchName) },
+    { key: 'status', label: 'Status', get: b => b.status },
+    { key: 'listingAt', label: 'Listing Date & Time', get: b => b.listingAt || '' },
+    { key: 'biddingStart', label: 'Bidding Window', get: b => b.biddingStart || '' },
+    { key: 'items', label: 'Items', num: true, get: b => itemIdsOf(b).length }
+  ];
+  function bsVisible(){
+    const col = BS_COLS.find(c => c.key === bsq.sort) || BS_COLS[0];
+    const list = allBatches.filter(b =>
+      (bsq.status === 'all' || b.status === bsq.status) &&
+      (bsq.when === 'any' || bidState(b) === bsq.when) &&
+      batchMatches(b, bsq.q));
+    list.sort((a, b) => {
+      const x = col.get(a), y = col.get(b);
+      const r = typeof x === 'number' ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true });
+      return (bsq.dir === 'asc' ? r : -r) || ((b.controlNo || 0) - (a.controlNo || 0));
+    });
+    return list;
+  }
+  function itemLine(id, hot){
+    const p = hotProducts.find(x => x.id === id);
+    if (!p) return `<li><span class="code-chip">?</span><span class="t">Deleted product</span></li>`;
+    return `<li><span class="code-chip">${esc(p.sku || 'NO SKU')}</span><span class="t">${esc(p.brand || p.productName || 'Untitled')}${p.item ? ' · ' + esc(p.item) : ''}</span>${statusPill(p.status || 'Available')}${hot ? '<span class="hotdot">HOT</span>' : ''}</li>`;
+  }
+  function renderBatchSearch(){
+    const total = allBatches.length;
+    const cnt = { all: total, Active: 0, Closed: 0 };
+    allBatches.forEach(b => { if (cnt[b.status] != null) cnt[b.status]++; });
+    document.getElementById('bsChips').innerHTML = [['all', 'All'], ['Active', 'Active'], ['Closed', 'Closed']].map(([k, l]) =>
+      `<button type="button" class="bs-chip ${bsq.status === k ? 'active' : ''}" data-bs-status="${k}" role="tab" aria-selected="${bsq.status === k}">${l}<b>${cnt[k]}</b></button>`).join('');
+
+    const list = bsVisible();
+    bsq.sel.forEach(id => { if (!allBatches.some(b => b.id === id)) bsq.sel.delete(id); });
+    const allOn = list.length > 0 && list.every(b => bsq.sel.has(b.id));
+    document.getElementById('bsHead').innerHTML =
+      `<th class="chk"><input type="checkbox" class="bs-chk" id="bsAll" ${allOn ? 'checked' : ''} aria-label="Select all shown"></th>` +
+      BS_COLS.map(c => `<th data-sort="${c.key}" class="${c.num ? 'num' : ''}">${c.label}${bsq.sort === c.key ? `<span class="arrow">${bsq.dir === 'asc' ? '▲' : '▼'}</span>` : ''}</th>`).join('') + '<th></th>';
+
+    const body = document.getElementById('bsBody');
+    if (!list.length){
+      body.innerHTML = `<tr><td class="empty-state" colspan="9">${!total
+        ? (batchesBlocked ? 'Batches could not be loaded.' : 'No batches yet. Click “+ Add New Batch” to create your first one.')
+        : 'No batches match your search. Try fewer words, or clear the filters.'}</td></tr>`;
+    } else {
+      body.innerHTML = list.map(b => {
+        const hot = (b.hotItemIds || []).length, rest = (b.batchItemIds || []).length;
+        const bs_ = bidState(b), open = bsq.open.has(b.id);
+        const isClosed = b.status === 'Closed';
+        const win = (b.biddingStart && b.biddingEnd) ? `${esc(fmtManila(b.biddingStart))}<br><span class="muted-inline">to ${esc(fmtManila(b.biddingEnd))}</span>` : '<span class="muted-inline">—</span>';
+        let html = `<tr data-id="${esc(b.id)}" class="${bsq.sel.has(b.id) ? 'selected' : ''}">
+          <td class="chk"><input type="checkbox" class="bs-chk" data-bs-sel="${esc(b.id)}" ${bsq.sel.has(b.id) ? 'checked' : ''} aria-label="Select Control No. ${esc(fmtControl(b.controlNo))}"></td>
+          <td class="sku">${esc(fmtControl(b.controlNo))}</td>
+          <td>${esc(b.batchNumber || '—')}</td>
+          <td class="nm">${esc(b.batchName || 'Untitled')}<small>${esc(b.updatedAt ? 'Updated ' + fmtManila(b.updatedAt) : '')}</small></td>
+          <td><span class="status-pill ${STATUS_CLASS[b.status] || ''}">${esc(b.status)}</span>${b.status === 'Active' ? `<span class="bid-tag ${bs_ === 'live' ? 'live' : ''}">${BID_LABEL[bs_]}</span>` : ''}</td>
+          <td>${esc(fmtManila(b.listingAt))}</td>
+          <td>${win}</td>
+          <td class="num">${hot + rest}<br><span class="muted-inline">${hot} hot · ${rest} more</span></td>
+          <td><div class="bs-actions">
+            <button type="button" class="btn btn-outline" data-bs-items="${esc(b.id)}" aria-expanded="${open}">${open ? 'Hide' : 'Items'}</button>
+            <button type="button" class="btn btn-dark" data-bs-open="${esc(b.id)}">Open</button>
+            <button type="button" class="btn btn-outline ${isClosed ? '' : 'btn-danger-outline'}" data-bs-toggle="${esc(b.id)}">${isClosed ? 'Reactivate' : 'Close'}</button>
+          </div></td></tr>`;
+        if (open){
+          const lis = (b.hotItemIds || []).map(id => itemLine(id, true)).concat((b.batchItemIds || []).map(id => itemLine(id, false))).join('');
+          html += `<tr class="detail"><td colspan="9">${lis ? `<ul class="bs-items">${lis}</ul>` : '<span class="muted-inline">No items in this batch yet.</span>'}</td></tr>`;
+        }
+        return html;
+      }).join('');
+    }
+
+    const n = bsq.sel.size;
+    document.getElementById('bsBulk').hidden = n === 0;
+    document.getElementById('bsBulkText').innerHTML = `<strong>${n}</strong> batch${n === 1 ? '' : 'es'} selected`;
+    document.getElementById('bsHint').textContent = total
+      ? `Showing ${list.length} of ${total} batch${total === 1 ? '' : 'es'} · click a column header to sort · press / to search`
+      : '';
+    document.getElementById('bsBlocked').style.display = batchesBlocked ? 'block' : 'none';
+  }
+
+  async function refreshBatchSearch(){
+    try{
+      await Promise.all([fetchBatches(), fetchAllProducts()]);
+      batchesBlocked = false;
+    } catch(err){
+      console.error(err);
+      if (err && err.code === 'permission-denied') batchesBlocked = true;
+      else showToast({ type: 'err', title: 'Could Not Load Batches', message: 'Check your connection, then press Reload.' });
+    }
+    bsq.loaded = true;
+    renderBatchSearch();
+  }
+
+  function goToDashboard(){
+    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.toggle('active', i.dataset.view === 'dashboard'));
+    document.querySelectorAll('.nav-subitem').forEach(x => x.classList.remove('active'));
+    switchView('dashboard');
+    window.scrollTo({ top: 0 });
+  }
+  function openBatchInDashboard(id){
+    const b = allBatches.find(x => x.id === id);
+    if (!b) return;
+    if (!confirmDiscardBatch()) return;
+    goToDashboard();
+    loadBatchIntoState(b);
+  }
+
+  // Close / reactivate one or many batches. Reactivating is all-or-nothing and refuses
+  // when an item already sits in another Active batch (an item lives in one Active batch only).
+  async function changeBatchStatus(ids, target){
+    if (bsq.busy || !ids.length) return;
+    if (state.id && ids.includes(state.id) && batchDirty){
+      showToast({ type: 'err', title: 'Unsaved changes', message: `Control No. ${fmtControl(state.controlNo)} has unsaved edits on the Dashboard. Save or discard them first.`, duration: 7000 });
+      return;
+    }
+    bsq.busy = true;
+    try{
+      await Promise.all([fetchAllProducts(), fetchBatches()]);
+      const chosen = ids.map(id => allBatches.find(b => b.id === id)).filter(b => b && b.status !== target);
+      if (!chosen.length){
+        showToast({ type: 'ok', title: 'Nothing to change', message: `The selected batch${ids.length === 1 ? ' is' : 'es are'} already ${target}.` });
+        return;
+      }
+      if (target === 'Active'){
+        const chosenIds = new Set(chosen.map(c => c.id));
+        const taken = new Map();
+        allBatches.forEach(b => { if (b.status === 'Active' && !chosenIds.has(b.id)) itemIdsOf(b).forEach(id => { if (!taken.has(id)) taken.set(id, b); }); });
+        const seen = new Map(), problems = [];
+        for (const b of chosen){
+          const label = `Control No. ${fmtControl(b.controlNo)}`;
+          if (!b.biddingStart || !b.biddingEnd){ problems.push(`${label} has no bidding dates — open it and set them first.`); continue; }
+          const clash = itemIdsOf(b).filter(id => taken.has(id) || seen.has(id));
+          if (clash.length){
+            const other = taken.get(clash[0]) || seen.get(clash[0]);
+            problems.push(`${label} shares ${clash.length} item${clash.length === 1 ? '' : 's'} with Control No. ${fmtControl(other.controlNo)} (Active). Close that one first or remove the items.`);
+          } else itemIdsOf(b).forEach(id => seen.set(id, b));
+        }
+        if (problems.length){
+          showToast({ type: 'err', title: 'Can’t reactivate', message: problems.slice(0, 2).join(' ') + (problems.length > 2 ? ` (+${problems.length - 2} more)` : ''), duration: 10000 });
+          return;
+        }
+      }
+      const verb = target === 'Closed' ? 'Close' : 'Reactivate';
+      const names = chosen.slice(0, 3).map(b => 'Control No. ' + fmtControl(b.controlNo)).join(', ') + (chosen.length > 3 ? ` and ${chosen.length - 3} more` : '');
+      if (!confirm(`${verb} ${names}?${target === 'Closed' ? '\n\nTheir items will leave the shop and become free for new batches.' : '\n\nTheir Available items will show on the shop again.'}`)) return;
+
+      const now = new Date().toISOString();
+      for (const b of chosen){
+        await updateDoc(doc(db, 'batches', b.id), { status: target, updatedAt: now, closedAt: target === 'Closed' ? now : '' });
+      }
+      await fetchBatches();
+      let mirrored = true;
+      try{ await publishLiveMirror(); } catch(err){ console.error(err); mirrored = false; }
+      await refreshControlPreview();
+      const cur = state.id && allBatches.find(b => b.id === state.id);
+      if (cur && ids.includes(cur.id)) loadBatchIntoState(cur); else renderBatchForm();
+      bsq.sel.clear();
+      showToast({ type: mirrored ? 'ok' : 'err', title: mirrored ? `Batch${chosen.length === 1 ? '' : 'es'} ${target === 'Closed' ? 'Closed' : 'Reactivated'}` : 'Saved, but home page not updated',
+        message: `${names} ${chosen.length === 1 ? 'is' : 'are'} now ${target}.${mirrored ? '' : ' The home-page copy could not be written.'}`, duration: 6000 });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could not change status', message: err && err.code === 'permission-denied' ? 'Firestore rules for batches are missing.' : 'Check your connection and try again.', duration: 7000 });
+    } finally {
+      bsq.busy = false;
+      renderBatchSearch();
+    }
+  }
+
+  function exportBatchesCsv(){
+    const rows = bsVisible();
+    if (!rows.length){ showToast({ type: 'err', title: 'Nothing to export', message: 'No batches match the current filters.' }); return; }
+    const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const head = ['Control No.', 'Batch Number', 'Batch Name', 'Status', 'Listing Date & Time', 'Bidding Start', 'Bidding End', 'Hot Items', 'Other Items', 'Total Items'];
+    const lines = [head.map(q).join(',')].concat(rows.map(b => [
+      fmtControl(b.controlNo), b.batchNumber, b.batchName, b.status, fmtManila(b.listingAt),
+      b.biddingStart ? fmtManila(b.biddingStart) : '', b.biddingEnd ? fmtManila(b.biddingEnd) : '',
+      (b.hotItemIds || []).length, (b.batchItemIds || []).length, itemIdsOf(b).length].map(q).join(',')));
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vestige-batches-' + nowLocalInput().slice(0, 10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  document.getElementById('bsSearch').addEventListener('input', (e) => { bsq.q = e.target.value; renderBatchSearch(); });
+  document.getElementById('bsWhen').addEventListener('change', (e) => { bsq.when = e.target.value; renderBatchSearch(); });
+  document.getElementById('bsChips').addEventListener('click', (e) => {
+    const c = e.target.closest('[data-bs-status]'); if (!c) return;
+    bsq.status = c.dataset.bsStatus; renderBatchSearch();
+  });
+  document.getElementById('bsHead').addEventListener('click', (e) => {
+    if (e.target.id === 'bsAll'){
+      const list = bsVisible();
+      if (e.target.checked) list.forEach(b => bsq.sel.add(b.id)); else list.forEach(b => bsq.sel.delete(b.id));
+      renderBatchSearch(); return;
+    }
+    const th = e.target.closest('th[data-sort]'); if (!th) return;
+    const k = th.dataset.sort;
+    if (bsq.sort === k) bsq.dir = bsq.dir === 'asc' ? 'desc' : 'asc'; else { bsq.sort = k; bsq.dir = k === 'controlNo' ? 'desc' : 'asc'; }
+    renderBatchSearch();
+  });
+  document.getElementById('bsBody').addEventListener('click', (e) => {
+    const sel = e.target.closest('[data-bs-sel]');
+    if (sel){ if (sel.checked) bsq.sel.add(sel.dataset.bsSel); else bsq.sel.delete(sel.dataset.bsSel); renderBatchSearch(); return; }
+    const it = e.target.closest('[data-bs-items]');
+    if (it){ const id = it.dataset.bsItems; if (bsq.open.has(id)) bsq.open.delete(id); else bsq.open.add(id); renderBatchSearch(); return; }
+    const op = e.target.closest('[data-bs-open]');
+    if (op){ openBatchInDashboard(op.dataset.bsOpen); return; }
+    const tg = e.target.closest('[data-bs-toggle]');
+    if (tg){ const b = allBatches.find(x => x.id === tg.dataset.bsToggle); if (b) changeBatchStatus([b.id], b.status === 'Closed' ? 'Active' : 'Closed'); }
+  });
+  document.getElementById('bsBulkClose').addEventListener('click', () => changeBatchStatus([...bsq.sel], 'Closed'));
+  document.getElementById('bsBulkOpen').addEventListener('click', () => changeBatchStatus([...bsq.sel], 'Active'));
+  document.getElementById('bsBulkClear').addEventListener('click', () => { bsq.sel.clear(); renderBatchSearch(); });
+  document.getElementById('bsExport').addEventListener('click', exportBatchesCsv);
+  document.getElementById('bsReload').addEventListener('click', refreshBatchSearch);
+  document.getElementById('bsNewBtn').addEventListener('click', async () => { goToDashboard(); await startNewBatch(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!document.getElementById('view-batches').classList.contains('active')) return;
+    const t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    e.preventDefault(); document.getElementById('bsSearch').focus();
+  });
 
   // ---------- save ----------
   function validateFields(){
