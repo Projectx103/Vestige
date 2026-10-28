@@ -738,11 +738,52 @@
     .imp-choices{ grid-template-columns:1fr; }
     .imp-actions .btn{ flex:1 1 auto; }
   }
+
+  /* ===== Sizing types ===== */
+  .size-chip{ display:inline-block; font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; background:var(--green-deep); color:var(--cream-soft); border:none; margin-top:8px; }
+  .size-chip.big{ font-size:0.78rem; padding:8px 14px; margin:0; cursor:pointer; }
+  .size-chip.big:hover{ filter:brightness(1.15); }
+  .cat-head-tags{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .category-card .size-chip{ display:block; width:max-content; }
+  .add-category-row select{ width:auto; margin:0; flex:0 0 auto; max-width:260px; }
+  .size-options{ display:grid; gap:10px; margin:8px 0 6px; }
+  .size-opt{ display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:12px; padding:13px 15px; cursor:pointer; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; color:var(--ink); font-size:0.9rem; margin:0; }
+  .size-opt:hover{ border-color:var(--gold); }
+  .size-opt.on{ border-color:var(--green-deep); background:rgba(201,164,104,.12); }
+  .size-opt input{ width:auto; min-height:0; margin:3px 0 0; flex-shrink:0; }
+  .size-opt strong{ display:block; color:var(--green-deep); margin-bottom:2px; }
+  .size-opt span{ font-size:0.78rem; color:rgba(20,32,28,.6); font-weight:300; line-height:1.45; display:block; }
+  .chart-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .chart-table{ width:100%; border-collapse:collapse; font-size:0.86rem; }
+  .chart-table th{ text-align:left; font-family:'Space Mono',monospace; font-weight:400; font-size:0.62rem; letter-spacing:.05em; text-transform:uppercase; color:rgba(20,32,28,.5); padding:6px 8px; }
+  .chart-table td{ padding:4px 8px; }
+  .chart-table input{ margin:0; min-height:40px; }
+  .chart-table .btn{ padding:6px 12px; min-height:36px; font-size:0.78rem; }
+  .chart-foot{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .chart-foot .btn{ padding:9px 16px; font-size:0.8rem; min-height:40px; }
+  @media (max-width:760px){ .add-category-row{ flex-direction:column; align-items:stretch; } .add-category-row select{ max-width:none; width:100%; } .cat-head-tags{ justify-content:flex-start; } }
 </style>
 </head>
 <body>
 
 <div id="toastLayer"></div>
+
+<div class="overlay" id="sizingOverlay" role="dialog" aria-modal="true" aria-labelledby="sizingTitle">
+  <div class="imp-modal">
+    <div class="im-head">
+      <div style="min-width:0;"><h2 id="sizingTitle">Sizing type</h2><p id="sizingSub"></p></div>
+      <button type="button" class="icon-btn" id="sizingClose" aria-label="Close">✕</button>
+    </div>
+    <div class="imp-body">
+      <div id="sizingOptions" class="size-options"></div>
+      <div class="hot-warn" id="sizingWarn" style="display:none;"></div>
+      <div class="imp-actions">
+        <button type="button" class="btn btn-outline" id="sizingCancel">Cancel</button>
+        <button type="button" class="btn btn-gold" id="sizingSave">Save sizing type</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="itemsOverlay" role="dialog" aria-modal="true" aria-labelledby="itemsTitle">
   <div class="items-modal">
@@ -1059,8 +1100,16 @@ match /counters/{id} {
           </div>
 
           <div class="card">
+            <h2>Size charts</h2>
+            <p class="hot-note">The charts behind automatic sizing. A size is the <strong>first row</strong> (top to bottom) whose limits the item is <strong>under</strong>, so keep the limits increasing. Each category picks its chart through its <em>Sizing</em> type.</p>
+            <div class="chart-tabs" id="chartTabs"></div>
+            <div id="chartEditor"></div>
+          </div>
+
+          <div class="card">
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
+            <div class="tool-row"><div><div class="set-title">Recalculate all sizes</div><div class="set-desc">Re-works every item's saved size from its measurements using its category's sizing type and the charts above. Manual-size categories are never touched.</div></div><button type="button" class="btn btn-outline" id="toolSizes">Recalculate sizes</button></div>
             <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
             <div class="tool-row"><div><div class="set-title">Repair batch index</div><div class="set-desc">Rebuilds the Control No. counter and the Batch Number / Name lookup from your saved batches. Safe to run; it also reports any duplicates.</div></div><button type="button" class="btn btn-outline" id="toolRepair">Repair index</button></div>
             <div class="tool-row"><div><div class="set-title">Download backup</div><div class="set-desc">Saves all batches, the counter and these settings as a JSON file.</div></div><button type="button" class="btn btn-outline" id="toolBackup">Download JSON</button></div>
@@ -1090,9 +1139,16 @@ match /counters/{id} {
             <h2>Categories</h2>
             <div class="category-grid" id="categoryGrid"></div>
             <div class="add-category-row">
-              <input type="text" id="newCategoryName" placeholder="e.g. Hoodies, Jackets, Windbreakers">
+              <input type="text" id="newCategoryName" placeholder="e.g. Hoodies, Shorts, Caps">
+              <select id="newCategoryProfile" aria-label="Sizing type">
+                <option value="tops">Sizing: Tops &amp; Jackets</option>
+                <option value="bottoms">Sizing: Shorts &amp; Pants</option>
+                <option value="caps">Sizing: Caps &amp; Hats</option>
+                <option value="manual">Sizing: Other (type the size)</option>
+              </select>
               <button class="btn btn-gold" id="addCategoryBtn">+ Add Category</button>
             </div>
+            <p class="fld-note" id="newCategoryNote" style="margin:10px 0 0;"></p>
           </div>
         </div>
 
@@ -1107,7 +1163,10 @@ match /counters/{id} {
               <h1 id="categoryDetailName">Category</h1>
               <p class="lead" style="margin:0;">Pick an item in Folder View, then open it in Attribute View to edit its details, photos and video.</p>
             </div>
-            <span class="code-chip big" id="categoryCodeChip" title="SKU prefix for this category — numbering runs separately per category"></span>
+            <div class="cat-head-tags">
+              <button type="button" class="size-chip big" id="categorySizingBtn" title="Change how this category is sized"></button>
+              <span class="code-chip big" id="categoryCodeChip" title="SKU prefix for this category — numbering runs separately per category"></span>
+            </div>
           </div>
 
           <div class="view-tabs" role="tablist" aria-label="Product views">
@@ -1222,30 +1281,105 @@ match /counters/{id} {
       .replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  // Auto size — same rules as the spreadsheet IF() formula, checked top to bottom.
-  // Length and width are in inches. If the measurements are over the chart, returns '' (shown as "Over chart").
-  const SIZE_CHART = [
-    { w:18, l:25, size:'XS' },
-    { w:19, l:26, size:'S' },
-    { w:20, l:27, size:'M' },
-    { w:21, l:28, size:'L' },
-    { w:22, l:29, size:'L-XL' },
-    { w:23, l:30, size:'XL' },
-    { w:24, l:31, size:'XL-2XL' },
-    { w:25, l:32, size:'2XL' }
-  ];
-  function computeSize(length, width){
+  // ---------------------------------------------------------------------
+  //  Sizing — every category has a SIZING TYPE that decides which measurements are taken
+  //  and which size chart is used.  (Measurements are stored in the product's `length` and
+  //  `width` slots; the label shown depends on the category's sizing type.)
+  //    tops    Length × Width (pit to pit)   → Tops chart      e.g. jackets, hoodies, shirts
+  //    bottoms Waist (around) + Length       → Bottoms chart   e.g. shorts, pants, jeans
+  //    caps    Head circumference            → Caps chart      e.g. caps, hats, beanies
+  //    manual  you type the size             → no chart        e.g. shoes, bags, accessories
+  // ---------------------------------------------------------------------
+  const SIZE_PROFILES = {
+    tops: { key: 'tops', name: 'Tops & Jackets', short: 'Tops', auto: true,
+      desc: 'Jackets, hoodies, shirts, windbreakers. Measure Length and Width (pit to pit) in inches — the size comes from the Tops chart.',
+      measures: [{ slot: 'length', label: 'Length (in)', ph: '26' }, { slot: 'width', label: 'Width (in)', ph: '19' }], empty: 'Enter length & width' },
+    bottoms: { key: 'bottoms', name: 'Shorts & Pants', short: 'Bottoms', auto: true,
+      desc: 'Shorts, pants, jeans, joggers. Measure the Waist (all the way around) and the Length in inches — the size comes from the Bottoms chart (waist).',
+      measures: [{ slot: 'width', label: 'Waist (in)', ph: '32' }, { slot: 'length', label: 'Length (in)', ph: '30' }], empty: 'Enter waist' },
+    caps: { key: 'caps', name: 'Caps & Hats', short: 'Caps', auto: true,
+      desc: 'Caps, hats, beanies. Measure the head circumference (inside band) in inches — the size comes from the Caps chart.',
+      measures: [{ slot: 'width', label: 'Head circumference (in)', ph: '22.5' }], empty: 'Enter head circumference' },
+    manual: { key: 'manual', name: 'Other (type the size)', short: 'Manual', auto: false,
+      desc: 'Shoes, bags, accessories — anything that isn\'t sized by measurement. You type the size yourself (One Size, 42, US 9…).',
+      measures: [{ slot: 'length', label: 'Length (in)', ph: '' }, { slot: 'width', label: 'Width (in)', ph: '' }], empty: '' }
+  };
+  const DEFAULT_SIZE_CHARTS = {
+    // checked top to bottom: the first row whose limits the item is UNDER wins
+    tops: [
+      { w: 18, l: 25, size: 'XS' }, { w: 19, l: 26, size: 'S' }, { w: 20, l: 27, size: 'M' }, { w: 21, l: 28, size: 'L' },
+      { w: 22, l: 29, size: 'L-XL' }, { w: 23, l: 30, size: 'XL' }, { w: 24, l: 31, size: 'XL-2XL' }, { w: 25, l: 32, size: '2XL' }
+    ],
+    bottoms: [
+      { max: 28, size: 'XS' }, { max: 31, size: 'S' }, { max: 34, size: 'M' }, { max: 37, size: 'L' }, { max: 40, size: 'XL' }, { max: 43, size: '2XL' }
+    ],
+    caps: [
+      { max: 20.5, size: 'XS' }, { max: 21.5, size: 'S' }, { max: 22.5, size: 'M' }, { max: 23.5, size: 'L' }, { max: 24.5, size: 'XL' }
+    ]
+  };
+  const cloneJson = (o) => JSON.parse(JSON.stringify(o));
+  let SIZE_CHARTS = cloneJson(DEFAULT_SIZE_CHARTS);
+  function sanitizeCharts(o){
+    const out = cloneJson(DEFAULT_SIZE_CHARTS);
+    if (!o || typeof o !== 'object') return out;
+    ['tops', 'bottoms', 'caps'].forEach(k => {
+      const rows = Array.isArray(o[k]) ? o[k].slice(0, 14) : null;
+      if (!rows || !rows.length) return;
+      const clean = [];
+      for (const r of rows){
+        const size = String(r && r.size || '').trim().slice(0, 12);
+        if (!size) return;
+        if (k === 'tops'){ const w = Number(r.w), l = Number(r.l); if (!(w > 0 && l > 0)) return; clean.push({ w, l, size }); }
+        else { const m = Number(r.max); if (!(m > 0)) return; clean.push({ max: m, size }); }
+      }
+      out[k] = clean;
+    });
+    return out;
+  }
+  function applySizeCharts(c){ SIZE_CHARTS = sanitizeCharts(c); }
+
+  // Auto size. Lengths/widths are in inches. Returns '' when measurements are missing,
+  // 'OVER' when they are beyond the chart, and '' for manual categories (the size is typed).
+  function computeSize(length, width, profile = 'tops'){
     const L = parseFloat(length), W = parseFloat(width);
+    if (profile === 'manual') return '';
+    if (profile === 'bottoms' || profile === 'caps'){
+      if (!(W > 0)) return '';
+      for (const row of SIZE_CHARTS[profile]) if (W < row.max) return row.size;
+      return 'OVER';
+    }
     if (!(L > 0) || !(W > 0)) return '';
-    for (const row of SIZE_CHART){
+    for (const row of SIZE_CHARTS.tops){
       if (W < row.w && L < row.l) return row.size;
     }
     return 'OVER';
   }
-  function sizeDisplay(size){
-    if (!size) return { text:'Enter length & width', empty:true };
-    if (size === 'OVER') return { text:'Over chart', empty:true };
-    return { text:size, empty:false };
+  function sizeDisplay(size, profile = 'tops'){
+    if (!size) return { text: (SIZE_PROFILES[profile] || SIZE_PROFILES.tops).empty || '—', empty: true };
+    if (size === 'OVER') return { text: 'Over chart', empty: true };
+    return { text: size, empty: false };
+  }
+  function profileKeyOfCat(catOrId){
+    const c = typeof catOrId === 'string' ? categories.find(x => x.id === catOrId) : catOrId;
+    return c && SIZE_PROFILES[c.sizeProfile] ? c.sizeProfile : 'tops';
+  }
+  const profileOfProduct = (p) => profileKeyOfCat(p.categoryId);
+  const curProfileKey = () => profileKeyOfCat(typeof currentCategory === 'function' ? currentCategory() : null);
+  function suggestProfile(name){
+    const n = String(name || '').toLowerCase();
+    if (/short|pant|jean|trouser|jogger|cargo|denim|skirt|legging|chino|slack/.test(n)) return 'bottoms';
+    if (/\bcaps?\b|hats?\b|beanie|bucket|snapback|visor|bonnet|beret|headwear/.test(n)) return 'caps';
+    if (/shoe|sneaker|boot|sandal|bag|belt|wallet|watch|sock|glove|scarf|accessor|sunglass|jewel|necklace|ring/.test(n)) return 'manual';
+    return 'tops';
+  }
+  // "Waist 32 × Length 30 in"
+  function measureText(p){
+    const prof = SIZE_PROFILES[profileOfProduct(p)];
+    const parts = prof.measures.map(m => {
+      const v = p[m.slot];
+      return (v === '' || v === null || v === undefined || isNaN(Number(v))) ? null : `${m.label.replace(/ \(in\)$/, '')} ${Number(v)}`;
+    }).filter(Boolean);
+    return parts.length ? parts.join(' × ') + ' in' : '';
   }
 
   const loginGate = document.getElementById('loginGate');
@@ -1385,7 +1519,7 @@ match /counters/{id} {
   const SETTINGS_DEFAULTS = {
     hotLimit: DEFAULT_HOT_LIMIT, autoNumber: true, numberPad: 3, nameTemplate: '',
     autoDates: false, startOffsetDays: 1, startTime: '12:00', durationHours: 72,
-    confirmStatus: true, autoCloseEnded: false
+    confirmStatus: true, autoCloseEnded: false, sizeCharts: cloneJson(DEFAULT_SIZE_CHARTS)
   };
   let settings = { ...SETTINGS_DEFAULTS };
   const settingsRef = doc(db, 'counters', 'settings');
@@ -1399,12 +1533,14 @@ match /counters/{id} {
       autoDates: o.autoDates === true, startOffsetDays: n(o.startOffsetDays, 0, 30, d.startOffsetDays),
       startTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(o.startTime) ? o.startTime : d.startTime,
       durationHours: n(o.durationHours, 1, 720, d.durationHours),
-      confirmStatus: o.confirmStatus !== false, autoCloseEnded: o.autoCloseEnded === true
+      confirmStatus: o.confirmStatus !== false, autoCloseEnded: o.autoCloseEnded === true,
+      sizeCharts: sanitizeCharts(o.sizeCharts)
     };
   }
   async function loadSettings(){
     try{ const s = await getDoc(settingsRef); settings = sanitizeSettings(s.exists() ? s.data() : {}); }
-    catch(err){ console.error('Could not load settings:', err); settings = { ...SETTINGS_DEFAULTS }; }
+    catch(err){ console.error('Could not load settings:', err); settings = { ...SETTINGS_DEFAULTS, sizeCharts: cloneJson(DEFAULT_SIZE_CHARTS) }; }
+    applySizeCharts(settings.sizeCharts);
   }
   function nextBatchNumberStr(cfg = settings){
     let max = 0;
@@ -1469,13 +1605,14 @@ match /counters/{id} {
 
   // ---------- products (for hot / batch items) ----------
   function toHotItem(p){
-    const s = computeSize(p.length, p.width);
+    // the size saved with the product is the source of truth (it was worked out with the right sizing type)
+    const s = p.size || computeSize(p.length, p.width, profileOfProduct(p));
     return {
       productId: p.id,
       code: p.sku || '',
       brand: p.brand || p.productName || '',
       item: p.item || (p.brand ? p.productName : '') || '',
-      size: (s && s !== 'OVER') ? s : (p.size || ''),
+      size: (s && s !== 'OVER') ? s : '',
       price: Number(p.price) || 0,
       status: p.status || 'Available',
       image: (p.images && p.images[0]) || ''
@@ -2155,8 +2292,7 @@ match /counters/{id} {
     { key: 'brand', label: 'Brand', val: r => r.p ? (r.p.brand || '') : '' },
     { key: 'item', label: 'Item', val: r => r.p ? (r.p.item || '') : '' },
     { key: 'category', label: 'Category', val: r => r.p ? categoryName(r.p.categoryId) : '' },
-    { key: 'length', label: 'Length (in)', num: true, val: r => r.p ? numOrBlank(r.p.length) : '' },
-    { key: 'width', label: 'Width (in)', num: true, val: r => r.p ? numOrBlank(r.p.width) : '' },
+    { key: 'measure', label: 'Measurements', val: r => r.p ? measureText(r.p) : '' },
     { key: 'size', label: 'Size', val: r => r.p ? sizeText(r.p) : '' },
     { key: 'qty', label: 'Qty on Hand', num: true, val: r => r.p ? numOrBlank(r.p.quantity) : '' },
     { key: 'status', label: 'Status', val: r => r.p ? (r.p.status || 'Available') : '', html: r => r.p ? statusPill(r.p.status || 'Available') : '' },
@@ -2291,6 +2427,62 @@ match /counters/{id} {
   // =====================================================================
   let settingsDirty = false;
   const $s = (id) => document.getElementById(id);
+  // ---------- size chart editor ----------
+  let chartDraft = cloneJson(settings.sizeCharts), chartTab = 'tops';
+  const CHART_NAMES = { tops: 'Tops & Jackets', bottoms: 'Shorts & Pants', caps: 'Caps & Hats' };
+  function renderChartEditor(){
+    $s('chartTabs').innerHTML = Object.keys(CHART_NAMES).map(k => `<button type="button" class="bs-chip ${chartTab === k ? 'active' : ''}" data-chart-tab="${k}">${CHART_NAMES[k]}</button>`).join('');
+    const rows = chartDraft[chartTab], tops = chartTab === 'tops';
+    const lim = tops ? ['Width under (in)', 'Length under (in)'] : [chartTab === 'caps' ? 'Head circumference under (in)' : 'Waist under (in)'];
+    $s('chartEditor').innerHTML = `<div class="table-scroll" style="border:none;max-height:none;"><table class="chart-table"><thead><tr><th>Size label</th>${lim.map(l => `<th>${l}</th>`).join('')}<th></th></tr></thead><tbody>
+      ${rows.map((r, i) => `<tr data-ci="${i}"><td><input type="text" data-c="size" value="${esc(r.size)}" maxlength="12" aria-label="Size label"></td>
+        ${tops ? `<td><input type="number" step="0.1" min="0" data-c="w" value="${esc(r.w)}"></td><td><input type="number" step="0.1" min="0" data-c="l" value="${esc(r.l)}"></td>` : `<td><input type="number" step="0.1" min="0" data-c="max" value="${esc(r.max)}"></td>`}
+        <td><button type="button" class="btn btn-outline btn-danger-outline" data-c-del="${i}" aria-label="Remove row">✕</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="chart-foot"><button type="button" class="btn btn-outline" id="chartAdd">+ Add size</button><button type="button" class="btn btn-outline" id="chartReset">Reset this chart</button></div>`;
+  }
+  function chartProblem(c){
+    for (const k of Object.keys(CHART_NAMES)){
+      const rows = c[k];
+      if (!rows.length) return `${CHART_NAMES[k]} chart needs at least one size.`;
+      const seen = new Set();
+      for (let i = 0; i < rows.length; i++){
+        const r = rows[i], label = String(r.size || '').trim();
+        if (!label) return `${CHART_NAMES[k]} chart: a size label is empty.`;
+        if (seen.has(label.toLowerCase())) return `${CHART_NAMES[k]} chart: size “${label}” appears twice.`;
+        seen.add(label.toLowerCase());
+        const vals = k === 'tops' ? [r.w, r.l] : [r.max];
+        if (vals.some(v => !(Number(v) > 0))) return `${CHART_NAMES[k]} chart (${label}): limits must be numbers above 0.`;
+        if (i && (k === 'tops' ? (r.w < rows[i - 1].w || r.l < rows[i - 1].l) : r.max <= rows[i - 1].max)) return `${CHART_NAMES[k]} chart: limits must keep increasing (check “${label}”).`;
+      }
+    }
+    return '';
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-chart-tab]');
+    if (t){ chartTab = t.dataset.chartTab; renderChartEditor(); return; }
+    if (!e.target.closest('#view-settings')) return;
+    const del = e.target.closest('[data-c-del]');
+    if (del){ chartDraft[chartTab].splice(Number(del.dataset.cDel), 1); renderChartEditor(); markSettingsDirty(); return; }
+    if (e.target.closest('#chartAdd')){
+      const rows = chartDraft[chartTab], last = rows[rows.length - 1] || {};
+      rows.push(chartTab === 'tops' ? { w: (last.w || 18) + 1, l: (last.l || 25) + 1, size: '' } : { max: (last.max || 20) + (chartTab === 'caps' ? 1 : 3), size: '' });
+      renderChartEditor(); markSettingsDirty(); return;
+    }
+    if (e.target.closest('#chartReset')){
+      if (!confirm(`Reset the ${CHART_NAMES[chartTab]} chart to the default sizes?`)) return;
+      chartDraft[chartTab] = cloneJson(DEFAULT_SIZE_CHARTS[chartTab]); renderChartEditor(); markSettingsDirty();
+    }
+  });
+  $s('chartEditor').addEventListener('input', (e) => {
+    const k = e.target.dataset.c, tr = e.target.closest('tr[data-ci]');
+    if (!k || !tr) return;
+    const row = chartDraft[chartTab][Number(tr.dataset.ci)];
+    row[k] = k === 'size' ? e.target.value : Number(e.target.value);
+    markSettingsDirty();
+  });
+
+
   function confirmDiscardSettings(){
     if (!settingsDirty) return true;
     if (confirm('You have unsaved changes to your settings. Discard them?')){ settingsDirty = false; fillSettingsForm(settings); return true; }
@@ -2305,6 +2497,7 @@ match /counters/{id} {
     $s('setAutoNumber').checked = c.autoNumber; $s('setAutoDates').checked = c.autoDates;
     $s('setOffset').value = c.startOffsetDays; $s('setStartTime').value = c.startTime; $s('setHours').value = c.durationHours;
     $s('setConfirm').checked = c.confirmStatus; $s('setAutoClose').checked = c.autoCloseEnded;
+    chartDraft = cloneJson(c.sizeCharts || DEFAULT_SIZE_CHARTS); renderChartEditor();
     $s('setDirtyBadge').style.display = settingsDirty ? 'inline-flex' : 'none';
     renderSettingsPreview();
   }
@@ -2313,11 +2506,13 @@ match /counters/{id} {
       hotLimit: Number($s('setHotLimit').value), numberPad: Number($s('setPad').value), nameTemplate: $s('setTemplate').value.trim(),
       autoNumber: $s('setAutoNumber').checked, autoDates: $s('setAutoDates').checked,
       startOffsetDays: Number($s('setOffset').value), startTime: $s('setStartTime').value, durationHours: Number($s('setHours').value),
-      confirmStatus: $s('setConfirm').checked, autoCloseEnded: $s('setAutoClose').checked
+      confirmStatus: $s('setConfirm').checked, autoCloseEnded: $s('setAutoClose').checked,
+      sizeCharts: cloneJson(chartDraft)
     };
   }
   function settingsProblem(c){
     if (!(c.hotLimit >= 1 && c.hotLimit <= MAX_HOT_LIMIT)) return `Max hot items must be between 1 and ${MAX_HOT_LIMIT}.`;
+    const cp = chartProblem(c.sizeCharts); if (cp) return cp;
     if (c.nameTemplate.length > 120) return 'The Batch Name template is too long (120 characters max).';
     if (c.autoDates){
       if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(c.startTime)) return 'Enter a valid start time.';
@@ -2369,9 +2564,15 @@ match /counters/{id} {
     btn.dataset.loading = 'true';
     try{
       await setDoc(settingsRef, { ...clean, updatedAt: new Date().toISOString() });
+      const chartsChanged = JSON.stringify(settings.sizeCharts) !== JSON.stringify(clean.sizeCharts);
       settings = clean; settingsDirty = false;
+      applySizeCharts(settings.sizeCharts);
       fillSettingsForm(settings);
       showToast({ type: 'ok', title: 'Settings Saved', message: 'New batches will start with these defaults.' });
+      if (chartsChanged && confirm('Your size charts changed.\n\nRecalculate the saved size of existing items now? (Items keep their old size until you do.)')){
+        const n = await recalcSizes();
+        showToast({ type: 'ok', title: 'Sizes Recalculated', message: `${n} item size${n === 1 ? '' : 's'} updated.` });
+      }
     } catch(err){
       console.error(err);
       showToast({ type: 'err', title: 'Save Failed', message: err && err.code === 'permission-denied' ? 'Firestore rules for counters are missing.' : 'Check your connection and try again.', duration: 7000 });
@@ -2403,6 +2604,11 @@ match /counters/{id} {
     await changeBatchStatus(ids, 'Closed', { silent });
   }
   $s('toolEnded').addEventListener('click', () => runTool('toolEnded', () => closeEndedBatches(false)));
+  $s('toolSizes').addEventListener('click', () => runTool('toolSizes', async () => {
+    const n = await recalcSizes();
+    if (currentCategoryId) await loadProductsForCategory(currentCategoryId);
+    showToast({ type: 'ok', title: 'Sizes Recalculated', message: n ? `${n} item size${n === 1 ? '' : 's'} updated.` : 'Every item already has the right size.' });
+  }));
   $s('toolSync').addEventListener('click', () => runTool('toolSync', async () => {
     await Promise.all([fetchAllProducts(), fetchBatches()]);
     await publishLiveMirror();
@@ -2811,8 +3017,8 @@ match /counters/{id} {
         const reason = lockReason(p);
         const checked = pickerSel.has(p.id);
         const blocked = !!reason || (!checked && left <= 0);
-        const s = computeSize(p.length, p.width);
-        const size = (s && s !== 'OVER') ? s : (p.size || '—');
+        const s = p.size || computeSize(p.length, p.width, profileOfProduct(p));
+        const size = (s && s !== 'OVER') ? s : '—';
         return `
         <label class="pick-row ${blocked ? 'blocked' : ''} ${checked ? 'checked' : ''}">
           <input type="checkbox" data-pid="${esc(p.id)}" ${checked ? 'checked' : ''} ${blocked ? 'disabled' : ''}>
@@ -2949,8 +3155,10 @@ match /counters/{id} {
           <h3>${cat.name}</h3>
           ${cat.code ? `<span class="code-chip" title="SKU prefix">${SKU_PREFIX}-${cat.code}</span>` : ''}
           <span class="count">${count} product${count === 1 ? '' : 's'}</span>
+          <span class="size-chip" title="${esc(SIZE_PROFILES[profileKeyOfCat(cat)].name)}">Sizing: ${esc(SIZE_PROFILES[profileKeyOfCat(cat)].short)}</span>
           <div class="category-card-actions">
             <button type="button" data-edit-cat="${cat.id}">Rename</button>
+            <button type="button" data-size-cat="${cat.id}">Sizing</button>
             <button type="button" class="danger" data-delete-cat="${cat.id}">Delete</button>
           </div>
         </div>`;
@@ -2974,6 +3182,13 @@ match /counters/{id} {
         }
       });
     });
+    grid.querySelectorAll('[data-size-cat]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cat = categories.find(c => c.id === btn.dataset.sizeCat);
+        if (cat) openSizingDialog(cat);
+      });
+    });
     grid.querySelectorAll('[data-delete-cat]').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -2990,14 +3205,29 @@ match /counters/{id} {
     });
   }
 
+  // The sizing type is suggested from the category name (e.g. "Shorts" → Shorts & Pants) until you pick one yourself.
+  let profileTouched = false;
+  function updateNewCategoryNote(suggested){
+    const k = document.getElementById('newCategoryProfile').value, p = SIZE_PROFILES[k];
+    document.getElementById('newCategoryNote').innerHTML = `<strong>${esc(p.name)}</strong>${suggested ? ' (suggested from the name)' : ''}: ${esc(p.desc)}`;
+  }
+  document.getElementById('newCategoryName').addEventListener('input', (e) => {
+    if (profileTouched) return;
+    document.getElementById('newCategoryProfile').value = e.target.value.trim() ? suggestProfile(e.target.value) : 'tops';
+    updateNewCategoryNote(!!e.target.value.trim());
+  });
+  document.getElementById('newCategoryProfile').addEventListener('change', () => { profileTouched = true; updateNewCategoryNote(false); });
+  updateNewCategoryNote(false);
+
   document.getElementById('addCategoryBtn').addEventListener('click', async () => {
     const input = document.getElementById('newCategoryName');
     const name = input.value.trim();
     if (!name) return;
     try{
       const taken = new Set(categories.map(c => c.code).filter(Boolean));
-      await addDoc(categoriesCol, { name, code: makeCategoryCode(name, taken), nextSeq: 1, createdAt: new Date().toISOString() });
-      input.value = '';
+      const sizeProfile = document.getElementById('newCategoryProfile').value;
+      await addDoc(categoriesCol, { name, code: makeCategoryCode(name, taken), nextSeq: 1, sizeProfile, createdAt: new Date().toISOString() });
+      input.value = ''; profileTouched = false; document.getElementById('newCategoryProfile').value = 'tops'; updateNewCategoryNote(false);
       showToast({ type: 'ok', title: 'Category Added', message: `"${name}" is ready for products.` });
       refreshCategoriesView();
     } catch(err){
@@ -3072,6 +3302,69 @@ match /counters/{id} {
     return { id: newRef.id, sku };
   }
 
+  // ---------- change a category's sizing type ----------
+  const sizingOverlay = document.getElementById('sizingOverlay');
+  let sizingCat = null, sizingPick = null;
+  function renderSizingOptions(){
+    document.getElementById('sizingOptions').innerHTML = Object.values(SIZE_PROFILES).map(p => `
+      <label class="size-opt ${sizingPick === p.key ? 'on' : ''}"><input type="radio" name="sizingType" value="${p.key}" ${sizingPick === p.key ? 'checked' : ''}>
+        <div><strong>${esc(p.name)}</strong><span>${esc(p.desc)}</span></div></label>`).join('');
+    const n = sizingCat ? allProductsForCounts.filter(x => x.categoryId === sizingCat.id).length : 0;
+    const w = document.getElementById('sizingWarn');
+    const changed = sizingCat && sizingPick !== profileKeyOfCat(sizingCat);
+    w.style.display = changed && n ? 'block' : 'none';
+    w.textContent = changed && n ? `${n} existing item${n === 1 ? '' : 's'} in this category will have ${n === 1 ? 'its' : 'their'} size recalculated from the measurements already entered. The numbers stay in the same fields (Length stays Length; Width becomes Waist or Head circumference), so please review them.` : '';
+  }
+  function openSizingDialog(cat){
+    sizingCat = cat; sizingPick = profileKeyOfCat(cat);
+    document.getElementById('sizingSub').textContent = `Category: ${cat.name}`;
+    renderSizingOptions();
+    sizingOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+  }
+  function closeSizingDialog(){ sizingOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.getElementById('sizingOptions').addEventListener('change', (e) => { if (e.target.name === 'sizingType'){ sizingPick = e.target.value; renderSizingOptions(); } });
+  document.getElementById('sizingClose').addEventListener('click', closeSizingDialog);
+  document.getElementById('sizingCancel').addEventListener('click', closeSizingDialog);
+  sizingOverlay.addEventListener('mousedown', (e) => { if (e.target === sizingOverlay) closeSizingDialog(); });
+  document.getElementById('categorySizingBtn').addEventListener('click', () => { const c = currentCategory(); if (c) openSizingDialog(c); });
+
+  // Re-works the saved size of products (all, or one category) from their measurements.
+  async function recalcSizes(catId){
+    await fetchAllProducts();
+    if (!categories.length) await refreshCategoriesView();
+    let n = 0;
+    for (const p of hotProducts){
+      if (catId && p.categoryId !== catId) continue;
+      const pk = profileKeyOfCat(p.categoryId);
+      if (pk === 'manual') continue;
+      const c = computeSize(p.length, p.width, pk), next = c === 'OVER' ? '' : c;
+      if ((p.size || '') !== next){ await updateDoc(doc(db, 'products', p.id), { size: next }); p.size = next; n++; }
+    }
+    if (n){
+      try{ await fetchBatches(); if (allBatches.some(b => b.status === 'Active')) await publishLiveMirror(); } catch(err){ console.error('Live copy not refreshed:', err); }
+    }
+    return n;
+  }
+  document.getElementById('sizingSave').addEventListener('click', async () => {
+    if (!sizingCat) return;
+    const cat = sizingCat, pick = sizingPick, btn = document.getElementById('sizingSave');
+    if (pick === profileKeyOfCat(cat)){ closeSizingDialog(); return; }
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try{
+      await updateDoc(doc(db, 'categories', cat.id), { sizeProfile: pick });
+      cat.sizeProfile = pick;
+      const n = await recalcSizes(cat.id);
+      closeSizingDialog();
+      showCategoryChip(cat);
+      renderCategoryGrid();
+      if (currentCategoryId === cat.id){ draft = null; dirty = false; await loadProductsForCategory(cat.id); setProductView('folder'); }
+      showToast({ type: 'ok', title: 'Sizing Updated', message: `${cat.name} now uses “${SIZE_PROFILES[pick].name}”.${n ? ` ${n} item size${n === 1 ? '' : 's'} recalculated.` : ''}`, duration: 7000 });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Could Not Change Sizing', message: 'Check your Firestore rules and try again.' });
+    } finally { btn.disabled = false; btn.textContent = 'Save sizing type'; }
+  });
+
   // Backfills SKUs for products that were added before this feature, oldest first.
   async function assignMissingSkus(){
     const cat = currentCategory();
@@ -3145,7 +3438,9 @@ match /counters/{id} {
     return '₱' + Number(v).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
   function sizeText(p){
-    const s = computeSize(p.length, p.width);
+    const prof = profileOfProduct(p);
+    if (prof === 'manual') return p.size || '';
+    const s = computeSize(p.length, p.width, prof);
     return s === 'OVER' ? 'Over chart' : s;
   }
   function statusPill(s){
@@ -3174,6 +3469,15 @@ match /counters/{id} {
     { key:'remarks',   label:'Remarks',          type:'text', val:p => p.remarks }
   ];
 
+  // The two measurement columns follow the category's sizing type (Waist/Length, Head circumference…).
+  function folderColumns(){
+    const prof = SIZE_PROFILES[curProfileKey()];
+    const meas = prof.measures.map(m => ({ key: m.slot, label: m.label, type: 'num', val: p => p[m.slot], fmt: v => `${v} in` }));
+    const out = COLUMNS.filter(c => c.key !== 'length' && c.key !== 'width');
+    out.splice(out.findIndex(c => c.key === 'size'), 0, ...meas);
+    return out;
+  }
+
   function isEmptyVal(col, v){
     if (v === '' || v === null || v === undefined) return true;
     if (col.type === 'num' && isNaN(Number(v))) return true;
@@ -3198,7 +3502,8 @@ match /counters/{id} {
       return [p.sku, p.productName, p.item, p.brand, p.soldTo, p.waybill, p.remarks, sizeText(p)]
         .some(v => String(v || '').toLowerCase().includes(q));
     });
-    const col = COLUMNS.find(c => c.key === sortKey) || COLUMNS[0];
+    const FC = folderColumns();
+    const col = FC.find(c => c.key === sortKey) || FC[0];
     const dir = sortDir === 'asc' ? 1 : -1;
     list.sort((a, b) => {
       const va = col.val(a), vb = col.val(b);
@@ -3213,7 +3518,8 @@ match /counters/{id} {
   }
 
   function renderFolder(){
-    document.getElementById('folderThead').innerHTML = COLUMNS.map(c =>
+    const FC = folderColumns();
+    document.getElementById('folderThead').innerHTML = FC.map(c =>
       `<th class="${c.type === 'num' ? 'num' : ''}" data-sort="${c.key}">${c.label}${
         sortKey === c.key ? `<span class="arrow">${sortDir === 'asc' ? '▲' : '▼'}</span>` : ''
       }</th>`).join('');
@@ -3224,10 +3530,10 @@ match /counters/{id} {
       const msg = categoryProducts.length === 0
         ? 'No products in this category yet. Click “+ Add Product” to create the first one — its SKU is assigned automatically.'
         : 'No items match your search or filter.';
-      tbody.innerHTML = `<tr><td class="empty-state" colspan="${COLUMNS.length}">${msg}</td></tr>`;
+      tbody.innerHTML = `<tr><td class="empty-state" colspan="${FC.length}">${msg}</td></tr>`;
     } else {
       tbody.innerHTML = list.map(p =>
-        `<tr tabindex="0" data-id="${p.id}" class="${p.id === selectedId ? 'selected' : ''}">${COLUMNS.map(c => cellHtml(c, p)).join('')}</tr>`
+        `<tr tabindex="0" data-id="${p.id}" class="${p.id === selectedId ? 'selected' : ''}">${FC.map(c => cellHtml(c, p)).join('')}</tr>`
       ).join('');
     }
 
@@ -3344,22 +3650,31 @@ match /counters/{id} {
   //  Import products (CSV / Excel) into the open category — SKUs are always auto-generated
   // =====================================================================
   const IMP_MAX_ROWS = 1000, IMP_CHUNK = 100;
-  const IMP_FIELDS = [
-    { key: 'sku', label: 'SKU (leave blank)', aliases: ['sku', 'skuleaveblank', 'productcode'] },
-    { key: 'productName', label: 'Product Name', aliases: ['productname', 'name', 'product', 'title'] },
-    { key: 'brand', label: 'Brand', aliases: ['brand'] },
-    { key: 'item', label: 'Item', aliases: ['item', 'itemdescription', 'description'] },
-    { key: 'length', label: 'Length (in)', aliases: ['lengthin', 'length', 'lengthinches'] },
-    { key: 'width', label: 'Width (in)', aliases: ['widthin', 'width', 'widthinches'] },
-    { key: 'quantity', label: 'Quantity on Hand', aliases: ['quantityonhand', 'quantity', 'qty', 'qtyonhand'] },
-    { key: 'status', label: 'Status', aliases: ['status'] },
-    { key: 'investmentPrice', label: 'Investment Price', aliases: ['investmentprice', 'investment', 'cost', 'costprice'] },
-    { key: 'price', label: 'Starting Bid', aliases: ['startingbid', 'startingbidprice', 'startingprice', 'bid', 'price'] },
-    { key: 'soldTo', label: 'Sold To', aliases: ['soldto', 'buyer'] },
-    { key: 'priceSold', label: 'Price Sold', aliases: ['pricesold', 'soldprice'] },
-    { key: 'waybill', label: 'Waybill No.', aliases: ['waybillno', 'waybill', 'waybillnumber'] },
-    { key: 'remarks', label: 'Remarks', aliases: ['remarks', 'notes', 'note'] }
-  ];
+  // Columns follow the category's sizing type: Tops = Length/Width · Bottoms = Waist/Length · Caps = Head circumference · Manual = Length/Width/Size
+  function impFields(){
+    const prof = curProfileKey();
+    const L = { key: 'length', label: 'Length (in)', aliases: ['lengthin', 'length', 'lengthinches', 'outseam', 'outseamin', 'inseam', 'inseamin'] };
+    const W = { key: 'width', label: 'Width (in)', aliases: ['widthin', 'width', 'widthinches', 'waist', 'waistin', 'waistinches', 'headcircumference', 'headcircumferencein', 'headsize', 'circumference', 'circumferencein', 'pittopit'] };
+    const meas = prof === 'bottoms' ? [{ ...W, label: 'Waist (in)' }, { ...L, label: 'Length (in)' }]
+      : prof === 'caps' ? [{ ...W, label: 'Head Circumference (in)' }] : [L, W];
+    return [
+      { key: 'sku', label: 'SKU (leave blank)', aliases: ['sku', 'skuleaveblank', 'productcode'] },
+      { key: 'productName', label: 'Product Name', aliases: ['productname', 'name', 'product', 'title'] },
+      { key: 'brand', label: 'Brand', aliases: ['brand'] },
+      { key: 'item', label: 'Item', aliases: ['item', 'itemdescription', 'description'] },
+      ...meas,
+      { key: 'size', label: 'Size', aliases: ['size', 'sizing'], onlyManual: true },
+      { key: 'quantity', label: 'Quantity on Hand', aliases: ['quantityonhand', 'quantity', 'qty', 'qtyonhand'] },
+      { key: 'status', label: 'Status', aliases: ['status'] },
+      { key: 'investmentPrice', label: 'Investment Price', aliases: ['investmentprice', 'investment', 'cost', 'costprice'] },
+      { key: 'price', label: 'Starting Bid', aliases: ['startingbid', 'startingbidprice', 'startingprice', 'bid', 'price'] },
+      { key: 'soldTo', label: 'Sold To', aliases: ['soldto', 'buyer'] },
+      { key: 'priceSold', label: 'Price Sold', aliases: ['pricesold', 'soldprice'] },
+      { key: 'waybill', label: 'Waybill No.', aliases: ['waybillno', 'waybill', 'waybillnumber'] },
+      { key: 'remarks', label: 'Remarks', aliases: ['remarks', 'notes', 'note'] }
+    ];
+  }
+  const impLabel = (k) => (impFields().find(f => f.key === k) || { label: k }).label.replace(/ \(in\)$/, '');
   const IMP_EXAMPLE = 'EXAMPLE - delete this row';
   const impOverlay = document.getElementById('importOverlay');
   const imp = { step: 'ask', fileName: '', rows: [], unknown: [], filter: 'all', progress: 0, result: null, busy: false };
@@ -3428,9 +3743,10 @@ match /counters/{id} {
   function impValidate(matrix){
     let hi = matrix.findIndex(r => r.some(c => String(c).trim() !== ''));
     if (hi < 0) return { fatal: 'The file is empty.' };
+    const FIELDS = impFields(), profKey = curProfileKey(), prof = SIZE_PROFILES[profKey];
     const map = {}, unknown = [];
     matrix[hi].forEach((h, i) => {
-      const f = IMP_FIELDS.find(x => x.aliases.includes(impNorm(h)));
+      const f = FIELDS.find(x => x.aliases.includes(impNorm(h)));
       if (f && map[f.key] == null) map[f.key] = i; else if (!f && String(h).trim()) unknown.push(String(h).trim());
     });
     if (map.productName == null) return { fatal: 'I couldn\'t find a “Product Name” column in the first row. Download the template to see the exact layout.' };
@@ -3453,7 +3769,7 @@ match /counters/{id} {
         if (isNaN(v) || v < min || v > max || (int && !Number.isInteger(v))){ errors.push(`${label} must be ${int ? 'a whole number' : 'a number'}${min >= 0 ? ' ≥ 0' : ''}${max < Infinity ? ` and ≤ ${max}` : ''}.`); return null; }
         return v;
       };
-      const length = num('length', 'Length', { max: 200 }), width = num('width', 'Width', { max: 200 });
+      const length = num('length', impLabel('length'), { max: 200 }), width = num('width', impLabel('width'), { max: 200 });
       let quantity = num('quantity', 'Quantity on Hand', { int: true });
       if (g('quantity') === '') quantity = 1;
       const invest = num('investmentPrice', 'Investment Price'), bid = num('price', 'Starting Bid');
@@ -3473,10 +3789,18 @@ match /counters/{id} {
       if (seen.has(key)) warnings.push(`Looks like a duplicate of row ${seen.get(key)} in this file.`); else seen.set(key, n);
       const ex = existing.get([g('productName'), g('brand'), g('item')].map(impNorm).join('|'));
       if (ex) warnings.push(`Same name, brand and item as ${ex || 'an existing product'} in this category.`);
-      const size = computeSize(length, width);
+      let size;
+      if (profKey === 'manual') size = g('size').slice(0, 24);
+      else {
+        if (g('size')) warnings.push('Size ignored — it is calculated automatically from the measurements.');
+        const c = computeSize(length, width, profKey);
+        size = c === 'OVER' ? '' : c;
+        if (c === '' && !errors.length) warnings.push(`No size calculated — ${prof.measures.map(m => m.label.replace(/ \(in\)$/, '')).join(' / ')} missing.`);
+        else if (c === 'OVER') warnings.push('Measurements are over the size chart — no size assigned.');
+      }
       row.p = {
         productName: name, brand: g('brand'), item: g('item'), remarks: g('remarks'),
-        length, width, size: size === 'OVER' ? '' : size, quantity: quantity == null ? 1 : quantity,
+        length, width, size, quantity: quantity == null ? 1 : quantity,
         investmentPrice: invest, price: bid == null ? 0 : bid, status: status || g('status'),
         soldTo: status === 'Claimed' ? soldTo : '', priceSold: status === 'Claimed' ? priceSold : null,
         waybill: status === 'Claimed' ? waybill : ''
@@ -3492,10 +3816,18 @@ match /counters/{id} {
   // ---------- template ----------
   function impTemplateCsv(){
     const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
-    const head = IMP_FIELDS.map(f => f.label);
-    const ex1 = ['', IMP_EXAMPLE, 'Nike', 'Windbreaker jacket, blue', 26, 19, 1, 'Available', 350, 800, '', '', '', 'Minor wear on cuff'];
-    const ex2 = ['', IMP_EXAMPLE, 'Adidas', 'Track jacket, black', 27, 20, 1, 'Claimed', 300, 900, 'Juan Dela Cruz', 950, '', 'Sold via Messenger'];
-    return '﻿' + [head, ex1, ex2].map(r => r.map(q).join(',')).join('\r\n');
+    const prof = curProfileKey();
+    const fields = impFields().filter(f => !f.onlyManual || prof === 'manual');
+    const sample = {
+      tops: [{ brand: 'Nike', item: 'Windbreaker jacket, blue', length: 26, width: 19 }, { brand: 'Adidas', item: 'Track jacket, black', length: 27, width: 20 }],
+      bottoms: [{ brand: 'Levi\'s', item: 'Denim shorts, blue', length: 18, width: 32 }, { brand: 'Dickies', item: 'Work pants, khaki', length: 31, width: 34 }],
+      caps: [{ brand: 'New Era', item: '59Fifty fitted cap, black', length: '', width: 22.5 }, { brand: 'Nike', item: 'Dri-FIT cap, white', length: '', width: 21.5 }],
+      manual: [{ brand: 'Nike', item: 'Air Force 1, white', length: '', width: '', size: 'US 9' }, { brand: 'Coach', item: 'Leather crossbody bag', length: 10, width: 8, size: 'One Size' }]
+    }[prof];
+    const base1 = { sku: '', productName: IMP_EXAMPLE, quantity: 1, status: 'Available', investmentPrice: 350, price: 800, soldTo: '', priceSold: '', waybill: '', remarks: 'Minor wear' };
+    const base2 = { sku: '', productName: IMP_EXAMPLE, quantity: 1, status: 'Claimed', investmentPrice: 300, price: 900, soldTo: 'Juan Dela Cruz', priceSold: 950, waybill: '', remarks: 'Sold via Messenger' };
+    const rowOf = (o) => fields.map(f => o[f.key] == null ? '' : o[f.key]);
+    return '﻿' + [fields.map(f => f.label), rowOf({ ...base1, ...sample[0] }), rowOf({ ...base2, ...sample[1] })].map(r => r.map(q).join(',')).join('\r\n');
   }
   function impDownloadTemplate(){
     const cat = currentCategory();
@@ -3523,13 +3855,20 @@ match /counters/{id} {
   }
   function closeImport(){ if (imp.busy) return; impOverlay.classList.remove('open'); document.body.style.overflow = ''; }
 
+  function impGuideMeasureRows(){
+    const k = curProfileKey(), p = SIZE_PROFILES[k];
+    const names = p.measures.map(m => m.label.replace(/ \(in\)$/, '')).join(' · ');
+    return k === 'manual'
+      ? [[names, 'Optional', 'Inches.'], ['Size', 'Optional', 'Type the size yourself (One Size, 42, US 9…).']]
+      : [[names, 'Needed for the size', `Inches. The Size is calculated for you from the ${p.name} chart.`]];
+  }
   function impGuideHtml(){
     const cat = currentCategory();
     const rows = [
       ['SKU', 'Leave blank', `Generated automatically for ${esc(cat ? cat.name : 'this category')} (${SKU_PREFIX}-${esc(cat && cat.code || '###')}-0001, 0002…). Anything typed here is ignored.`],
       ['Product Name', 'Required', 'The item\'s name.'],
       ['Brand · Item', 'Optional', 'Brand and a short description.'],
-      ['Length · Width', 'Optional', 'Inches. The Size (XS–XXL) is calculated for you.'],
+      ...impGuideMeasureRows(),
       ['Quantity on Hand', 'Optional', 'Whole number. Blank = 1.'],
       ['Status', 'Optional', 'Available, 1 Left or Claimed. Blank = Available.'],
       ['Investment Price · Starting Bid', 'Optional', 'Numbers only (₱ and commas are fine).'],
@@ -3735,7 +4074,8 @@ match /counters/{id} {
     const d = draft;
     if (!d) return;
     const cat = currentCategory();
-    const sd = sizeDisplay(computeSize(d.length, d.width));
+    const profKey = curProfileKey(), prof = SIZE_PROFILES[profKey];
+    const sd = sizeDisplay(computeSize(d.length, d.width, profKey), profKey);
     const isClaimed = d.status === 'Claimed';
     const imgs = d.images || [];
 
@@ -3809,11 +4149,13 @@ match /counters/{id} {
               <div><label>SKU</label><div class="readonly-box mono">${esc(d.sku || 'Not assigned yet')}</div></div>
               <div><label>Category</label><div class="readonly-box">${esc(cat ? cat.name : '—')}</div></div>
             </div>
-            <div class="grid3">
-              <div><label>Length (in)</label><input type="number" min="0" step="0.1" data-a-field="length" value="${esc(d.length)}" placeholder="26"></div>
-              <div><label>Width (in)</label><input type="number" min="0" step="0.1" data-a-field="width" value="${esc(d.width)}" placeholder="19"></div>
-              <div><label>Size (auto)</label><div class="readonly-box ${sd.empty ? 'empty' : ''}" id="attrSize">${sd.text}</div></div>
+            <div class="${prof.measures.length === 2 ? 'grid3' : 'grid2'}">
+              ${prof.measures.map(m => `<div><label>${esc(m.label)}</label><input type="number" min="0" step="0.1" data-a-field="${m.slot}" value="${esc(d[m.slot])}" placeholder="${esc(m.ph || '')}"></div>`).join('')}
+              ${prof.auto
+                ? `<div><label>Size (auto)</label><div class="readonly-box ${sd.empty ? 'empty' : ''}" id="attrSize">${esc(sd.text)}</div></div>`
+                : `<div><label>Size</label><input type="text" list="sizeSuggest" data-a-field="size" value="${esc(d.size)}" placeholder="One Size, 42, US 9…" maxlength="24"><datalist id="sizeSuggest">${['XS', 'S', 'M', 'L', 'XL', '2XL', 'One Size', 'Free Size'].map(x => `<option value="${x}">`).join('')}</datalist></div>`}
             </div>
+            <p class="fld-note" style="margin-top:-6px;">Sizing: <strong>${esc(prof.name)}</strong>${prof.auto ? ' — size is calculated from the measurements' : ' — type the size yourself'}. Change it from the category's <em>Sizing</em> button.</p>
           </div>
 
           <div class="attr-card">
@@ -3859,10 +4201,10 @@ match /counters/{id} {
     markDirty();
 
     if (f === 'length' || f === 'width'){
-      const sd = sizeDisplay(computeSize(draft.length, draft.width));
+      const pk = curProfileKey();
+      const sd = sizeDisplay(computeSize(draft.length, draft.width, pk), pk);
       const box = document.getElementById('attrSize');
-      box.textContent = sd.text;
-      box.classList.toggle('empty', sd.empty);
+      if (box){ box.textContent = sd.text; box.classList.toggle('empty', sd.empty); }
     }
     if (f === 'status'){
       const sold = document.getElementById('attrSold');
@@ -3963,7 +4305,8 @@ match /counters/{id} {
 
     btn.dataset.loading = 'true';
     try{
-      const size = computeSize(d.length, d.width);
+      const pk = curProfileKey();
+      const size = pk === 'manual' ? String(d.size || '').trim() : computeSize(d.length, d.width, pk);
       const payload = {
         productName: (d.productName || '').trim(),
         brand: d.brand || '',
@@ -4040,6 +4383,7 @@ match /counters/{id} {
 
   function showCategoryChip(cat){
     document.getElementById('categoryCodeChip').textContent = cat.code ? `${SKU_PREFIX}-${cat.code}-####` : '…';
+    document.getElementById('categorySizingBtn').textContent = `Sizing: ${SIZE_PROFILES[profileKeyOfCat(cat)].short} ✎`;
   }
 
   async function openCategoryDetail(cat){
