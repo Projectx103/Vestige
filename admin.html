@@ -1109,6 +1109,7 @@ match /counters/{id} {
           <div class="card">
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
+            <div class="tool-row"><div><div class="set-title">Secure private product data</div><div class="set-desc" id="toolSecureInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolSecure">Secure now</button></div>
             <div class="tool-row"><div><div class="set-title">Recalculate all sizes</div><div class="set-desc">Re-works every item's saved size from its measurements using its category's sizing type and the charts above. Manual-size categories are never touched.</div></div><button type="button" class="btn btn-outline" id="toolSizes">Recalculate sizes</button></div>
             <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
             <div class="tool-row"><div><div class="set-title">Repair batch index</div><div class="set-desc">Rebuilds the Control No. counter and the Batch Number / Name lookup from your saved batches. Safe to run; it also reports any duplicates.</div></div><button type="button" class="btn btn-outline" id="toolRepair">Repair index</button></div>
@@ -1233,7 +1234,7 @@ match /counters/{id} {
     getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction
+    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction, deleteField
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
@@ -1242,6 +1243,25 @@ match /counters/{id} {
   const batchRef = doc(db, "vestige", "liveBatch");
   const categoriesCol = collection(db, "categories");
   const productsCol = collection(db, "products");
+  // Private business data (cost, buyer, sale price, waybill, remarks) lives in an admin-only collection,
+  // never in the public `products` documents that the shop can read.
+  const privateCol = collection(db, "productPrivate");
+  const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks'];
+  function splitPrivate(obj){
+    const pub = {}, priv = {};
+    for (const k of Object.keys(obj)) (PRIVATE_FIELDS.includes(k) ? priv : pub)[k] = obj[k];
+    return { pub, priv };
+  }
+  const hasPrivateData = (o) => PRIVATE_FIELDS.some(k => o[k] !== undefined && o[k] !== null && o[k] !== '');
+  const dropPrivateFields = () => Object.fromEntries(PRIVATE_FIELDS.map(k => [k, deleteField()]));
+  async function fetchPrivateMap(){
+    const map = {};
+    const snap = await getDocs(privateCol);
+    snap.docs.forEach(d => { map[d.id] = d.data(); });
+    return map;
+  }
+  // Merges the admin-only data onto the public product. (Un-migrated products still carry the values publicly; the private copy wins.)
+  const withPrivate = (d, privMap) => normalizeProduct(d.id, { ...d.data(), ...(privMap[d.id] || {}) });
 
   const CLOUDINARY_CLOUD_NAME = "dxv11m11i";
   const CLOUDINARY_UPLOAD_PRESET = "vestige_signed";
@@ -1634,8 +1654,8 @@ match /counters/{id} {
   }
 
   async function fetchAllProducts(){
-    const snap = await getDocs(productsCol);
-    hotProducts = snap.docs.map(d => normalizeProduct(d.id, d.data()));
+    const [snap, privMap] = await Promise.all([getDocs(productsCol), fetchPrivateMap()]);
+    hotProducts = snap.docs.map(d => withPrivate(d, privMap));
     return hotProducts;
   }
 
@@ -2546,7 +2566,37 @@ match /counters/{id} {
       : 'No Active batch has passed its Bidding End.';
     $s('toolEnded').disabled = !ended.length;
   }
+  // ---------- private data: move cost / buyer / sale price / waybill / remarks out of the public catalog ----------
+  async function exposedProducts(){
+    const snap = await getDocs(productsCol);
+    return snap.docs.filter(d => PRIVATE_FIELDS.some(k => k in d.data()));
+  }
+  async function refreshSecureInfo(){
+    const info = $s('toolSecureInfo'); if (!info) return;
+    try{
+      const n = (await exposedProducts()).length;
+      info.innerHTML = n ? `<strong style="color:var(--danger,#a33);">${n} item${n === 1 ? '' : 's'} still store cost, buyer or waybill details in the public catalog.</strong> Move them to the admin-only vault.`
+        : '✓ All private details are stored in the admin-only vault.';
+      $s('toolSecure').disabled = !n;
+    } catch(err){ info.textContent = 'Could not check (permissions or connection).'; }
+  }
+  async function securePrivateData(){
+    const rows = await exposedProducts();
+    let moved = 0;
+    for (const d of rows){
+      const data = d.data(), { priv } = splitPrivate(data);
+      const existing = await getDoc(doc(db, 'productPrivate', d.id));
+      const merged = { ...priv, ...(existing.exists() ? existing.data() : {}), updatedAt: new Date().toISOString() };
+      await runTransaction(db, async (tx) => {
+        tx.set(doc(db, 'productPrivate', d.id), merged);
+        tx.update(doc(db, 'products', d.id), dropPrivateFields());
+      });
+      moved++;
+    }
+    return moved;
+  }
   async function refreshSettingsView(){
+    refreshSecureInfo();
     try{ await Promise.all([fetchBatches(), loadSettings()]); await refreshControlPreview(); } catch(err){ console.error(err); }
     if (!settingsDirty) fillSettingsForm(settings);
     renderSettingsOverview();
@@ -2604,6 +2654,12 @@ match /counters/{id} {
     await changeBatchStatus(ids, 'Closed', { silent });
   }
   $s('toolEnded').addEventListener('click', () => runTool('toolEnded', () => closeEndedBatches(false)));
+  $s('toolSecure').addEventListener('click', () => runTool('toolSecure', async () => {
+    const n = await securePrivateData();
+    await fetchAllProducts();
+    if (currentCategoryId) await loadProductsForCategory(currentCategoryId);
+    showToast({ type: 'ok', title: 'Private Data Secured', message: n ? `${n} item${n === 1 ? '' : 's'} moved to the admin-only vault. The public catalog no longer holds cost, buyer or waybill.` : 'Nothing to move.', duration: 7000 });
+  }).then(refreshSecureInfo));
   $s('toolSizes').addEventListener('click', () => runTool('toolSizes', async () => {
     const n = await recalcSizes();
     if (currentCategoryId) await loadProductsForCategory(currentCategoryId);
@@ -3291,10 +3347,10 @@ match /counters/{id} {
       sku = formatSku(cd.code, seq);
       tx.set(newRef, {
         categoryId: catId, sku, skuSeq: seq,
-        productName: '', brand: '', item: '', remarks: '',
+        productName: '', brand: '', item: '',
         length: null, width: null, size: '',
-        quantity: 1, investmentPrice: null, price: 0,
-        status: 'Available', soldTo: '', priceSold: null, waybill: '',
+        quantity: 1, price: 0,
+        status: 'Available',
         images: [], video: '', createdAt: new Date().toISOString()
       });
       tx.update(catRef, { nextSeq: seq + 1 });
@@ -3984,7 +4040,9 @@ match /counters/{id} {
             let seq = cd.nextSeq || 1; skus = [];
             for (const r of chunk){
               const sku = formatSku(cd.code, seq);
-              tx.set(doc(productsCol), { ...r.p, categoryId: cat.id, sku, skuSeq: seq, images: [], video: '', createdAt: now, importedAt: now });
+              const { pub, priv } = splitPrivate(r.p), pref = doc(productsCol);
+              tx.set(pref, { ...pub, categoryId: cat.id, sku, skuSeq: seq, images: [], video: '', createdAt: now, importedAt: now });
+              if (hasPrivateData(priv)) tx.set(doc(db, 'productPrivate', pref.id), { ...priv, updatedAt: now });
               skus.push(sku); seq++;
             }
             tx.update(catRef, { nextSeq: seq });
@@ -4327,7 +4385,11 @@ match /counters/{id} {
         video: d.video || '',
         updatedAt: new Date().toISOString()
       };
-      await updateDoc(doc(db, 'products', d.id), payload);
+      const { pub, priv } = splitPrivate(payload);
+      await runTransaction(db, async (tx) => {
+        tx.update(doc(db, 'products', d.id), { ...pub, ...dropPrivateFields() });
+        tx.set(doc(db, 'productPrivate', d.id), { ...priv, updatedAt: payload.updatedAt });
+      });
 
       const saved = normalizeProduct(d.id, { ...d, ...payload });
       const idx = categoryProducts.findIndex(p => p.id === d.id);
@@ -4351,6 +4413,7 @@ match /counters/{id} {
     if (!confirm(`Delete "${label}"? This can't be undone. (Its SKU number will not be reused.)`)) return;
     try{
       await deleteDoc(doc(db, 'products', d.id));
+      try{ await deleteDoc(doc(db, 'productPrivate', d.id)); } catch(e){ console.error('Private copy not removed:', e); }
       categoryProducts = categoryProducts.filter(p => p.id !== d.id);
       selectedId = null;
       draft = null;
@@ -4371,9 +4434,9 @@ match /counters/{id} {
   async function loadProductsForCategory(categoryId){
     try{
       const q = query(productsCol, where('categoryId', '==', categoryId));
-      const snap = await getDocs(q);
+      const [snap, privMap] = await Promise.all([getDocs(q), fetchPrivateMap()]);
       if (categoryId !== currentCategoryId) return;   // user already moved to another category
-      categoryProducts = snap.docs.map(d => normalizeProduct(d.id, d.data()));
+      categoryProducts = snap.docs.map(d => withPrivate(d, privMap));
       renderFolder();
     } catch(err){
       console.error('Could not load products:', err);
