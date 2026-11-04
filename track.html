@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Your Order — Vestige Thrift Shop</title>
+<meta name="description" content="Track your Vestige order with your order number or J&T Express tracking number.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0f241c; --green:#1b3a2f; --green-soft:#2c4f41;
+    --cream:#efe3c8; --cream-soft:#f8f3e6; --paper:#faf7f0;
+    --gold:#c9a468; --gold-soft:#dcc190; --gold-deep:#8a6a30; --ink:#14201c;
+    --line:rgba(20,32,28,0.14); --ok:#2f7d57; --warn:#a4452f;
+    --ease:cubic-bezier(.22,.8,.32,1);
+  }
+  *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){ *{transition-duration:0.01ms !important; animation:none !important;} }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'Space Mono',monospace; }
+  a{ color:inherit; } img{ max-width:100%; display:block; }
+  .wrap{ max-width:880px; margin:0 auto; padding:0 24px; }
+
+  .nav{ position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:18px 28px; background:rgba(250,247,240,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .nav-logo{ font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; letter-spacing:.14em; display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .nav-mark{ width:26px; height:26px; }
+  .nav-links{ display:flex; gap:28px; font-size:.82rem; letter-spacing:.04em; list-style:none; margin:0; padding:0; }
+  .nav-links a{ text-decoration:none; opacity:.85; } .nav-links a:hover{ opacity:1; } .nav-links a.active{ color:var(--gold-deep); opacity:1; font-weight:500; }
+  .nav-cta{ font-size:.78rem; letter-spacing:.05em; border:1px solid currentColor; padding:9px 18px; border-radius:999px; text-decoration:none; white-space:nowrap; }
+  @media (max-width:760px){ .nav-links{ display:none; } .nav{ padding:14px 16px; } .wrap{ padding:0 16px; } }
+
+  .hero{ background:var(--green-deep); color:var(--cream-soft); padding:64px 0 90px; }
+  .eyebrow{ font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-soft); display:block; margin-bottom:14px; }
+  .hero h1{ font-size:clamp(2.2rem,5vw,3.4rem); margin:0 0 10px; font-weight:600; }
+  .hero p{ margin:0 0 28px; color:rgba(239,227,200,.72); font-weight:300; max-width:460px; }
+  .search{ display:flex; gap:10px; max-width:640px; }
+  .search input{ flex:1; min-width:0; padding:16px 18px; border-radius:12px; border:1px solid rgba(239,227,200,.28); background:rgba(248,243,230,.07); color:var(--cream-soft); font:inherit; font-size:1rem; letter-spacing:.02em; }
+  .search input::placeholder{ color:rgba(239,227,200,.5); }
+  .search input:focus{ outline:2px solid var(--gold); outline-offset:1px; background:rgba(248,243,230,.12); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:15px 24px; border-radius:12px; border:1px solid transparent; font:inherit; font-weight:500; font-size:.92rem; cursor:pointer; text-decoration:none; transition:transform .2s var(--ease), box-shadow .2s var(--ease), background .2s; white-space:nowrap; }
+  .btn-gold{ background:var(--gold); color:var(--green-deep); } .btn-gold:hover{ transform:translateY(-1px); box-shadow:0 12px 24px -12px rgba(201,164,104,.7); }
+  .btn-gold[disabled]{ opacity:.65; cursor:wait; transform:none; box-shadow:none; }
+  .btn-line{ background:transparent; border-color:var(--ink); color:var(--ink); } .btn-line:hover{ background:var(--ink); color:var(--cream-soft); }
+  .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .hint{ font-size:.8rem; color:rgba(239,227,200,.6); margin-top:12px; min-height:1.2em; }
+  .hint.err{ color:#f0b3a3; }
+  @media (max-width:520px){ .search{ flex-direction:column; } .search .btn{ width:100%; } }
+
+  main{ margin-top:-48px; padding-bottom:70px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:0 24px 50px -34px rgba(15,36,28,.5); padding:28px; }
+  @media (max-width:520px){ .card{ padding:20px 16px; border-radius:14px; } }
+  .empty{ text-align:center; padding:44px 20px; color:rgba(20,32,28,.7); }
+  .empty h2{ margin:0 0 8px; font-size:1.3rem; color:var(--ink); }
+  .empty p{ margin:0 auto; max-width:420px; font-size:.92rem; }
+  .empty.err h2{ color:var(--warn); }
+
+  .sk{ background:linear-gradient(90deg,#eee9dc 25%,#f6f2e8 50%,#eee9dc 75%); background-size:200% 100%; animation:sk 1.2s linear infinite; border-radius:8px; }
+  @keyframes sk{ to{ background-position:-200% 0; } }
+
+  .sum-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid var(--line); }
+  .lbl{ font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:rgba(20,32,28,.55); display:block; margin-bottom:4px; }
+  .big{ font-family:'Space Mono',monospace; font-size:1.05rem; font-weight:700; word-break:break-all; }
+  .badge{ display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border-radius:999px; font-size:.8rem; font-weight:500; background:rgba(201,164,104,.18); color:var(--gold-deep); }
+  .badge::before{ content:''; width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .badge.done{ background:rgba(47,125,87,.14); color:var(--ok); }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px 20px; padding:20px 0; border-bottom:1px solid var(--line); }
+  .grid div span:last-child{ font-size:.95rem; }
+  .latest{ margin:20px 0; padding:16px 18px; background:var(--cream-soft); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; }
+  .latest strong{ display:block; font-family:'Fraunces',serif; font-size:1.05rem; margin-bottom:2px; }
+  .latest small{ color:rgba(20,32,28,.6); }
+  .items{ display:grid; gap:12px; margin:4px 0 8px; }
+  .item{ display:flex; gap:14px; align-items:center; }
+  .item img,.item .ph{ width:64px; height:64px; border-radius:10px; object-fit:cover; background:var(--cream); flex-shrink:0; border:1px solid var(--line); }
+  .item b{ font-weight:500; } .item small{ display:block; color:rgba(20,32,28,.6); }
+
+  h3.sec{ font-size:1.15rem; margin:26px 0 16px; }
+  .tl{ list-style:none; margin:0; padding:0; }
+  .tl li{ position:relative; display:flex; gap:16px; padding-bottom:26px; }
+  .tl li:last-child{ padding-bottom:0; }
+  .tl li::before{ content:''; position:absolute; left:13px; top:28px; bottom:-2px; width:2px; background:var(--line); }
+  .tl li:last-child::before{ display:none; }
+  .tl li.completed::before{ background:var(--ok); }
+  .dot{ width:28px; height:28px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:#fff; border:2px solid var(--line); color:#fff; z-index:1; }
+  .completed .dot{ background:var(--ok); border-color:var(--ok); }
+  .current .dot{ border-color:var(--gold); background:var(--gold); box-shadow:0 0 0 5px rgba(201,164,104,.25); }
+  .tl h4{ margin:2px 0 2px; font-size:1rem; font-weight:500; }
+  .pending h4{ color:rgba(20,32,28,.45); font-weight:400; }
+  .tl p{ margin:0; font-size:.88rem; color:rgba(20,32,28,.72); }
+  .meta{ font-size:.78rem; color:rgba(20,32,28,.55); margin-top:3px; display:flex; gap:6px 14px; flex-wrap:wrap; }
+  .src{ font-family:'Space Mono',monospace; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 8px; }
+
+  .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:28px; padding-top:22px; border-top:1px solid var(--line); align-items:center; }
+  .note{ font-size:.8rem; color:rgba(20,32,28,.6); margin-top:18px; line-height:1.55; }
+  footer{ border-top:1px solid var(--line); padding:28px 0; text-align:center; font-size:.8rem; color:rgba(20,32,28,.6); }
+  .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Main">
+  <a href="home.html" class="nav-logo" style="color:inherit;">
+    <svg class="nav-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/></svg>
+    VESTIGE
+  </a>
+  <ul class="nav-links">
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="shop.html#batch">This Week's Batch</a></li>
+    <li><a href="track.html" class="active" aria-current="page">Track Order</a></li>
+    <li><a href="home.html#how">How It Works</a></li>
+  </ul>
+  <a class="nav-cta" href="home.html#regulars">Message Us</a>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Order tracking</span>
+    <h1>Track Your Order</h1>
+    <p>Your next favorite piece is on its way.</p>
+    <form class="search" id="form" novalidate>
+      <label class="sr" for="q">Order number or tracking number</label>
+      <input id="q" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="Enter your order number or tracking number">
+      <button class="btn btn-gold" id="go" type="submit">Track My Order</button>
+    </form>
+    <div class="hint" id="hint" role="status" aria-live="polite">Your order number looks like VST-XXXXXXXX.</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="out" aria-live="polite">
+    <div class="empty">
+      <h2>Where's my order?</h2>
+      <p>Enter the order number we sent you, or your J&amp;T Express tracking number, to see your shipment's progress.</p>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">VESTIGE THRIFT SHOP · Questions about your order? <a href="home.html#regulars">Message us</a></div></footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
+  const db = getFirestore(app);
+
+  // Official J&T Express Philippines site. A tracking-number deep link is NOT assumed to exist, so we open the
+  // official site and copy the number to the clipboard for pasting. (Change this one line if J&T gives you a direct link.)
+  const JNT_URL = 'https://www.jtexpress.ph/';
+  const TZ = 'Asia/Manila';
+  const STAGES = [
+    { key: 'confirmed',  title: 'Order Confirmed',      desc: 'We received your order.' , src: 'vestige' },
+    { key: 'preparing',  title: 'Preparing Your Order', desc: 'Your piece is being checked and packed.', src: 'vestige' },
+    { key: 'picked_up',  title: 'Shipment Picked Up',   desc: 'J&T Express has collected your parcel.', src: 'jnt' },
+    { key: 'in_transit', title: 'In Transit',           desc: 'Your parcel is on its way.', src: 'jnt' },
+    { key: 'out_for_delivery', title: 'Out for Delivery', desc: 'Your parcel is out for delivery today.', src: 'jnt' },
+    { key: 'delivered',  title: 'Delivered',            desc: 'Your parcel has been delivered.', src: 'jnt' }
+  ];
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  function fmt(iso, withTime = true){
+    const d = new Date(iso);
+    if (!iso || isNaN(d)) return '';
+    return new Intl.DateTimeFormat('en-PH', { timeZone: TZ, year: 'numeric', month: 'short', day: 'numeric', ...(withTime ? { hour: 'numeric', minute: '2-digit', hour12: true } : {}) }).format(d);
+  }
+  // "vst abc23456" / "vstabc23456" -> VST-ABC23456 ; everything else -> uppercase alphanumerics only
+  function normalize(raw){
+    const k = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return /^VST[A-Z0-9]{8}$/.test(k) ? 'VST-' + k.slice(3) : k;
+  }
+  const alnum = (s) => s.replace(/[^A-Z0-9]/g, '');
+
+  async function lookup(raw){
+    const key = normalize(raw);
+    let snap = await getDoc(doc(db, 'shipments', key));
+    if (!snap.exists()){
+      const idx = await getDoc(doc(db, 'shipmentIndex', alnum(key)));
+      if (idx.exists() && idx.data().orderNo) snap = await getDoc(doc(db, 'shipments', String(idx.data().orderNo)));
+    }
+    return snap.exists() ? snap.data() : null;
+  }
+
+  function stageIndex(s){ return Math.max(0, STAGES.findIndex(x => x.key === s.status)); }
+
+  function render(s){
+    const cur = stageIndex(s), delivered = s.status === 'delivered';
+    const events = Array.isArray(s.events) ? s.events : [];
+    const latest = [...events].filter(e => e.timestamp).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] || events[events.length - 1];
+    const items = (Array.isArray(s.items) ? s.items : []).map(i => `
+      <div class="item">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy">` : '<div class="ph" aria-hidden="true"></div>'}
+        <div><b>${esc(i.name || 'Vestige piece')}</b><small>Qty ${esc(i.qty || 1)}${i.sku ? ` · ${esc(i.sku)}` : ''}</small></div></div>`).join('');
+    const tl = STAGES.map((st, i) => {
+      const ev = [...events].filter(e => e.stage === st.key).sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0];
+      const state = i < cur || (delivered && i === cur) ? 'completed' : i === cur ? 'current' : 'pending';
+      const srcLabel = ev ? (ev.source === 'jnt' ? 'From J&T Express' : 'Vestige') : '';
+      return `<li class="${state}"><span class="dot" aria-hidden="true">${state === 'completed' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</span>
+        <div><h4>${esc(st.title)}<span class="sr"> — ${state}</span></h4>
+          ${state !== 'pending' ? `<p>${esc(ev && ev.description ? ev.description : st.desc)}</p>` : ''}
+          ${ev ? `<div class="meta">${ev.timestamp ? `<span>${esc(fmt(ev.timestamp))}</span>` : ''}${ev.location ? `<span>${esc(ev.location)}</span>` : ''}<span class="src">${esc(srcLabel)}</span></div>` : ''}</div></li>`;
+    }).join('');
+    $('out').innerHTML = `
+      <div class="sum-top">
+        <div><span class="lbl">Order number</span><span class="big">${esc(s.orderNo)}</span></div>
+        <span class="badge ${delivered ? 'done' : ''}">${esc(STAGES[cur].title)}</span>
+      </div>
+      <div class="grid">
+        <div><span class="lbl">J&amp;T tracking number</span><span class="mono" style="font-weight:700;word-break:break-all;">${esc(s.trackingNumber || 'Not yet assigned')}</span></div>
+        <div><span class="lbl">Courier</span><span>${esc(s.courier || 'J&T Express')}</span></div>
+        <div><span class="lbl">Order date</span><span>${esc(fmt(s.orderedAt, false) || '—')}</span></div>
+        <div><span class="lbl">Shipment date</span><span>${esc(fmt(s.shippedAt, false) || 'Not shipped yet')}</span></div>
+        ${s.estimatedDelivery && !delivered ? `<div><span class="lbl">Estimated delivery</span><span>${esc(fmt(s.estimatedDelivery, false))}</span></div>` : ''}
+        ${delivered && s.deliveredAt ? `<div><span class="lbl">Delivered</span><span>${esc(fmt(s.deliveredAt))}</span></div>` : ''}
+      </div>
+      ${latest ? `<div class="latest"><span class="lbl">Latest update</span><strong>${esc(latest.description || STAGES[cur].title)}</strong><small>${esc([fmt(latest.timestamp), latest.location].filter(Boolean).join(' · '))}</small></div>` : ''}
+      ${items ? `<h3 class="sec">In this order</h3><div class="items">${items}</div>` : ''}
+      <h3 class="sec">Shipment progress</h3>
+      <ol class="tl">${tl}</ol>
+      <div class="actions">
+        ${s.trackingNumber ? `<button type="button" class="btn btn-line" id="jnt">Track on J&amp;T Express</button>` : ''}
+        <span class="note" style="margin:0;">${s.trackingNumber ? 'Opens the official J&amp;T Express website — your tracking number is copied so you can paste it.' : 'A tracking number will appear here once your parcel is handed to J&amp;T Express.'}</span>
+      </div>
+      <p class="note">Order and packing steps are posted by Vestige. Courier steps are relayed by Vestige from J&amp;T Express and may be a little behind — for the carrier's own live scans, use the J&amp;T button above. ${s.lastUpdated ? `Last updated ${esc(fmt(s.lastUpdated))} (Philippine time).` : ''}</p>`;
+    const b = $('jnt');
+    if (b) b.addEventListener('click', async () => {
+      try{ await navigator.clipboard.writeText(s.trackingNumber); b.textContent = 'Tracking number copied — opening J&T…'; } catch(e){}
+      window.open(JNT_URL, '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  function skeleton(){
+    $('out').innerHTML = `<div aria-busy="true" aria-label="Loading your shipment"><div class="sk" style="height:34px;width:46%;margin-bottom:18px"></div><div class="sk" style="height:70px;margin-bottom:18px"></div>${'<div class="sk" style="height:44px;margin-bottom:12px"></div>'.repeat(4)}</div>`;
+  }
+  function message(title, text, isErr){
+    $('out').innerHTML = `<div class="empty ${isErr ? 'err' : ''}"><h2>${esc(title)}</h2><p>${esc(text)}</p></div>`;
+  }
+
+  let busy = false;
+  async function run(raw){
+    if (busy) return;
+    const hint = $('hint'), btn = $('go');
+    const key = normalize(raw);
+    hint.classList.remove('err');
+    if (!key){ hint.textContent = 'Please enter your order number or tracking number.'; hint.classList.add('err'); $('q').focus(); return; }
+    if (key.length < 6 || key.length > 32 || !/^[A-Z0-9-]+$/.test(key)){ hint.textContent = "That doesn't look like a valid order or tracking number. Please check it and try again."; hint.classList.add('err'); return; }
+    busy = true; btn.disabled = true; btn.textContent = 'Searching…'; hint.textContent = '';
+    skeleton();
+    try{
+      const s = await lookup(raw);
+      if (!s){
+        message('We couldn’t find that order', 'Check the number and try again. If you just reserved an item, tracking appears once your order is confirmed and shipped — message us if you need help.', false);
+      } else render(s);
+    } catch(err){
+      console.error(err);
+      message('Something went wrong', 'We couldn’t load tracking right now. Please check your connection and try again in a moment.', true);
+    } finally { busy = false; btn.disabled = false; btn.textContent = 'Track My Order'; }
+  }
+  $('form').addEventListener('submit', (e) => { e.preventDefault(); run($('q').value); });
+  const pre = new URLSearchParams(location.search).get('o');
+  if (pre){ $('q').value = pre.slice(0, 40); run(pre); }
+</script>
+</body>
+</html>
