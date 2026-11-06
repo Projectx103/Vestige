@@ -891,12 +891,27 @@
   <div class="login-box">
     <h1>Vestige Admin</h1>
     <p style="color:rgba(239,227,200,0.65); font-weight:300; margin-bottom:26px;">Sign in to manage batches and listings.</p>
-    <label>Email</label>
-    <input type="email" id="loginEmail" autocomplete="username">
-    <label>Password</label>
-    <input type="password" id="loginPassword" autocomplete="current-password">
-    <p class="login-err" id="loginErr"></p>
-    <button class="btn btn-gold" id="loginBtn" style="width:100%; justify-content:center;">Sign In</button>
+    <div id="gateLoading" role="status" aria-live="polite" style="color:rgba(239,227,200,0.7); padding:18px 0 6px;">Checking your session…</div>
+    <div id="gateForm" style="display:none;">
+      <button type="button" class="btn" id="googleLoginBtn" style="width:100%; justify-content:center; background:#fff; color:#14201c; margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.3-1.8 14-5l-6.5-5.5C29.6 35.3 27 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5C39.9 37.4 44 31.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+      <div style="text-align:center; color:rgba(239,227,200,0.4); font-size:.75rem; margin:12px 0;">or</div>
+      <label>Email</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password">
+      <p class="login-err" id="loginErr"></p>
+      <button class="btn btn-gold" id="loginBtn" style="width:100%; justify-content:center;">Sign In</button>
+      <p style="text-align:center; margin:16px 0 0; font-size:.8rem;"><a href="home.html" style="color:rgba(239,227,200,0.6);">← Back to Vestige</a></p>
+    </div>
+    <div id="gateDenied" style="display:none;">
+      <p class="login-err" style="display:block; margin:0 0 10px;">This account isn't authorized for admin access.</p>
+      <p style="color:rgba(239,227,200,0.7); font-size:.88rem; margin:0 0 18px;">You're signed in as <strong id="deniedEmail"></strong>. Your session on the shop is untouched.</p>
+      <button type="button" class="btn btn-gold" id="switchAccountBtn" style="width:100%; justify-content:center; margin-bottom:10px;">Use a different account</button>
+      <a href="home.html" class="btn btn-outline" style="width:100%; justify-content:center; color:#efe3c8; border-color:rgba(239,227,200,.4); text-decoration:none;">Back to Vestige</a>
+    </div>
   </div>
 </div>
 
@@ -1295,7 +1310,7 @@ match /counters/{id} {
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction, deleteField
@@ -1483,31 +1498,37 @@ match /counters/{id} {
   });
 
   document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+  document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+    loginErr.style.display = 'none';
+    try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch(err){ loginErr.textContent = 'Google sign-in failed or was cancelled.'; loginErr.style.display = 'block'; }
+  });
+  document.getElementById('switchAccountBtn').addEventListener('click', () => signOut(auth));
 
+  // One sign-in for the whole site: Firebase keeps the session shared between auth.html, the shop and this page,
+  // so an admin who already signed in on the home page's sign-in is let straight in here — no second login.
+  const showGate = (which) => {
+    loginGate.style.display = 'flex'; adminApp.style.display = 'none';
+    ['gateLoading', 'gateForm', 'gateDenied'].forEach(id => { document.getElementById(id).style.display = id === which ? 'block' : 'none'; });
+  };
   onAuthStateChanged(auth, async (user) => {
-    if (!user){
-      loginGate.style.display = 'flex';
-      adminApp.style.display = 'none';
-      return;
-    }
+    if (!user){ showGate('gateForm'); return; }
+    showGate('gateLoading');
 
-    // Verify this signed-in account is an authorized admin — not just "someone is logged in."
-    // Matches the `isAdmin()` function in firestore.rules: existence of admins/{uid}.
-    let isAdmin = false;
+    // Signed in — but only an authorized admin gets in. Matches `isAdmin()` in firestore.rules: admins/{uid} exists.
+    let isAdmin = false, checkFailed = false;
     try{
-      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-      isAdmin = adminSnap.exists();
+      isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists();
     } catch(err){
       console.error('Admin check failed:', err);
-      isAdmin = false;
+      checkFailed = true;
     }
 
     if (!isAdmin){
-      await signOut(auth);
-      loginErr.textContent = "This account isn't authorized for admin access.";
-      loginErr.style.display = 'block';
-      loginGate.style.display = 'flex';
-      adminApp.style.display = 'none';
+      // Never sign a regular customer out of the shop just because they opened the admin page.
+      document.getElementById('deniedEmail').textContent = user.email || 'this account';
+      showGate('gateDenied');
+      if (checkFailed) loginErr.textContent = '';
       return;
     }
 
