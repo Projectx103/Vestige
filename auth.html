@@ -125,7 +125,7 @@
         </p>
       </div>
 
-
+      <div class="guest-note">
         <strong>Don't want an account?</strong> You can still bid — just message us on Facebook with a screenshot of the item and your bid. Signed-in accounts get a few extras (auto-generated bid receipts, saved favorites), but they're not required to buy.
       </div>
     </div>
@@ -184,7 +184,7 @@
   tabSignIn.addEventListener('click', () => {
     tabSignIn.classList.add('active'); tabSignUp.classList.remove('active');
     document.getElementById('signInFields').style.display = 'block';
-    document.getElementById('signUpFields').style.display = 'none';
+    const su = document.getElementById('signUpFields'); if (su) su.style.display = 'none';
     document.getElementById('cardTitle').textContent = 'Welcome back';
     document.getElementById('cardLead').textContent = 'Sign in to bid, favorite items, and track your orders.';
     clearError();
@@ -256,7 +256,7 @@
   }
 
   // If already signed in and verified, skip straight through.
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user && user.emailVerified){
       // Only auto-redirect if we're not mid-signup-flow (verify box not showing)
       if (document.getElementById('verifyBox').style.display !== 'block'){
