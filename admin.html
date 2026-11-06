@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vestige Admin</title>
@@ -107,7 +108,29 @@
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--green-deep); color:var(--cream-soft);
   }
-  .login-box{ width:100%; max-width:360px; padding:0 24px; }
+  .login-box{ width:100%; max-width:460px; padding:28px 28px 24px; margin:24px; background:rgba(239,227,200,0.05); border:1px solid rgba(239,227,200,0.16); border-radius:20px; }
+  .login-box h1{ margin:0 0 4px; }
+  .login-box h2{ font-family:'Fraunces',serif; font-size:1.15rem; margin:18px 0 6px; color:var(--cream-soft); }
+  .gate-lead{ color:rgba(239,227,200,0.66); font-weight:300; font-size:.9rem; margin:0 0 18px; line-height:1.5; }
+  .gate-step{ font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-soft,#dcc190); margin-top:14px; display:block; }
+  .login-box select{ width:100%; padding:11px 12px; border-radius:9px; background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); font:inherit; margin-bottom:10px; }
+  .login-box select option{ color:#14201c; }
+  .login-box input,.login-box select{ margin-bottom:12px; }
+  .pw-wrap{ position:relative; } .pw-wrap input{ padding-right:64px; }
+  .pw-eye{ position:absolute; right:8px; top:6px; background:none; border:none; color:var(--gold); cursor:pointer; font:inherit; font-size:.78rem; padding:6px; }
+  .pw-checks{ list-style:none; margin:0 0 14px; padding:0; font-size:.8rem; display:grid; gap:4px; color:rgba(239,227,200,.6); }
+  .pw-checks li.ok{ color:#8fd6ae; } .pw-checks li::before{ content:'○ '; } .pw-checks li.ok::before{ content:'✓ '; }
+  .q-block{ border:1px solid rgba(239,227,200,0.16); border-radius:12px; padding:12px 12px 2px; margin-bottom:12px; }
+  .q-block .qn{ font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(239,227,200,.5); display:block; margin-bottom:6px; }
+  .gate-btn{ display:flex; align-items:center; justify-content:center; width:100%; padding:13px 20px; border-radius:999px; border:1px solid transparent; font:inherit; font-weight:600; font-size:.92rem; cursor:pointer; margin-top:6px; text-decoration:none; }
+  .gate-btn.gold{ background:var(--gold); color:var(--green-deep); } .gate-btn[disabled]{ opacity:.45; cursor:not-allowed; }
+  .gate-btn.ghost{ background:transparent; color:var(--cream-soft); border-color:rgba(239,227,200,.35); }
+  .gate-links{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:16px; font-size:.82rem; }
+  .gate-links a,.gate-links button{ color:var(--gold); background:none; border:none; padding:0; font:inherit; cursor:pointer; text-decoration:underline; }
+  .gate-note{ background:rgba(201,164,104,.12); border:1px solid rgba(201,164,104,.3); border-radius:10px; padding:12px 14px; font-size:.84rem; line-height:1.5; margin-bottom:14px; }
+  .gate-danger{ background:rgba(179,64,47,.16); border:1px solid rgba(242,165,140,.4); border-radius:12px; padding:16px; font-size:.92rem; line-height:1.55; color:#ffd9cd; margin-bottom:14px; }
+  .login-err{ margin-top:0; }
+
   .login-box h1{ color:var(--cream-soft); font-size:1.6rem; }
   .login-box label{ color:rgba(239,227,200,0.6); }
   .login-box input{ background:rgba(239,227,200,0.08); border:1px solid rgba(239,227,200,0.22); color:var(--cream-soft); }
@@ -888,31 +911,7 @@
 
 
 <div id="loginGate">
-  <div class="login-box">
-    <h1>Vestige Admin</h1>
-    <p style="color:rgba(239,227,200,0.65); font-weight:300; margin-bottom:26px;">Sign in to manage batches and listings.</p>
-    <div id="gateLoading" role="status" aria-live="polite" style="color:rgba(239,227,200,0.7); padding:18px 0 6px;">Checking your session…</div>
-    <div id="gateForm" style="display:none;">
-      <button type="button" class="btn" id="googleLoginBtn" style="width:100%; justify-content:center; background:#fff; color:#14201c; margin-bottom:6px;">
-        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l6-6C34.5 6 29.6 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.3-1.8 14-5l-6.5-5.5C29.6 35.3 27 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5C39.9 37.4 44 31.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
-        Continue with Google
-      </button>
-      <div style="text-align:center; color:rgba(239,227,200,0.4); font-size:.75rem; margin:12px 0;">or</div>
-      <label>Email</label>
-      <input type="email" id="loginEmail" autocomplete="username">
-      <label>Password</label>
-      <input type="password" id="loginPassword" autocomplete="current-password">
-      <p class="login-err" id="loginErr"></p>
-      <button class="btn btn-gold" id="loginBtn" style="width:100%; justify-content:center;">Sign In</button>
-      <p style="text-align:center; margin:16px 0 0; font-size:.8rem;"><a href="home.html" style="color:rgba(239,227,200,0.6);">← Back to Vestige</a></p>
-    </div>
-    <div id="gateDenied" style="display:none;">
-      <p class="login-err" style="display:block; margin:0 0 10px;">This account isn't authorized for admin access.</p>
-      <p style="color:rgba(239,227,200,0.7); font-size:.88rem; margin:0 0 18px;">You're signed in as <strong id="deniedEmail"></strong>. Your session on the shop is untouched.</p>
-      <button type="button" class="btn btn-gold" id="switchAccountBtn" style="width:100%; justify-content:center; margin-bottom:10px;">Use a different account</button>
-      <a href="home.html" class="btn btn-outline" style="width:100%; justify-content:center; color:#efe3c8; border-color:rgba(239,227,200,.4); text-decoration:none;">Back to Vestige</a>
-    </div>
-  </div>
+  <div class="login-box" id="gateBox" aria-live="polite"><h1>Vestige Admin</h1><p class="gate-lead">Checking your session…</p></div>
 </div>
 
 <div id="adminApp">
@@ -962,6 +961,10 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
           <span class="nav-label">View Public Site</span>
         </a>
+        <div class="nav-item" id="lockBtn" title="Lock the admin page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span class="nav-label">Lock</span>
+        </div>
         <div class="nav-item" id="signOutBtn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           <span class="nav-label">Sign Out</span>
@@ -1310,7 +1313,7 @@ match /counters/{id} {
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+    getAuth, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction, deleteField
@@ -1481,64 +1484,310 @@ match /counters/{id} {
     return parts.length ? parts.join(' × ') + ' in' : '';
   }
 
+  // =====================================================================
+  //  Admin access: Google sign-in (auth.html) → admin check → separate Admin Lock password
+  //  • not signed in       → auth.html (then back here)
+  //  • signed in, not admin → home page, immediately
+  //  • admin               → set up Admin Lock (first time) or unlock with email + password
+  //  Password and security answers are stored only as salted PBKDF2-SHA256 hashes in adminLocks/{uid}.
+  // =====================================================================
   const loginGate = document.getElementById('loginGate');
   const adminApp = document.getElementById('adminApp');
-  const loginErr = document.getElementById('loginErr');
+  const gateBox = document.getElementById('gateBox');
 
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    loginErr.style.display = 'none';
-    try{
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch(err){
-      loginErr.textContent = "Sign-in failed — check your email and password.";
-      loginErr.style.display = 'block';
-    }
-  });
+  const LOCK_ITER = 310000, MAX_ATTEMPTS = 3, IDLE_MS = 30 * 60 * 1000, HISTORY_KEEP = 5;
+  const UNLOCK_KEY = 'vestigeAdminUnlock';
+  const lockRef = (uid) => doc(db, 'adminLocks', uid);
+  const COMMON_QUESTIONS = [
+    "What was the name of your first pet?", "What is your mother's maiden name?", "In what city were you born?",
+    "What was the name of your elementary school?", "What was your childhood nickname?", "What street did you grow up on?",
+    "What was the make and model of your first car?", "What is the name of your favorite teacher?",
+    "What was the first concert you attended?", "What was the name of your best friend in childhood?",
+    "What is your favorite movie?", "What was your first job?"
+  ];
+  const PW_RULES = [
+    ['At least 10 characters', p => p.length >= 10], ['An uppercase letter (A–Z)', p => /[A-Z]/.test(p)],
+    ['A lowercase letter (a–z)', p => /[a-z]/.test(p)], ['A number (0–9)', p => /\d/.test(p)],
+    ['A special character (! @ # $ % …)', p => /[^A-Za-z0-9\s]/.test(p)]
+  ];
+  const pwOk = (p) => PW_RULES.every(([, f]) => f(p));
 
-  document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
-  document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-    loginErr.style.display = 'none';
-    try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
-    catch(err){ loginErr.textContent = 'Google sign-in failed or was cancelled.'; loginErr.style.display = 'block'; }
-  });
-  document.getElementById('switchAccountBtn').addEventListener('click', () => signOut(auth));
+  // --- hashing (WebCrypto PBKDF2) ---
+  const toHex = (buf) => Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+  const randHex = (n = 16) => toHex(crypto.getRandomValues(new Uint8Array(n)));
+  async function pbkdf2(secret, salt, iter){
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+    return toHex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode(salt), iterations: iter }, key, 256));
+  }
+  async function makeHash(secret){ const salt = randHex(); return { salt, iter: LOCK_ITER, hash: await pbkdf2(secret, salt, LOCK_ITER) }; }
+  function safeEq(a, b){ if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
+  async function hashMatches(secret, rec){ return !!rec && safeEq(await pbkdf2(secret, rec.salt, rec.iter || LOCK_ITER), rec.hash); }
+  const normAnswer = (a) => String(a || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
-  // One sign-in for the whole site: Firebase keeps the session shared between auth.html, the shop and this page,
-  // so an admin who already signed in on the home page's sign-in is let straight in here — no second login.
-  const showGate = (which) => {
+  const G = { user: null, lock: null, started: false, signingOut: false, busy: false, st: null, forgotOk: false, timers: false };
+  const isMe = (email) => String(email || '').trim().toLowerCase() === String(G.user && G.user.email || '').trim().toLowerCase();
+
+  function gateShow(html){
     loginGate.style.display = 'flex'; adminApp.style.display = 'none';
-    ['gateLoading', 'gateForm', 'gateDenied'].forEach(id => { document.getElementById(id).style.display = id === which ? 'block' : 'none'; });
-  };
-  onAuthStateChanged(auth, async (user) => {
-    if (!user){ showGate('gateForm'); return; }
-    showGate('gateLoading');
+    gateBox.innerHTML = '<h1>Vestige Admin</h1>' + html;
+    const f = gateBox.querySelector('input, select'); if (f) f.focus();
+  }
+  const gErr = (m) => { const e = document.getElementById('gErr'); if (e){ e.textContent = m; e.style.display = m ? 'block' : 'none'; } };
+  const pwField = (id, label, ac) => `<label for="${id}">${label}</label><div class="pw-wrap"><input id="${id}" type="password" autocomplete="${ac}" maxlength="128"><button type="button" class="pw-eye" data-act="eye" data-for="${id}" aria-label="Show or hide ${label}">Show</button></div>`;
+  const checksHtml = (p) => PW_RULES.map(([t, f]) => `<li class="${f(p) ? 'ok' : ''}">${t}</li>`).join('');
+  const backLink = '<a href="home.html">← Back to Vestige</a>';
 
-    // Signed in — but only an authorized admin gets in. Matches `isAdmin()` in firestore.rules: admins/{uid} exists.
-    let isAdmin = false, checkFailed = false;
-    try{
-      isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists();
-    } catch(err){
-      console.error('Admin check failed:', err);
-      checkFailed = true;
+  // --- screens ---
+  const screenLoading = () => gateShow('<p class="gate-lead">Checking your session…</p>');
+  function screenError(msg){
+    gateShow(`<p class="login-err" style="display:block;">${esc(msg)}</p><button type="button" class="gate-btn gold" data-act="retry">Try again</button><div class="gate-links">${backLink}</div>`);
+  }
+  function screenLocked(){
+    gateShow(`<div class="gate-danger"><strong>Admin access locked.</strong><br>Incorrect password was entered for 3 attempts. Please contact your system admin to fix this concern.</div>
+      <div class="gate-links">${backLink}<button type="button" data-act="signout">Sign out</button></div>`);
+  }
+  function screenSetup1(){
+    const st = G.st;
+    gateShow(`<span class="gate-step">Step 1 of 3 · Password</span><h2>Secure your admin account</h2>
+      <p class="gate-lead">Create your Admin Lock password. You'll enter it every time you open the admin page — it's separate from your Google sign-in.</p>
+      <form data-form="setup1" novalidate>
+        ${pwField('pw', 'Admin password', 'new-password')}<ul class="pw-checks" id="pwChecks">${checksHtml(st.pw)}</ul>
+        ${pwField('pw2', 'Confirm password', 'new-password')}<p class="gate-lead" id="pwMatch" style="margin:-4px 0 8px;font-size:.8rem;"></p>
+        <p class="login-err" id="gErr" role="alert"></p>
+        <button class="gate-btn gold" id="gNext" type="submit" disabled>Continue</button>
+      </form><div class="gate-links">${backLink}</div>`);
+    document.getElementById('pw').value = st.pw; document.getElementById('pw2').value = st.pw2; refreshSetup1();
+  }
+  function refreshSetup1(){
+    const st = G.st; document.getElementById('pwChecks').innerHTML = checksHtml(st.pw);
+    const m = document.getElementById('pwMatch'); m.textContent = st.pw2 ? (st.pw === st.pw2 ? '✓ Passwords match' : 'Passwords do not match yet') : ''; m.style.color = st.pw === st.pw2 ? '#8fd6ae' : '#f2a58c';
+    document.getElementById('gNext').disabled = !(pwOk(st.pw) && st.pw === st.pw2);
+  }
+  function screenSetup2(){
+    const qs = G.st.qs, taken = (i) => qs.filter((q, j) => j !== i && q.sel && q.sel !== '__custom').map(q => q.sel);
+    const block = (q, i) => `<div class="q-block"><span class="qn">Question ${i + 1}</span>
+      <select id="qsel${i}" aria-label="Security question ${i + 1}"><option value="">Choose a question…</option>
+        ${COMMON_QUESTIONS.filter(x => !taken(i).includes(x)).map(x => `<option value="${esc(x)}" ${q.sel === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}
+        <option value="__custom" ${q.sel === '__custom' ? 'selected' : ''}>✎ Write my own question…</option></select>
+      ${q.sel === '__custom' ? `<input id="qcus${i}" type="text" maxlength="120" placeholder="Type your own question" value="${esc(q.custom)}" autocomplete="off">` : ''}
+      <input id="qans${i}" type="text" maxlength="80" placeholder="Your answer" value="${esc(q.ans)}" autocomplete="off"></div>`;
+    gateShow(`<span class="gate-step">Step 2 of 3 · Security questions</span><h2>Choose 3 security questions</h2>
+      <p class="gate-lead">They're used to verify you if you ever forget your password. Pick a common question or write your own. Answers aren't case-sensitive.</p>
+      <form data-form="setup2" novalidate>${qs.map(block).join('')}<p class="login-err" id="gErr" role="alert"></p>
+        <button class="gate-btn gold" type="submit">Continue</button><button class="gate-btn ghost" type="button" data-act="setup-back1">Back</button></form>`);
+  }
+  const qText = (q) => q.sel === '__custom' ? q.custom.trim() : q.sel;
+  function screenSetup3(){
+    const st = G.st;
+    gateShow(`<span class="gate-step">Step 3 of 3 · Confirm</span><h2>Review and save</h2>
+      <p class="gate-lead">Check your details. After saving you'll be asked to sign in with the email and password you just created.</p>
+      <div class="gate-note"><strong>Admin email</strong><br>${esc(G.user.email || '')}<br><br><strong>Password</strong><br>••••••••••<br><br><strong>Security questions</strong><br>${st.qs.map((q, i) => `${i + 1}. ${esc(qText(q))}`).join('<br>')}</div>
+      <p class="login-err" id="gErr" role="alert"></p>
+      <button class="gate-btn gold" type="button" data-act="setup-save" id="gSave">Save &amp; secure my account</button><button class="gate-btn ghost" type="button" data-act="setup-back2">Back</button>`);
+  }
+  function screenUnlock(notice){
+    gateShow(`<h2>Admin lock</h2><p class="gate-lead">Enter your admin email address and Admin Lock password to continue.</p>
+      ${notice ? `<div class="gate-note">${esc(notice)}</div>` : ''}
+      <form data-form="unlock" novalidate><label for="uEmail">Email address</label><input id="uEmail" type="email" autocomplete="username" maxlength="120">
+        ${pwField('uPw', 'Password', 'current-password')}<p class="login-err" id="gErr" role="alert"></p>
+        <button class="gate-btn gold" type="submit" id="gGo">Unlock</button></form>
+      <div class="gate-links"><button type="button" data-act="forgot">Forgot password?</button>${backLink}</div>`);
+  }
+  function screenForgot1(){
+    gateShow(`<h2>Reset your password</h2><p class="gate-lead">First confirm it's you: enter your admin email address and the last password you remember.</p>
+      <form data-form="forgot1" novalidate><label for="fEmail">Admin email address</label><input id="fEmail" type="email" autocomplete="off" maxlength="120">
+        ${pwField('fPw', 'Last remembered password', 'off')}<p class="login-err" id="gErr" role="alert"></p>
+        <button class="gate-btn gold" type="submit">Continue</button><button class="gate-btn ghost" type="button" data-act="cancel-forgot">Cancel</button></form>`);
+  }
+  function screenForgot2(){
+    const qs = G.lock.questions || [];
+    gateShow(`<h2>Answer your security questions</h2><p class="gate-lead">Answer the questions you set up. At least 2 of 3 must be correct to reset your password.</p>
+      <form data-form="forgot2" novalidate>${qs.map((q, i) => `<div class="q-block"><span class="qn">Question ${i + 1}</span><p style="margin:0 0 8px;font-size:.9rem;">${esc(q.q)}</p><input id="fans${i}" type="text" maxlength="80" placeholder="Your answer" autocomplete="off"></div>`).join('')}
+        <p class="login-err" id="gErr" role="alert"></p><button class="gate-btn gold" type="submit">Verify answers</button><button class="gate-btn ghost" type="button" data-act="cancel-forgot">Cancel</button></form>`);
+  }
+  function screenForgot3(){
+    G.st = { pw: '', pw2: '' };
+    gateShow(`<h2>Create a new password</h2><p class="gate-lead">Identity verified. Choose a new Admin Lock password.</p>
+      <form data-form="forgot3" novalidate>${pwField('pw', 'New password', 'new-password')}<ul class="pw-checks" id="pwChecks">${checksHtml('')}</ul>
+        ${pwField('pw2', 'Confirm new password', 'new-password')}<p class="gate-lead" id="pwMatch" style="margin:-4px 0 8px;font-size:.8rem;"></p>
+        <p class="login-err" id="gErr" role="alert"></p><button class="gate-btn gold" id="gNext" type="submit" disabled>Save new password</button></form>`);
+  }
+
+  // --- data helpers ---
+  async function loadLock(){ const s = await getDoc(lockRef(G.user.uid)); return s.exists() ? s.data() : null; }
+  async function registerFailure(){
+    let out;
+    await runTransaction(db, async (tx) => {
+      const d = (await tx.get(lockRef(G.user.uid))).data() || {};
+      const failed = (d.failedAttempts || 0) + 1, locked = d.locked === true || failed >= MAX_ATTEMPTS;
+      tx.update(lockRef(G.user.uid), { failedAttempts: failed, locked, ...(locked && !d.locked ? { lockedAt: new Date().toISOString() } : {}) });
+      out = { failed, locked, remaining: Math.max(0, MAX_ATTEMPTS - failed) };
+    });
+    return out;
+  }
+  const attemptsMsg = (r) => `${r.remaining} attempt${r.remaining === 1 ? '' : 's'} remaining before this account is locked.`;
+
+  // --- unlock session (this tab only, 30 minutes idle) ---
+  const readUnlock = () => { try{ const v = JSON.parse(sessionStorage.getItem(UNLOCK_KEY) || 'null'); return v && v.uid === G.user.uid && v.until > Date.now(); } catch(e){ return false; } };
+  const touchUnlock = () => { try{ sessionStorage.setItem(UNLOCK_KEY, JSON.stringify({ uid: G.user.uid, until: Date.now() + IDLE_MS })); } catch(e){} };
+  const clearUnlock = () => { try{ sessionStorage.removeItem(UNLOCK_KEY); } catch(e){} };
+  async function lockNow(notice){
+    clearUnlock();
+    try{ G.lock = await loadLock(); } catch(e){}
+    if (G.lock && G.lock.locked === true) return screenLocked();
+    screenUnlock(notice || 'The admin page was locked.');
+  }
+  function enterAdmin(){
+    touchUnlock();
+    loginGate.style.display = 'none'; adminApp.style.display = 'block';
+    if (!G.timers){
+      G.timers = true;
+      let last = 0;
+      ['pointerdown', 'keydown', 'scroll'].forEach(ev => window.addEventListener(ev, () => { if (G.user && adminApp.style.display === 'block' && Date.now() - last > 10000){ last = Date.now(); touchUnlock(); } }, { passive: true }));
+      setInterval(() => { if (G.user && adminApp.style.display === 'block' && !readUnlock()) lockNow('Locked after 30 minutes without activity.'); }, 15000);
     }
-
-    if (!isAdmin){
-      // Never sign a regular customer out of the shop just because they opened the admin page.
-      document.getElementById('deniedEmail').textContent = user.email || 'this account';
-      showGate('gateDenied');
-      if (checkFailed) loginErr.textContent = '';
-      return;
-    }
-
-    loginGate.style.display = 'none';
-    adminApp.style.display = 'block';
-    const email = user.email || 'Admin';
+    if (G.started) return;
+    G.started = true;
+    const email = G.user.email || 'Admin';
     document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
     document.getElementById('profileName').textContent = email;
     initBatches();
     refreshCategoriesView();
+  }
+
+  // --- flows ---
+  async function boot(user){
+    G.user = user; screenLoading();
+    let isAdmin = false;
+    try{ isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); }
+    catch(err){ console.error('Admin check failed:', err); return screenError("We couldn't verify your access. Check your connection and try again."); }
+    if (!isAdmin){ location.replace('home.html'); return; }      // regular users never see the admin page
+    try{ G.lock = await loadLock(); }
+    catch(err){ console.error(err); return screenError("We couldn't load your admin security settings. Check your connection and try again."); }
+    if (!G.lock){ G.st = { pw: '', pw2: '', qs: [{ sel: '', custom: '', ans: '' }, { sel: '', custom: '', ans: '' }, { sel: '', custom: '', ans: '' }] }; return screenSetup1(); }
+    if (G.lock.locked === true) return screenLocked();
+    if (readUnlock()) return enterAdmin();
+    screenUnlock('');
+  }
+  async function afterFailure(prefix){
+    const r = await registerFailure();
+    if (r.locked) return screenLocked();
+    gErr(`${prefix} ${attemptsMsg(r)}`);
+  }
+  const forms = {
+    setup1(){ if (pwOk(G.st.pw) && G.st.pw === G.st.pw2) screenSetup2(); },
+    setup2(){
+      const qs = G.st.qs, seen = new Set();
+      for (let i = 0; i < qs.length; i++){
+        const t = qText(qs[i]);
+        if (!qs[i].sel) return gErr(`Choose a question for #${i + 1}.`);
+        if (qs[i].sel === '__custom' && t.length < 10) return gErr(`Your own question #${i + 1} needs at least 10 characters.`);
+        if (seen.has(t.toLowerCase())) return gErr('Each question must be different.');
+        seen.add(t.toLowerCase());
+        if (normAnswer(qs[i].ans).length < 3) return gErr(`Answer #${i + 1} needs at least 3 characters.`);
+      }
+      screenSetup3();
+    },
+    async unlock(){
+      if (G.busy) return; const email = document.getElementById('uEmail').value, pw = document.getElementById('uPw').value;
+      if (!email.trim() || !pw) return gErr('Enter your email address and password.');
+      G.busy = true; const btn = document.getElementById('gGo'); btn.disabled = true; btn.textContent = 'Checking…';
+      try{
+        G.lock = await loadLock();
+        if (!G.lock) return boot(G.user);
+        if (G.lock.locked === true) return screenLocked();
+        const pwGood = await hashMatches(pw, { hash: G.lock.pwHash, salt: G.lock.pwSalt, iter: G.lock.pwIter });
+        if (pwGood && isMe(email) && isMe(G.lock.email)){
+          await updateDoc(lockRef(G.user.uid), { failedAttempts: 0, lastUnlockAt: new Date().toISOString() });
+          return enterAdmin();
+        }
+        await afterFailure('Incorrect email or password.');
+      } catch(err){ console.error(err); gErr('Something went wrong. Check your connection and try again.'); }
+      finally { G.busy = false; const b = document.getElementById('gGo'); if (b){ b.disabled = false; b.textContent = 'Unlock'; } }
+    },
+    async forgot1(){
+      if (G.busy) return; const email = document.getElementById('fEmail').value, pw = document.getElementById('fPw').value;
+      if (!email.trim() || !pw) return gErr('Enter your email address and the last password you remember.');
+      G.busy = true;
+      try{
+        G.lock = await loadLock(); if (G.lock.locked === true) return screenLocked();
+        const recs = [{ hash: G.lock.pwHash, salt: G.lock.pwSalt, iter: G.lock.pwIter }, ...(G.lock.history || [])];
+        let good = false; for (const r of recs){ if (await hashMatches(pw, r)) good = true; }
+        if (good && isMe(email) && isMe(G.lock.email)) return screenForgot2();
+        await afterFailure("That email and password don't match our records.");
+      } catch(err){ console.error(err); gErr('Something went wrong. Check your connection and try again.'); }
+      finally { G.busy = false; }
+    },
+    async forgot2(){
+      if (G.busy) return; G.busy = true;
+      try{
+        const qs = G.lock.questions || []; let correct = 0;
+        for (let i = 0; i < qs.length; i++){ const v = normAnswer(document.getElementById('fans' + i).value); if (v && await hashMatches(v, qs[i])) correct++; }
+        if (correct >= 2){ G.forgotOk = true; return screenForgot3(); }
+        const r = await registerFailure();
+        if (r.locked) return screenLocked();
+        screenUnlock(`We couldn't verify your identity, so the password was not reset. ${attemptsMsg(r)}`);
+      } catch(err){ console.error(err); gErr('Something went wrong. Check your connection and try again.'); }
+      finally { G.busy = false; }
+    },
+    async forgot3(){
+      if (G.busy || !G.forgotOk || !(pwOk(G.st.pw) && G.st.pw === G.st.pw2)) return; G.busy = true;
+      try{
+        if (await hashMatches(G.st.pw, { hash: G.lock.pwHash, salt: G.lock.pwSalt, iter: G.lock.pwIter })) return gErr('Choose a password you have not used before.');
+        const h = await makeHash(G.st.pw), old = { hash: G.lock.pwHash, salt: G.lock.pwSalt, iter: G.lock.pwIter };
+        await updateDoc(lockRef(G.user.uid), { pwHash: h.hash, pwSalt: h.salt, pwIter: h.iter, history: [old, ...(G.lock.history || [])].slice(0, HISTORY_KEEP),
+          failedAttempts: 0, locked: false, updatedAt: new Date().toISOString() });
+        G.forgotOk = false; G.st = null;
+        G.lock = await loadLock();
+        screenUnlock('Password updated. Sign in with your email and your new password.');
+      } catch(err){ console.error(err); gErr('Could not save the new password. Try again.'); }
+      finally { G.busy = false; }
+    }
+  };
+  gateBox.addEventListener('submit', (e) => { const f = e.target.closest('[data-form]'); if (f){ e.preventDefault(); forms[f.dataset.form](); } });
+  gateBox.addEventListener('input', (e) => {
+    const id = e.target.id, st = G.st;
+    if (id === 'pw' || id === 'pw2'){ st[id] = e.target.value; refreshSetup1(); return; }
+    const m = /^q(cus|ans)(\d)$/.exec(id); if (m && st && st.qs) st.qs[+m[2]][m[1] === 'cus' ? 'custom' : 'ans'] = e.target.value;
+  });
+  gateBox.addEventListener('change', (e) => {
+    const m = /^qsel(\d)$/.exec(e.target.id); if (m){ G.st.qs[+m[1]].sel = e.target.value; screenSetup2(); const n = document.getElementById('qsel' + m[1]); if (n) n.focus(); }
+  });
+  gateBox.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'eye'){ const i = document.getElementById(b.dataset.for); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? 'Hide' : 'Show'; }
+    else if (act === 'retry') boot(G.user);
+    else if (act === 'forgot') screenForgot1();
+    else if (act === 'cancel-forgot'){ G.forgotOk = false; screenUnlock(''); }
+    else if (act === 'setup-back1') screenSetup1();
+    else if (act === 'setup-back2') screenSetup2();
+    else if (act === 'signout') doSignOut();
+    else if (act === 'setup-save'){
+      if (G.busy) return; G.busy = true; b.disabled = true; b.textContent = 'Saving…';
+      try{
+        const st = G.st, now = new Date().toISOString(), p = await makeHash(st.pw), questions = [];
+        for (const q of st.qs){ const h = await makeHash(normAnswer(q.ans)); questions.push({ q: qText(q), hash: h.hash, salt: h.salt, iter: h.iter }); }
+        await setDoc(lockRef(G.user.uid), { email: G.user.email || '', pwHash: p.hash, pwSalt: p.salt, pwIter: p.iter, history: [], questions,
+          failedAttempts: 0, locked: false, createdAt: now, updatedAt: now });
+        G.lock = await loadLock(); G.st = null;
+        screenUnlock('Admin lock is set. Now sign in with the email and password you just created.');
+      } catch(err){ console.error(err); b.disabled = false; b.textContent = 'Save & secure my account'; gErr('Could not save. Check your connection and try again.'); }
+      finally { G.busy = false; }
+    }
+  });
+
+  function doSignOut(){ G.signingOut = true; clearUnlock(); signOut(auth).finally(() => location.replace('home.html')); }
+  document.getElementById('signOutBtn').addEventListener('click', doSignOut);
+  document.getElementById('lockBtn').addEventListener('click', () => {
+    if (!confirmDiscard() || !confirmDiscardBatch() || !confirmDiscardSettings()) return;
+    lockNow('Admin page locked.');
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (G.signingOut) return;
+    if (!user){ location.replace('auth.html?redirect=admin.html'); return; }
+    boot(user);
   });
 
   const sidebar = document.getElementById('sidebar');
