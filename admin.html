@@ -401,6 +401,7 @@
     background:rgba(15,36,28,0.55); padding:20px; backdrop-filter:blur(2px);
   }
   .overlay.open{ display:flex; }
+  #presetOverlay{ z-index:950; }
   .picker{
     background:#fff; width:100%; max-width:720px; max-height:88vh; border-radius:18px;
     display:flex; flex-direction:column; box-shadow:0 30px 70px -20px rgba(0,0,0,0.55); overflow:hidden;
@@ -3289,6 +3290,7 @@ match /counters/{id} {
     else if (e.target.closest('#pmDelTpl')){ if (pm.templates.length > 1 && confirm(`Delete “${t.name}”?`)){ pm.templates.splice(pm.idx, 1); pm.idx = 0; renderPresetManager(); } }
   });
   const closePm = () => { pmOverlay.classList.remove('open'); pm = null; };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pmOverlay.classList.contains('open')) closePm(); });
   document.getElementById('pmClose').addEventListener('click', closePm);
   document.getElementById('pmCancel').addEventListener('click', closePm);
   document.getElementById('pmReset').addEventListener('click', () => { if (confirm('Replace your default step sets with the built-in set?')){ pm.templates = [JSON.parse(JSON.stringify(BUILTIN_TEMPLATE))]; pm.idx = 0; renderPresetManager(); } });
