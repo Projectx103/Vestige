@@ -14,7 +14,7 @@
     --green-deep:#0f241c; --green:#1b3a2f; --cream:#efe3c8; --cream-soft:#f8f3e6;
     --paper:#faf7f0; --gold:#c9a468; --ink:#14201c; --line:rgba(20,32,28,0.14);
     --danger:#b3402f;
-    --sidebar-collapsed:76px; --sidebar-expanded:248px;
+    --topbar-h:60px; --subbar-h:0px;
   }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',sans-serif; }
@@ -137,71 +137,6 @@
   .login-err{ color:#f2a58c; font-size:0.82rem; margin-top:-8px; margin-bottom:14px; display:none; }
 
   #adminApp{ display:none; }
-  .admin-shell{ display:flex; min-height:100vh; }
-
-  .sidebar{
-    width:var(--sidebar-collapsed);
-    background:var(--green-deep); color:var(--cream-soft);
-    flex-shrink:0;
-    display:flex; flex-direction:column;
-    transition:width .32s cubic-bezier(.22,.8,.32,1);
-    overflow:hidden;
-    position:sticky; top:0; height:100vh;
-  }
-  .sidebar.expanded{ width:var(--sidebar-expanded); }
-
-  .sidebar-top{
-    padding:22px 0 18px; display:flex; flex-direction:column; align-items:center;
-    border-bottom:1px solid rgba(239,227,200,0.12);
-  }
-  .sidebar.expanded .sidebar-top{ align-items:flex-start; padding:22px 20px 18px; }
-
-  .avatar-circle{
-    width:44px; height:44px; border-radius:50%;
-    background:var(--gold); color:var(--green-deep);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem;
-    flex-shrink:0; overflow:hidden;
-  }
-  .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
-
-  .profile-info{
-    display:none; flex-direction:column; margin-top:12px; width:100%;
-  }
-  .sidebar.expanded .profile-info{ display:flex; }
-  .profile-name{ font-family:'Fraunces',serif; font-size:0.95rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .profile-role{ font-family:'Space Mono',monospace; font-size:0.66rem; letter-spacing:0.06em; color:var(--gold-soft,#dcc190); text-transform:uppercase; margin-top:2px; }
-
-  .sidebar-toggle{
-    background:none; border:none; color:rgba(239,227,200,0.55); cursor:pointer;
-    padding:14px 0; display:flex; align-items:center; justify-content:center;
-    width:100%; border-bottom:1px solid rgba(239,227,200,0.12);
-  }
-  .sidebar-toggle:hover{ color:var(--cream-soft); }
-  .sidebar.expanded .sidebar-toggle{ justify-content:flex-end; padding-right:20px; }
-  .sidebar-toggle svg{ transition:transform .32s ease; }
-  .sidebar.expanded .sidebar-toggle svg{ transform:rotate(180deg); }
-
-  .sidebar-nav{ flex:1; padding:14px 0; display:flex; flex-direction:column; gap:2px; }
-  .nav-item{
-    display:flex; align-items:center; gap:16px;
-    padding:13px 0; margin:0 14px; border-radius:10px;
-    cursor:pointer; color:rgba(239,227,200,0.65);
-    justify-content:center;
-    transition:background .2s, color .2s;
-  }
-  .sidebar.expanded .nav-item{ justify-content:flex-start; padding:13px 14px; }
-  .nav-item:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
-  .nav-item.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
-  .nav-item svg{ flex-shrink:0; }
-  .nav-label{ display:none; white-space:nowrap; font-size:0.86rem; font-weight:500; }
-  .sidebar.expanded .nav-label{ display:inline; }
-
-  .sidebar-bottom{
-    padding:14px 0; border-top:1px solid rgba(239,227,200,0.12);
-    display:flex; flex-direction:column; gap:2px;
-  }
-
   .main-content{ flex:1; min-width:0; }
 
   .view{ display:none; }
@@ -218,28 +153,6 @@
   }
   .placeholder-view h2{ font-size:1.6rem; margin:0 0 10px; color:var(--green-deep); }
   .placeholder-view p{ color:rgba(20,32,28,0.6); font-weight:300; }
-
-  .nav-item-row{ display:flex; align-items:center; }
-  .nav-chevron{
-    display:none; margin-left:auto; padding:4px; color:rgba(239,227,200,0.5);
-    transition:transform .25s;
-  }
-  .sidebar.expanded .nav-chevron{ display:block; }
-  .nav-chevron.open{ transform:rotate(90deg); }
-
-  .nav-sublist{
-    display:none; flex-direction:column; gap:1px;
-    padding:2px 14px 6px 44px;
-  }
-  .sidebar.expanded .nav-sublist.open{ display:flex; }
-  .nav-subitem{
-    padding:9px 10px; border-radius:8px; cursor:pointer;
-    color:rgba(239,227,200,0.55); font-size:0.8rem;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    transition:background .2s, color .2s;
-  }
-  .nav-subitem:hover{ background:rgba(239,227,200,0.06); color:var(--cream-soft); }
-  .nav-subitem.active{ background:rgba(201,164,104,0.16); color:var(--gold); }
 
   .back-link{
     display:inline-flex; align-items:center; gap:6px;
@@ -588,12 +501,6 @@
   .save-info .dirty-badge{ margin-left:0; }
   .save-bar .btn{ flex-shrink:0; padding:12px 28px; }
 
-  .sidebar-nav .nav-item.is-soon{ opacity:.5; cursor:default; }
-  .soon-tag{ display:none; margin-left:auto; font-family:'Space Mono',monospace; font-size:0.56rem; letter-spacing:.06em; text-transform:uppercase; border:1px solid rgba(239,227,200,.3); border-radius:999px; padding:1px 7px; }
-  .sidebar.expanded .soon-tag{ display:inline-block; }
-
-  .mobile-bar, .drawer-backdrop{ display:none; }
-
   .folder-card{ overflow:hidden; }
   .folder-toolbar > *{ min-width:0; }
   
@@ -626,20 +533,81 @@
     .add-category-row{ flex-direction:column; }
     .add-category-row .btn{ width:100%; }
 
-    .mobile-bar{ display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:40; padding:10px 14px; background:var(--green-deep); color:var(--cream-soft); }
-    .hamburger{ width:44px; height:44px; border:none; background:transparent; color:inherit; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer; }
-    .hamburger:hover{ background:rgba(239,227,200,0.1); }
-    .mobile-title{ font-family:'Fraunces',serif; font-size:1.05rem; }
-    .sidebar{ position:fixed; left:0; top:0; z-index:60; height:100vh; width:var(--sidebar-expanded); transform:translateX(-100%); transition:transform .28s cubic-bezier(.22,.8,.32,1); overflow-y:auto; }
-    .sidebar.mobile-open{ transform:none; box-shadow:0 0 40px rgba(0,0,0,.4); }
-    .sidebar-toggle{ display:none; }
-    .drawer-backdrop{ position:fixed; inset:0; z-index:55; background:rgba(15,36,28,.5); }
-    .drawer-backdrop.open{ display:block; }
-    .admin-shell{ display:block; }
   }
   @media (max-width:420px){
     .tiles{ grid-template-columns:1fr 1fr; }
     .btn{ padding-left:16px; padding-right:16px; }
+  }
+
+
+  /* ===== Modular shell: top bar + module tabs + sub-tabs ===== */
+  .admin-shell{ min-height:100vh; }
+  .main-content{ min-width:0; }
+  .wrap{ max-width:1040px; }
+  .topbar{ position:sticky; top:0; z-index:50; height:var(--topbar-h); display:flex; align-items:center; gap:18px; padding:0 24px; background:var(--green-deep); color:var(--cream-soft); box-shadow:0 1px 0 rgba(239,227,200,.08); }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; font-weight:600; letter-spacing:.14em; font-size:1rem; color:inherit; text-decoration:none; white-space:nowrap; }
+  .brand svg{ width:24px; height:24px; }
+  .brand small{ font-family:'Space Mono',monospace; font-size:.58rem; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; border:1px solid rgba(201,164,104,.5); border-radius:999px; padding:2px 8px; }
+  .module-nav{ display:flex; gap:4px; margin-left:14px; }
+  .mod-tab{ display:flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; cursor:pointer; color:rgba(239,227,200,.7); font-size:.88rem; font-weight:500; transition:background .2s,color .2s; user-select:none; white-space:nowrap; }
+  .mod-tab:hover{ background:rgba(239,227,200,.09); color:var(--cream-soft); }
+  .mod-tab.active{ background:var(--gold); color:var(--green-deep); }
+  .mod-tab:focus-visible,.user-btn:focus-visible,.sub-tab:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:8px; position:relative; }
+  .user-btn{ display:flex; align-items:center; gap:10px; background:rgba(239,227,200,.07); border:1px solid rgba(239,227,200,.14); color:inherit; border-radius:999px; padding:4px 12px 4px 4px; cursor:pointer; font:inherit; }
+  .user-btn:hover{ background:rgba(239,227,200,.12); }
+  .avatar-circle{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:var(--green-deep); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; font-size:.95rem; flex-shrink:0; }
+  .user-name{ font-size:.82rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-pop{ position:absolute; right:0; top:calc(100% + 10px); min-width:240px; background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:14px; box-shadow:0 24px 50px -20px rgba(15,36,28,.45); padding:8px; display:none; z-index:80; }
+  .user-pop.open{ display:block; }
+  .up-head{ padding:10px 12px 12px; border-bottom:1px solid var(--line); margin-bottom:6px; }
+  .up-head b{ display:block; font-size:.86rem; word-break:break-all; } .up-head span{ font-family:'Space Mono',monospace; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-deep,#8a6a30); }
+  .pop-item{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border-radius:9px; background:none; border:none; font:inherit; font-size:.86rem; color:var(--ink); cursor:pointer; text-decoration:none; text-align:left; }
+  .pop-item:hover{ background:var(--paper); } .pop-item.danger{ color:var(--danger); }
+
+  .subbar{ position:sticky; top:var(--topbar-h); z-index:45; background:#fff; border-bottom:1px solid var(--line); display:none; }
+  .subbar.show{ display:block; }
+  .subbar-inner{ max-width:1040px; margin:0 auto; padding:0 24px; }
+  .subgroup{ display:none; align-items:stretch; gap:2px; overflow-x:auto; scrollbar-width:none; }
+  .subgroup::-webkit-scrollbar{ display:none; }
+  .subgroup.show{ display:flex; }
+  #categorySubNav{ display:flex; gap:2px; }
+  .sub-tab,.nav-subitem{ padding:14px 14px 12px; font-size:.86rem; color:rgba(20,32,28,.6); border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; background:none; border-top:0; border-left:0; border-right:0; font-family:inherit; font-weight:500; }
+  .sub-tab:hover,.nav-subitem:hover{ color:var(--green-deep); }
+  .sub-tab.active,.nav-subitem.active{ color:var(--green-deep); border-bottom-color:var(--gold); font-weight:600; }
+  .sub-sep{ width:1px; background:var(--line); margin:10px 8px; flex-shrink:0; }
+  .attr-bar{ top:calc(var(--topbar-h) + var(--subbar-h)); }
+  [data-pane][hidden]{ display:none !important; }
+
+  /* ===== Overview module ===== */
+  .ov-hello{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+  .ov-hello h1{ margin:0 0 4px; }
+  .ov-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .ov-cols{ display:grid; grid-template-columns:1.15fr 1fr; gap:18px; margin-bottom:6px; align-items:start; }
+  .attn{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  .attn li{ display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+  .attn .dot{ width:10px; height:10px; border-radius:50%; background:var(--gold); flex-shrink:0; } .attn .dot.ok{ background:#2f7d57; } .attn .dot.warn{ background:#c2562f; }
+  .attn .txt{ flex:1; min-width:0; font-size:.9rem; line-height:1.4; }
+  .attn .go{ background:none; border:none; color:var(--green-deep); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; text-decoration:underline; white-space:nowrap; }
+  .mod-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+  .mod-card{ text-align:left; background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; cursor:pointer; font:inherit; color:inherit; transition:border-color .2s,transform .2s,box-shadow .2s; display:flex; flex-direction:column; gap:6px; }
+  .mod-card:hover{ border-color:var(--gold); transform:translateY(-2px); box-shadow:0 16px 30px -22px rgba(15,36,28,.5); }
+  .mod-card .mi{ width:38px; height:38px; border-radius:11px; background:rgba(201,164,104,.16); color:var(--gold-deep,#8a6a30); display:grid; place-items:center; margin-bottom:4px; }
+  .mod-card h3{ margin:0; font-family:'Fraunces',serif; font-size:1.05rem; color:var(--green-deep); }
+  .mod-card p{ margin:0; font-size:.82rem; color:rgba(20,32,28,.62); line-height:1.45; }
+  .mod-card .stat{ margin-top:6px; font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.04em; color:var(--green-deep); }
+  @media (max-width:1000px){ .ov-cols{ grid-template-columns:1fr; } }
+
+  @media (max-width:900px){
+    .topbar{ padding:0 14px; } .brand small,.user-name{ display:none; } .user-btn{ padding:4px; }
+    .module-nav{ position:fixed; left:0; right:0; bottom:0; z-index:60; margin:0; gap:0; background:var(--green-deep); border-top:1px solid rgba(239,227,200,.16); padding:6px 4px calc(6px + env(safe-area-inset-bottom)); justify-content:space-around; }
+    .mod-tab{ flex:1; min-width:0; flex-direction:column; gap:3px; padding:6px 2px; border-radius:10px; font-size:.64rem; justify-content:center; }
+    .mod-tab.active{ background:rgba(201,164,104,.18); color:var(--gold); }
+    .wrap,.wrap.wide{ padding-bottom:100px; }
+    .save-bar{ bottom:62px; }
+    .subbar-inner{ padding:0 8px; }
+    .mod-grid{ grid-template-columns:1fr; }
+    .ov-actions .btn{ flex:1; }
   }
 
   /* ===== Batch Search ===== */
@@ -917,71 +885,69 @@
 <div id="adminApp">
   <div class="admin-shell">
 
-    <div class="drawer-backdrop" id="drawerBackdrop"></div>
-    <nav class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <div class="avatar-circle" id="avatarCircle">V</div>
-        <div class="profile-info">
-          <span class="profile-name" id="profileName">Admin</span>
-          <span class="profile-role">Vestige Admin</span>
+    <header class="topbar">
+      <a href="home.html" class="brand" title="View public site">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M6 8 L15 32 L20 18 L25 32 L34 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="square"/></svg>
+        VESTIGE <small>Admin</small>
+      </a>
+      <nav class="module-nav" id="moduleNav" aria-label="Admin modules">
+        <div class="nav-item mod-tab active" data-view="overview" data-module="overview" role="button" tabindex="0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Overview</span></div>
+        <div class="nav-item mod-tab" data-view="dashboard" data-module="batches" role="button" tabindex="0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Batches</span></div>
+        <div class="nav-item mod-tab" data-view="products" data-module="products" id="navProducts" role="button" tabindex="0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg><span>Products</span></div>
+        <div class="nav-item mod-tab" data-view="shipments" data-module="shipments" role="button" tabindex="0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Shipments</span></div>
+        <div class="nav-item mod-tab" data-view="settings" data-module="settings" role="button" tabindex="0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></div>
+      </nav>
+      <div class="topbar-right">
+        <button type="button" class="user-btn" id="userBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar-circle" id="avatarCircle">V</span><span class="user-name" id="profileName">Admin</span>
+        </button>
+        <div class="user-pop" id="userPop" role="menu">
+          <div class="up-head"><span>Signed in as admin</span><b id="popEmail"></b></div>
+          <a class="pop-item" href="home.html" target="_blank" rel="noopener" role="menuitem">View public site ↗</a>
+          <button type="button" class="pop-item" id="lockBtn" role="menuitem">Lock admin page</button>
+          <button type="button" class="pop-item danger" id="signOutBtn" role="menuitem">Sign out</button>
         </div>
       </div>
+    </header>
 
-      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Expand menu">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-
-      <div class="sidebar-nav">
-        <div class="nav-item active" data-view="dashboard">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
-          <span class="nav-label">Dashboard</span>
+    <div class="subbar" id="subBar">
+      <div class="subbar-inner">
+        <div class="subgroup" data-module="batches">
+          <div class="nav-item sub-tab" data-view="dashboard" role="button" tabindex="0">Batch Manager</div>
+          <div class="nav-item sub-tab" data-view="batches" role="button" tabindex="0">Batch Search</div>
         </div>
-        <div class="nav-item nav-item-row" data-view="products" id="navProducts">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7" cy="7" r="1"></circle></svg>
-          <span class="nav-label">Products</span>
-          <svg class="nav-chevron" id="productsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <div class="subgroup" data-module="products">
+          <div class="sub-tab" id="subAllCats" role="button" tabindex="0">All categories</div><span class="sub-sep"></span>
+          <div id="categorySubNav"></div>
         </div>
-        <div class="nav-sublist" id="categorySubNav"></div>
-        <div class="nav-item" data-view="batches">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span class="nav-label">Batch Search</span>
-        </div>
-        <div class="nav-item" data-view="shipments">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-          <span class="nav-label">Shipments</span>
-        </div>
-        <div class="nav-item" data-view="settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-          <span class="nav-label">Batch Settings</span>
+        <div class="subgroup" data-module="settings">
+          <div class="sub-tab active" data-pane="defaults" role="button" tabindex="0">Batch Defaults</div>
+          <div class="sub-tab" data-pane="sizes" role="button" tabindex="0">Size Charts</div>
+          <div class="sub-tab" data-pane="tools" role="button" tabindex="0">Tools &amp; Maintenance</div>
         </div>
       </div>
-
-      <div class="sidebar-bottom">
-        <a href="home.html" class="nav-item" style="text-decoration:none;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
-          <span class="nav-label">View Public Site</span>
-        </a>
-        <div class="nav-item" id="lockBtn" title="Lock the admin page">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span class="nav-label">Lock</span>
-        </div>
-        <div class="nav-item" id="signOutBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span class="nav-label">Sign Out</span>
-        </div>
-      </div>
-    </nav>
+    </div>
 
     <div class="main-content">
-      <header class="mobile-bar">
-        <button type="button" class="hamburger" id="hamburger" aria-label="Open menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-        <span class="mobile-title">Vestige Admin</span>
-      </header>
       <div class="wrap">
 
-        <div class="view active" id="view-dashboard">
+        <div class="view active" id="view-overview">
+          <div class="ov-hello">
+            <div><h1>Dashboard</h1><p class="lead" style="margin:0;" id="ovDate"></p></div>
+            <div class="ov-actions">
+              <button type="button" class="btn btn-gold" data-ov-go="new-batch">+ New Batch</button>
+              <button type="button" class="btn btn-outline" data-ov-go="new-ship">+ New Shipment</button>
+              <button type="button" class="btn btn-outline" data-ov-go="products">Products</button>
+            </div>
+          </div>
+          <div class="tiles" id="ovTiles" aria-label="Summary"></div>
+          <div class="ov-cols">
+            <div class="card"><h2 style="margin-top:0;">Needs your attention</h2><ul class="attn" id="ovAttn"><li><span class="dot"></span><span class="txt">Loading…</span></li></ul></div>
+            <div class="mod-grid" id="ovMods"></div>
+          </div>
+        </div>
+
+        <div class="view" id="view-dashboard">
 
           <div class="warn-banner" id="rulesBanner" style="display:none;">
             <strong>One-time setup:</strong> add these two blocks inside <code>match /databases/{database}/documents</code> in your Firestore Rules, then click Publish:
@@ -1150,14 +1116,14 @@ match /counters/{id} {
         <div class="view" id="view-settings">
           <div class="dash-head">
             <div>
-              <h1>Batch Settings</h1>
+              <h1>Settings</h1>
               <p class="lead" style="margin:0;">Set your defaults once so every new batch starts ready — then use the tools below to keep things tidy.</p>
             </div>
           </div>
 
-          <div class="tiles" id="setTiles" aria-label="Batch overview"></div>
+          <div class="tiles" data-pane="defaults" id="setTiles" aria-label="Batch overview"></div>
 
-          <div class="card">
+          <div class="card" data-pane="defaults">
             <h2>New batch defaults</h2>
             <div class="grid3">
               <div><label for="setHotLimit">Max hot items per batch</label><input type="number" id="setHotLimit" min="1" max="30" step="1"></div>
@@ -1175,20 +1141,20 @@ match /counters/{id} {
             <div class="set-preview" id="setPreview"></div>
           </div>
 
-          <div class="card">
+          <div class="card" data-pane="defaults">
             <h2>Behavior</h2>
             <div class="set-row"><div><div class="set-title">Ask before closing or reactivating a batch</div><div class="set-desc">Shows a confirmation whenever a status is changed from Batch Search.</div></div><label class="switch"><input type="checkbox" id="setConfirm"><span class="slider"></span></label></div>
             <div class="set-row"><div><div class="set-title">Close batches automatically when bidding ends</div><div class="set-desc">Checked each time you open the admin page. Ended Active batches are closed and their items are released. (Runs when you open the page, not in the background.)</div></div><label class="switch"><input type="checkbox" id="setAutoClose"><span class="slider"></span></label></div>
           </div>
 
-          <div class="card">
+          <div class="card" data-pane="sizes">
             <h2>Size charts</h2>
             <p class="hot-note">The charts behind automatic sizing. A size is the <strong>first row</strong> (top to bottom) whose limits the item is <strong>under</strong>, so keep the limits increasing. Each category picks its chart through its <em>Sizing</em> type.</p>
             <div class="chart-tabs" id="chartTabs"></div>
             <div id="chartEditor"></div>
           </div>
 
-          <div class="card">
+          <div class="card" data-pane="tools">
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
             <div class="tool-row"><div><div class="set-title">Secure private product data</div><div class="set-desc" id="toolSecureInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolSecure">Secure now</button></div>
@@ -1198,7 +1164,7 @@ match /counters/{id} {
             <div class="tool-row"><div><div class="set-title">Download backup</div><div class="set-desc">Saves all batches, the counter and these settings as a JSON file.</div></div><button type="button" class="btn btn-outline" id="toolBackup">Download JSON</button></div>
           </div>
 
-          <div class="save-bar" role="region" aria-label="Save settings">
+          <div class="save-bar" data-pane="defaults sizes" role="region" aria-label="Save settings">
             <div class="save-info">
               <span class="dirty-badge" id="setDirtyBadge" style="display:none;">Unsaved changes</span>
               <p>Settings apply to new batches and to how this admin page behaves. Existing batches are never changed.</p>
@@ -1651,8 +1617,10 @@ match /counters/{id} {
     const email = G.user.email || 'Admin';
     document.getElementById('avatarCircle').textContent = email.charAt(0).toUpperCase();
     document.getElementById('profileName').textContent = email;
+    document.getElementById('popEmail').textContent = email;
     initBatches();
     refreshCategoriesView();
+    refreshOverview();
   }
 
   // --- flows ---
@@ -1790,53 +1758,62 @@ match /counters/{id} {
     boot(user);
   });
 
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('sidebarToggle').addEventListener('click', () => {
-    sidebar.classList.toggle('expanded');
-  });
+  // ---------- modular navigation: top module tabs + contextual sub-tabs ----------
+  const MODULE_OF = { overview: 'overview', dashboard: 'batches', batches: 'batches', products: 'products', 'category-detail': 'products', shipments: 'shipments', settings: 'settings' };
+  const subBar = document.getElementById('subBar');
 
   function switchView(viewName){
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + viewName).classList.add('active');
     document.querySelector('.wrap').classList.toggle('wide', viewName === 'category-detail');
+    const mod = MODULE_OF[viewName] || 'overview';
+    document.querySelectorAll('.mod-tab').forEach(t => t.classList.toggle('active', t.dataset.module === mod));
+    let any = false;
+    document.querySelectorAll('.subgroup').forEach(g => { const on = g.dataset.module === mod; g.classList.toggle('show', on); any = any || on; });
+    subBar.classList.toggle('show', any);
+    document.documentElement.style.setProperty('--subbar-h', any ? subBar.offsetHeight + 'px' : '0px');
+    document.querySelectorAll('.sub-tab[data-view]').forEach(t => t.classList.toggle('active', t.dataset.view === viewName));
+    document.getElementById('subAllCats').classList.toggle('active', viewName === 'products');
+    if (!/jsdom/i.test(navigator.userAgent)) window.scrollTo({ top: 0 });
   }
-
+  function goView(viewName){
+    switchView(viewName);
+    if (viewName === 'overview') refreshOverview();
+    if (viewName === 'products') refreshCategoriesView();
+    if (viewName === 'dashboard') refreshHotFromProducts();
+    if (viewName === 'batches') refreshBatchSearch();
+    if (viewName === 'settings') refreshSettingsView();
+    if (viewName === 'shipments') loadShipments();
+  }
+  const canLeave = () => confirmDiscard() && confirmDiscardBatch() && confirmDiscardSettings();
   document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-    item.addEventListener('click', (e) => {
-      if (!confirmDiscard() || !confirmDiscardBatch() || !confirmDiscardSettings()) return;
-      document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      document.querySelectorAll('.nav-subitem').forEach(s => s.classList.remove('active'));
-      const viewName = item.dataset.view;
-      switchView(viewName);
-      if (viewName === 'products') refreshCategoriesView();
-      if (viewName === 'dashboard') refreshHotFromProducts();
-      if (viewName === 'batches') refreshBatchSearch();
-      if (viewName === 'settings') refreshSettingsView();
-      if (viewName === 'shipments') loadShipments();
-      setDrawer(false);
-    });
+    const open = () => { if (canLeave()) goView(item.dataset.view); };
+    item.addEventListener('click', open);
+    item.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
   });
+  const allCatsTab = document.getElementById('subAllCats');
+  const openAllCats = () => { if (!canLeave()) return; currentCategoryId = null; selectedId = null; draft = null; dirty = false; goView('products'); renderCategorySidebar(); };
+  allCatsTab.addEventListener('click', openAllCats);
+  allCatsTab.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openAllCats(); } });
 
-  // mobile drawer
-  const drawerBackdrop = document.getElementById('drawerBackdrop');
-  function setDrawer(open){
-    sidebar.classList.toggle('mobile-open', open);
-    if (open) sidebar.classList.add('expanded');
-    drawerBackdrop.classList.toggle('open', open);
+  // settings sub-tabs show one pane at a time
+  function setSettingsPane(name){
+    document.querySelectorAll('.sub-tab[data-pane]').forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+    document.querySelectorAll('#view-settings [data-pane]').forEach(el => { el.hidden = !el.dataset.pane.split(' ').includes(name); });
   }
-  document.getElementById('hamburger').addEventListener('click', () => setDrawer(!sidebar.classList.contains('mobile-open')));
-  drawerBackdrop.addEventListener('click', () => setDrawer(false));
-  document.querySelectorAll('.nav-item[data-soon]').forEach(el => el.addEventListener('click', () => {
-    showToast({ type: 'ok', title: 'Coming soon', message: el.dataset.soon + '.' });
-    setDrawer(false);
-  }));
-
-  document.getElementById('productsChevron').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('productsChevron').classList.toggle('open');
-    document.getElementById('categorySubNav').classList.toggle('open');
+  document.querySelectorAll('.sub-tab[data-pane]').forEach(t => {
+    t.addEventListener('click', () => setSettingsPane(t.dataset.pane));
+    t.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setSettingsPane(t.dataset.pane); } });
   });
+  setSettingsPane('defaults');
+
+  // account menu
+  const userBtn = document.getElementById('userBtn'), userPop = document.getElementById('userPop');
+  const setPop = (open) => { userPop.classList.toggle('open', open); userBtn.setAttribute('aria-expanded', String(open)); };
+  userBtn.addEventListener('click', (e) => { e.stopPropagation(); setPop(!userPop.classList.contains('open')); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#userPop')) setPop(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setPop(false); });
+  userPop.addEventListener('click', () => setPop(false));
 
   // =====================================================================
   //  Batches — every drop is its own record with an automatic Control No.
@@ -3200,6 +3177,71 @@ match /counters/{id} {
       closeShipment(); await loadShipments();
       showToast({ type: 'ok', title: 'Shipment Deleted', message: `${no} was removed.` });
     } catch(err){ console.error(err); showToast({ type: 'err', title: 'Delete Failed', message: 'Check your Firestore rules and try again.' }); }
+  });
+
+  // =====================================================================
+  //  Overview module — read-only summary + shortcuts. Each module below still works on its own.
+  // =====================================================================
+  const OV_ICONS = {
+    batches: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+    products: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>',
+    shipments: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+    settings: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="#fff"/><circle cx="15" cy="12" r="2" fill="#fff"/><circle cx="8" cy="18" r="2" fill="#fff"/></svg>'
+  };
+  let ovBusy = false;
+  async function refreshOverview(){
+    if (ovBusy) return; ovBusy = true;
+    const el = (id) => document.getElementById(id);
+    el('ovDate').textContent = new Intl.DateTimeFormat('en-PH', { timeZone: TZ, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()) + ' · Philippine time';
+    let products = null, batches = null, shipOk = true;
+    try{ [products, batches] = await Promise.all([fetchAllProducts(), fetchBatches()]); } catch(err){ console.error('Overview data:', err); }
+    try{ await loadShipments(); shipOk = !document.getElementById('shipBlocked') || document.getElementById('shipBlocked').style.display === 'none'; } catch(err){ shipOk = false; }
+    ovBusy = false;
+    products = products || []; batches = batches || allBatches || [];
+    const avail = products.filter(p => (p.status || 'Available') === 'Available').length;
+    const claimed = products.filter(p => p.status === 'Claimed');
+    const shippedIds = new Set(Object.values(shipPriv).flatMap(p => p.productIds || []));
+    const unshipped = claimed.filter(p => !shippedIds.has(p.id));
+    const live = batches.find(b => b.status === 'Active');
+    const open = ships.filter(s => s.status !== 'delivered');
+    const noTrack = ships.filter(s => !s.trackingNumber && s.status !== 'delivered');
+    const noPhoto = products.filter(p => (p.status || 'Available') === 'Available' && !(p.images || []).length);
+    const cats = new Set(products.map(p => p.categoryId).filter(Boolean)).size;
+    const tile = (l, v, sub, acc) => `<div class="tile${acc ? ' accent' : ''}"><div class="t-label">${esc(l)}</div><div class="t-value">${v}</div><div class="t-sub">${sub}</div></div>`;
+    el('ovTiles').innerHTML =
+      tile('Live batch', live ? 'Control ' + esc(fmtControl(live.controlNo)) : 'None', live ? esc(live.batchName || '') : 'No Active batch', true) +
+      tile('Available', String(avail), `of ${products.length} product${products.length === 1 ? '' : 's'}`) +
+      tile('To ship', String(unshipped.length), 'claimed, no shipment yet') +
+      tile('In delivery', String(open.length), `${ships.length} shipment${ships.length === 1 ? '' : 's'} total`);
+
+    const items = [];
+    const add = (cls, text, go, label) => items.push(`<li><span class="dot ${cls}"></span><span class="txt">${text}</span>${go ? `<button type="button" class="go" data-ov-go="${go}">${label}</button>` : ''}</li>`);
+    if (!live) add('warn', 'There is no <strong>Active</strong> batch — the shop is showing no current drop.', 'batches', 'Open Batches');
+    else {
+      const end = live.biddingEnd ? new Date(live.biddingEnd) : null, ms = end ? end - Date.now() : null;
+      if (ms !== null && ms < 0) add('warn', `<strong>${esc(live.batchName || 'Live batch')}</strong> has ended but is still Active.`, 'batches', 'Close it');
+      else if (ms !== null && ms < 24 * 3600 * 1000) add('', `<strong>${esc(live.batchName || 'Live batch')}</strong> closes in under 24 hours.`, 'batches', 'View batch');
+    }
+    if (unshipped.length) add('warn', `<strong>${unshipped.length}</strong> claimed item${unshipped.length === 1 ? ' is' : 's are'} not in a shipment yet.`, 'shipments', 'Create shipment');
+    if (noTrack.length) add('', `<strong>${noTrack.length}</strong> shipment${noTrack.length === 1 ? ' is' : 's are'} waiting for a J&amp;T tracking number.`, 'shipments', 'Add tracking');
+    if (noPhoto.length) add('', `<strong>${noPhoto.length}</strong> available item${noPhoto.length === 1 ? ' has' : 's have'} no photo.`, 'products', 'Open Products');
+    if (!shipOk) add('warn', 'Shipments can’t be read — publish the Firestore rules for shipments.', 'settings', 'Settings');
+    if (!items.length) add('ok', 'All clear — nothing needs your attention right now.');
+    el('ovAttn').innerHTML = items.join('');
+
+    const mod = (key, title, desc, stat, view) => `<button type="button" class="mod-card" data-ov-go="${view}"><span class="mi">${OV_ICONS[key]}</span><h3>${title}</h3><p>${desc}</p><span class="stat">${stat}</span></button>`;
+    el('ovMods').innerHTML =
+      mod('batches', 'Batches', 'Create, schedule and search your weekly drops.', `${batches.length} batch${batches.length === 1 ? '' : 'es'}`, 'batches') +
+      mod('products', 'Products', 'Categories, items, photos, sizes and imports.', `${products.length} items · ${cats} categor${cats === 1 ? 'y' : 'ies'}`, 'products') +
+      mod('shipments', 'Shipments', 'Track claimed items through J&amp;T delivery.', `${open.length} in progress`, 'shipments') +
+      mod('settings', 'Settings', 'Batch defaults, size charts and maintenance tools.', 'Defaults · Size charts · Tools', 'settings');
+  }
+  document.getElementById('view-overview').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ov-go]'); if (!b || !canLeave()) return;
+    const t = b.dataset.ovGo;
+    if (t === 'new-batch'){ goView('dashboard'); document.getElementById('newBatchBtn').click(); }
+    else if (t === 'new-ship'){ goView('shipments'); document.getElementById('shipNewBtn').click(); }
+    else goView(t === 'batches' ? 'dashboard' : t);
   });
 
   // ---------- tools ----------
@@ -5025,8 +5067,6 @@ match /counters/{id} {
     document.getElementById('folderStatus').value = 'all';
     document.getElementById('categoryDetailName').textContent = cat.name;
     showCategoryChip(cat);
-    document.querySelectorAll('.nav-item[data-view]').forEach(i => i.classList.remove('active'));
-    document.getElementById('navProducts').classList.add('active');
     renderCategorySidebar();
     switchView('category-detail');
     setProductView('folder');
@@ -5041,7 +5081,6 @@ match /counters/{id} {
     currentCategoryId = null;
     selectedId = null;
     draft = null;
-    document.getElementById('navProducts').classList.add('active');
     renderCategorySidebar();
     switchView('products');
     refreshCategoriesView();
