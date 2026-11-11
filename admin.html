@@ -394,6 +394,36 @@
   .pm-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:4px 6px 4px 12px; font-size:.8rem; margin:0 6px 6px 0; } .pm-chip button{ border:none; background:none; cursor:pointer; color:var(--danger); font-size:.9rem; }
   .pm-step{ display:grid; grid-template-columns:1fr 2fr auto auto auto; gap:8px; align-align:center; margin-bottom:8px; align-items:center; } .pm-step input,.pm-step select{ margin:0; }
   @media (max-width:640px){ .ds-row,.custom-row,.loc-row,.pm-step{ grid-template-columns:1fr; } }
+  #shipReload{ margin-left:auto; }
+  .ship-list{ display:grid; gap:14px; padding:4px 2px 2px; }
+  .sc,.rd-card{ border:1px solid var(--line); border-radius:14px; background:#fff; padding:16px 18px; }
+  .sc-top{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+  .sc-top small,.sc-meta{ color:rgba(20,32,28,.6); font-size:.82rem; }
+  .sc-title{ font-weight:600; margin:10px 0 2px; font-size:.98rem; }
+  .sc-warn{ color:#8a5a12; font-weight:600; }
+  .stepper{ list-style:none; display:grid; grid-template-columns:repeat(6,1fr); margin:16px 0 10px; padding:0; }
+  .stepper li{ position:relative; text-align:center; font-size:.68rem; color:rgba(20,32,28,.5); }
+  .stepper li i{ display:block; width:14px; height:14px; border-radius:50%; background:#e4e0d8; margin:0 auto 6px; position:relative; z-index:1; }
+  .stepper li::before{ content:''; position:absolute; top:6px; left:-50%; width:100%; height:2px; background:#e4e0d8; }
+  .stepper li:first-child::before{ display:none; }
+  .stepper li.done i,.stepper li.now i{ background:var(--green-deep); }
+  .stepper li.done::before,.stepper li.now::before{ background:var(--green-deep); }
+  .stepper li.now i{ box-shadow:0 0 0 4px rgba(201,164,104,.45); } .stepper li.now{ color:var(--ink); font-weight:600; }
+  .sc-foot{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:12px; }
+  .sc-foot .acts{ display:flex; gap:8px; flex-wrap:wrap; } .sc-done{ color:#1b4a30; font-weight:600; font-size:.9rem; }
+  .rd-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px; }
+  .rd-head small{ color:rgba(20,32,28,.6); display:block; }
+  .rd-all{ display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; font-size:.82rem; margin:0; cursor:pointer; } .rd-all input,.rd-item input{ width:auto; margin:0; }
+  .rd-item{ display:flex; gap:12px; align-items:center; padding:9px 0; border-top:1px solid var(--line); cursor:pointer; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; font-size:.88rem; color:var(--ink); margin:0; }
+  .rd-item img,.rd-item .noimg{ width:44px; height:44px; object-fit:cover; border-radius:8px; background:var(--paper); flex:none; }
+  .rd-item small{ display:block; color:rgba(20,32,28,.55); }
+  .rd-foot{ display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:12px; align-items:center; } .rd-foot input{ margin:0; }
+  .stg-row{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin:8px 0 14px; }
+  .stg-btn{ border:1px solid var(--line); background:#fff; border-radius:10px; padding:11px 4px; font-size:.78rem; cursor:pointer; font-family:inherit; color:var(--ink); }
+  .stg-btn.on{ background:var(--green-deep); color:var(--cream-soft); border-color:var(--green-deep); } .stg-btn.cur{ box-shadow:inset 0 -3px 0 #c9a468; }
+  details.more > summary{ cursor:pointer; color:var(--green-deep); font-weight:600; font-size:.86rem; margin:12px 0; }
+  .chk{ display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; font-size:.84rem; margin:12px 0; cursor:pointer; } .chk input{ width:auto; margin:0; }
+  @media (max-width:640px){ .stg-row{ grid-template-columns:repeat(3,1fr); } .rd-foot{ grid-template-columns:1fr; } .stepper li{ font-size:.58rem; } .sc-foot .btn{ flex:1; } }
   .ship-url{ font-family:'Space Mono',monospace; font-size:.74rem; word-break:break-all; background:var(--paper); border-radius:8px; padding:8px 10px; }
   @media (max-width:640px){ .ship-grid,.ship-add{ grid-template-columns:1fr; } .ship-body{ padding:6px 16px 16px; } .ship-foot .btn{ flex:1; } }
   .overlay{
@@ -849,8 +879,8 @@
     <div class="ship-body" id="shipBodyForm"></div>
     <div class="ship-foot">
       <div class="left"><button type="button" class="btn btn-outline" id="shipDelete" style="display:none;color:#a4452f;">Delete</button><button type="button" class="btn btn-outline" id="shipCopy" style="display:none;">Copy tracking link</button></div>
-      <button type="button" class="btn btn-outline" id="shipCancel">Cancel</button>
-      <button type="button" class="btn btn-gold" id="shipSave">Save shipment</button>
+      <button type="button" class="btn btn-outline" id="shipCancel">Close</button>
+      <button type="button" class="btn btn-gold" id="shipSave">Save changes</button>
     </div>
   </div>
 </div>
@@ -1065,23 +1095,23 @@ match /counters/{id} {
           <div class="dash-head">
             <div>
               <h1>Shipments</h1>
-              <p class="lead" style="margin:0;">Turn claimed items into tracked J&amp;T Express shipments. Buyers follow them on your public <strong>Track Order</strong> page.</p>
+              <p class="lead" style="margin:0;">Ship claimed items in one click, then move each parcel forward as J&amp;T updates it. Buyers follow along on your public <strong>Track Order</strong> page.</p>
             </div>
-            <button type="button" class="btn btn-gold" id="shipNewBtn">+ New Shipment</button>
+            <button type="button" class="btn btn-gold" id="shipNewBtn">Ship claimed items</button>
           </div>
           <div class="warn-banner" id="shipBlocked" style="display:none;">Shipments can't be read yet. Publish the Firestore rules for <code>shipments</code>, <code>shipmentIndex</code> and <code>shipmentPrivate</code>, then reload.</div>
-          <div class="tiles" id="shipTiles"></div>
           <div class="card bs-card">
             <div class="bs-toolbar">
-              <div class="bs-search">
+              <div class="bs-search" id="shipSearchWrap">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
                 <input type="search" id="shipSearch" placeholder="Search order no., tracking no., item or buyer…" autocomplete="off" aria-label="Search shipments">
               </div>
               <button type="button" class="btn btn-outline" id="shipReload">↻ Reload</button>
             </div>
-            <div class="bs-chips" id="shipChips" role="tablist" aria-label="Filter by status"></div>
-            <div class="table-scroll"><table class="inv-table"><thead><tr><th>Order No.</th><th>Tracking No.</th><th>Items</th><th>Buyer</th><th>Status</th><th>Last update</th></tr></thead><tbody id="shipBody"></tbody></table></div>
+            <div class="bs-chips" id="shipChips" role="tablist" aria-label="Shipment lists"></div>
+            <div class="ship-list" id="shipBody"></div>
           </div>
+        </div>
         </div>
 
         <div class="view" id="view-batches">
@@ -3059,7 +3089,18 @@ match /counters/{id} {
   }
 
 
-  async function loadShipments(){
+  const DEFAULT_TEXT = ['Order confirmed', 'Item checked and being packed', 'Picked up by ' + COURIER, 'In transit to next facility', 'Out for delivery', 'Delivered'];
+  const SHORT = ['Confirmed', 'Preparing', 'Picked up', 'In transit', 'Out for delivery', 'Delivered'];
+  const srcFor = (stage) => stageIdx(stage) <= 1 ? 'vestige' : 'jnt';
+  const isOpen = (x) => x.status !== 'delivered';
+  const pName = (p) => [p.brand, p.productName].filter(Boolean).join(' ') || p.sku || 'Vestige piece';
+  let readyItems = [], readyGroups = [], productsCache = null, shipsLoaded = false;
+
+  // prod: array = use it · undefined = fetch fresh · false = reuse the last fetch
+  async function loadShipments(prod){
+    let list = Array.isArray(prod) ? prod : (prod === false && productsCache ? productsCache : null);
+    if (!list){ try{ list = await fetchAllProducts(); } catch(err){ console.error(err); list = productsCache || []; } }
+    productsCache = list;
     try{
       const [a, b] = await Promise.all([getDocs(shipCol), getDocs(shipPrivCol)]);
       ships = a.docs.map(d => ({ ...d.data(), orderNo: d.id })).sort((x, y) => String(y.lastUpdated || '').localeCompare(String(x.lastUpdated || '')));
@@ -3070,90 +3111,132 @@ match /counters/{id} {
       ships = []; shipPriv = {};
       document.getElementById('shipBlocked').style.display = 'block';
     }
+    const used = new Set(Object.values(shipPriv).flatMap(p => p.productIds || []));
+    readyItems = list.filter(p => p.status === 'Claimed' && !used.has(p.id));
+    if (!shipsLoaded){ shipsLoaded = true; shipChip = readyItems.length || !ships.some(isOpen) ? 'ready' : 'active'; }
     renderShipments();
   }
+
+  function shipCard(x){
+    const i = Math.max(0, stageIdx(x.status)), buyer = (shipPriv[x.orderNo] || {}).buyer || '';
+    const names = (x.items || []).map(it => it.name), shown = names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3} more` : '');
+    const steps = SHIP_STAGES.map((st, k) => `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"><i></i><span>${SHORT[k]}</span></li>`).join('');
+    const o = esc(x.orderNo);
+    return `<article class="sc" data-ship="${o}">
+      <div class="sc-top"><div><span class="sku">${o}</span> &nbsp;${stagePill(x.status)}</div><small>Updated ${esc(fmtManila(x.lastUpdated))}</small></div>
+      <div class="sc-title">${esc(shown || 'Shipment')}</div>
+      <div class="sc-meta">${buyer ? 'Buyer: ' + esc(buyer) + ' · ' : ''}${x.trackingNumber ? 'J&amp;T ' + esc(x.trackingNumber) : '<span class="sc-warn">No tracking number yet</span>'}</div>
+      <ol class="stepper" aria-label="Progress">${steps}</ol>
+      <div class="sc-foot">${i < 5 ? `<button type="button" class="btn btn-gold" data-next="${o}">Mark as ${SHORT[i + 1]}</button>` : `<span class="sc-done">✓ Delivered${x.deliveredAt ? ' · ' + esc(fmtManila(x.deliveredAt)) : ''}</span>`}
+        <div class="acts"><button type="button" class="btn btn-outline" data-open="${o}">Details &amp; history</button></div></div>
+    </article>`;
+  }
+  function readyHtml(){
+    const by = new Map();
+    readyItems.forEach(p => { const k = (p.soldTo || '').trim().toLowerCase(); if (!by.has(k)) by.set(k, { buyer: (p.soldTo || '').trim(), items: [] }); by.get(k).items.push(p); });
+    readyGroups = [...by.values()];
+    if (!readyGroups.length) return '<div class="empty-state">Nothing is waiting to ship. Items marked <b>Claimed</b> (with a buyer) in Products show up here.</div>';
+    return readyGroups.map((g, gi) => `<section class="rd-card" data-grp="${gi}">
+      <div class="rd-head"><div><b>${esc(g.buyer || 'No buyer name')}</b><small>${g.items.length} claimed item${g.items.length === 1 ? '' : 's'} · ships together as one parcel</small></div>
+        ${g.items.length > 1 ? '<label class="rd-all"><input type="checkbox" data-rd-all checked> Select all</label>' : ''}</div>
+      ${g.items.map(p => `<label class="rd-item"><input type="checkbox" data-rd="${esc(p.id)}" checked>${(p.images || [])[0] ? `<img src="${esc(p.images[0])}" alt="" loading="lazy">` : '<span class="noimg"></span>'}<span><b>${esc(pName(p))}</b><small>${esc(p.sku || '')}</small></span></label>`).join('')}
+      <div class="rd-foot"><input class="rd-track" type="text" maxlength="30" autocomplete="off" placeholder="J&amp;T tracking number (optional — you can add it later)" aria-label="J&amp;T tracking number"><button type="button" class="btn btn-gold" data-rd-create="${gi}">Create shipment${g.items.length > 1 ? ` (${g.items.length} items)` : ''}</button></div>
+    </section>`).join('');
+  }
   function renderShipments(){
-    const count = (f) => ships.filter(f).length;
-    const tile = (l, v) => `<div class="tile"><div class="t-label">${l}</div><div class="t-value">${v}</div></div>`;
-    document.getElementById('shipTiles').innerHTML =
-      tile('To prepare', count(s => stageIdx(s.status) <= 1)) + tile('With J&T', count(s => stageIdx(s.status) >= 2 && stageIdx(s.status) <= 3)) +
-      tile('Out for delivery', count(s => s.status === 'out_for_delivery')) + tile('Delivered', count(s => s.status === 'delivered'));
-    const chips = [['all', 'All'], ['prep', 'To prepare'], ['way', 'On the way'], ['delivered', 'Delivered']];
-    const inChip = (s) => shipChip === 'all' || (shipChip === 'prep' && stageIdx(s.status) <= 1) || (shipChip === 'way' && stageIdx(s.status) >= 2 && s.status !== 'delivered') || (shipChip === 'delivered' && s.status === 'delivered');
-    document.getElementById('shipChips').innerHTML = chips.map(([k, l]) => `<button type="button" class="bs-chip ${shipChip === k ? 'active' : ''}" data-ship-chip="${k}">${l}<b>${ships.filter(s => k === 'all' ? true : (k === 'prep' ? stageIdx(s.status) <= 1 : k === 'way' ? stageIdx(s.status) >= 2 && s.status !== 'delivered' : s.status === 'delivered')).length}</b></button>`).join('');
+    const open = ships.filter(isOpen), done = ships.filter(x => !isOpen(x));
+    const chips = [['ready', 'Ready to ship', readyItems.length], ['active', 'In progress', open.length], ['delivered', 'Delivered', done.length], ['all', 'All', ships.length]];
+    document.getElementById('shipChips').innerHTML = chips.map(([k, l, n]) => `<button type="button" class="bs-chip ${shipChip === k ? 'active' : ''}" data-ship-chip="${k}">${l}<b>${n}</b></button>`).join('');
+    document.getElementById('shipSearchWrap').style.display = shipChip === 'ready' ? 'none' : '';
+    const body = document.getElementById('shipBody');
+    if (shipChip === 'ready'){ body.innerHTML = readyHtml(); return; }
     const q = shipQ.trim().toLowerCase();
-    const rows = ships.filter(inChip).filter(s => !q || [s.orderNo, s.trackingNumber, (s.items || []).map(i => i.name + ' ' + (i.sku || '')).join(' '), (shipPriv[s.orderNo] || {}).buyer].join(' ').toLowerCase().includes(q));
-    document.getElementById('shipBody').innerHTML = rows.length ? rows.map(s => `<tr data-ship="${esc(s.orderNo)}" tabindex="0">
-      <td class="sku">${esc(s.orderNo)}</td><td>${esc(s.trackingNumber || '—')}</td><td>${esc((s.items || []).map(i => i.name).join(', ') || '—')}</td>
-      <td>${esc((shipPriv[s.orderNo] || {}).buyer || '—')}</td><td>${stagePill(s.status)}</td><td>${esc(fmtManila(s.lastUpdated))}</td></tr>`).join('')
-      : `<tr><td colspan="6" class="empty-state">${ships.length ? 'No shipments match your search.' : 'No shipments yet. Claimed items can be turned into a tracked shipment with “+ New Shipment”.'}</td></tr>`;
+    const pool = shipChip === 'active' ? open : shipChip === 'delivered' ? done : ships;
+    const rows = pool.filter(x => !q || [x.orderNo, x.trackingNumber, (x.items || []).map(i => i.name + ' ' + (i.sku || '')).join(' '), (shipPriv[x.orderNo] || {}).buyer].join(' ').toLowerCase().includes(q));
+    body.innerHTML = rows.length ? rows.map(shipCard).join('')
+      : `<div class="empty-state">${ships.length ? (q ? 'No shipments match your search.' : 'Nothing here yet.') : 'No shipments yet. Open “Ready to ship”, pick the items and press Create shipment.'}</div>`;
   }
   document.getElementById('shipChips').addEventListener('click', (e) => { const b = e.target.closest('[data-ship-chip]'); if (b){ shipChip = b.dataset.shipChip; renderShipments(); } });
   document.getElementById('shipSearch').addEventListener('input', (e) => { shipQ = e.target.value; renderShipments(); });
-  document.getElementById('shipReload').addEventListener('click', loadShipments);
-  document.getElementById('shipBody').addEventListener('click', (e) => { const r = e.target.closest('[data-ship]'); if (r) openShipment(r.dataset.ship); });
-  document.getElementById('shipBody').addEventListener('keydown', (e) => { if (e.key === 'Enter'){ const r = e.target.closest('[data-ship]'); if (r) openShipment(r.dataset.ship); } });
-
-  // ----- editor -----
-  const shipOverlay = document.getElementById('shipOverlay');
-  const pName = (p) => [p.brand, p.productName].filter(Boolean).join(' ') || p.sku || 'Vestige piece';
-  async function openShipment(orderNo){
-    const base = orderNo ? ships.find(x => x.orderNo === orderNo) : null;
-    if (orderNo && !base) return;
-    if (base){
-      sh = { isNew: false, orderNo, trackingNumber: base.trackingNumber || '', eta: base.estimatedDelivery ? toLocalInput(base.estimatedDelivery).slice(0, 10) : '',
-        events: (base.events || []).map(e => ({ ...e })), items: (base.items || []).map(i => ({ ...i })), productIds: (shipPriv[orderNo] || {}).productIds || [],
-        buyer: (shipPriv[orderNo] || {}).buyer || '', orderedAt: base.orderedAt, picks: new Set(), pickList: [] };
-    } else {
-      let list = [];
-      try{ list = await fetchAllProducts(); } catch(err){ console.error(err); }
-      const used = new Set(Object.values(shipPriv).flatMap(p => p.productIds || []));
-      sh = { isNew: true, orderNo: '', trackingNumber: '', eta: '', events: [], items: [], productIds: [], buyer: '', orderedAt: new Date().toISOString(), picks: new Set(),
-        pickList: list.filter(p => p.status === 'Claimed' && !used.has(p.id)) };
+  document.getElementById('shipReload').addEventListener('click', () => loadShipments());
+  document.getElementById('shipNewBtn').addEventListener('click', () => { shipChip = 'ready'; renderShipments(); });
+  const shipBodyEl = document.getElementById('shipBody');
+  shipBodyEl.addEventListener('change', (e) => {
+    const card = e.target.closest('.rd-card'); if (!card) return;
+    if (e.target.matches('[data-rd-all]')) card.querySelectorAll('[data-rd]').forEach(c => { c.checked = e.target.checked; });
+    const boxes = [...card.querySelectorAll('[data-rd]')], n = boxes.filter(c => c.checked).length, all = card.querySelector('[data-rd-all]');
+    if (all) all.checked = n === boxes.length;
+    const btn = card.querySelector('[data-rd-create]'); btn.disabled = !n;
+    btn.textContent = n > 1 ? `Create shipment (${n} items)` : 'Create shipment';
+  });
+  shipBodyEl.addEventListener('click', async (e) => {
+    let el;
+    if ((el = e.target.closest('[data-rd-create]'))){
+      const card = el.closest('.rd-card'), ids = [...card.querySelectorAll('[data-rd]:checked')].map(c => c.dataset.rd);
+      if (!ids.length) return;
+      const s = { isNew: true, orderNo: '', trackingNumber: card.querySelector('.rd-track').value, eta: '', events: [], items: [], productIds: [], buyer: '', orderedAt: new Date().toISOString(), picks: new Set(ids), pickList: readyItems };
+      const no = await persistShipment(s, el, 'created');
+      if (no && !readyItems.length){ shipChip = 'active'; renderShipments(); }
     }
+    else if ((el = e.target.closest('[data-next]'))) quickAdvance(el.dataset.next, el);
+    else if ((el = e.target.closest('[data-open]'))) openShipment(el.dataset.open);
+  });
+
+  // ----- status helpers -----
+  function buildShipObj(orderNo){
+    const base = ships.find(x => x.orderNo === orderNo); if (!base) return null;
+    return { isNew: false, orderNo, trackingNumber: base.trackingNumber || '', eta: base.estimatedDelivery ? toLocalInput(base.estimatedDelivery).slice(0, 10) : '',
+      events: (base.events || []).map(e => ({ ...e })), items: (base.items || []).map(i => ({ ...i })), productIds: (shipPriv[orderNo] || {}).productIds || [],
+      buyer: (shipPriv[orderNo] || {}).buyer || '', orderedAt: base.orderedAt, picks: new Set(), pickList: [] };
+  }
+  const topStage = (evs) => evs.length ? Math.max(...evs.map(e => stageIdx(e.stage))) : -1;
+  function applyStatus(s, { stage, text, location, when, fill }){
+    const k = stageIdx(stage);
+    if (fill) for (let i = 0; i < k; i++){
+      if (!s.events.some(e => stageIdx(e.stage) === i)) s.events.push({ stage: SHIP_STAGES[i].key, description: DEFAULT_TEXT[i], location: null, timestamp: null, source: srcFor(SHIP_STAGES[i].key) });
+    }
+    s.events.push({ stage, description: text, location: location || null, timestamp: when, source: srcFor(stage) });
+  }
+  async function quickAdvance(orderNo, btn){
+    const s = buildShipObj(orderNo); if (!s) return;
+    const next = topStage(s.events) + 1; if (next > 5) return;
+    if (next >= 2 && !trackKey(s.trackingNumber)){
+      await openShipment(orderNo, { focusTrack: true });
+      showToast({ type: 'err', title: 'Tracking number needed', message: 'Add the J&T tracking number, then press Post update.', duration: 6000 }); return;
+    }
+    applyStatus(s, { stage: SHIP_STAGES[next].key, text: DEFAULT_TEXT[next], when: new Date().toISOString(), fill: true });
+    await persistShipment(s, btn, 'updated', `Marked as ${SHORT[next]}`);
+  }
+
+  // ----- details modal -----
+  const shipOverlay = document.getElementById('shipOverlay');
+  async function openShipment(orderNo, opts = {}){
+    const s = buildShipObj(orderNo); if (!s) return;
+    sh = s;
+    const cur = topStage(sh.events);
+    sh.sel = SHIP_STAGES[Math.min(5, cur + 1)].key; sh.dirty = false;
     await loadShipPresets();
-    document.getElementById('shipTitle').textContent = sh.isNew ? 'New shipment' : `Shipment ${sh.orderNo}`;
-    document.getElementById('shipSub').textContent = sh.isNew ? 'Pick the claimed item(s) in this parcel. An order number is created when you save.' : 'Update the tracking number and post each tracking step as it happens.';
-    document.getElementById('shipDelete').style.display = sh.isNew ? 'none' : '';
-    document.getElementById('shipCopy').style.display = sh.isNew ? 'none' : '';
-    renderShipForm();
+    document.getElementById('shipTitle').textContent = `Shipment ${sh.orderNo}`;
+    document.getElementById('shipSub').textContent = 'Post a status update, fix the tracking number, or review the history.';
+    document.getElementById('shipDelete').style.display = '';
+    document.getElementById('shipCopy').style.display = '';
+    renderShipDetail();
     shipOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    if (opts.focusTrack) setTimeout(() => { const t = document.getElementById('shTrack'); if (t) t.focus(); }, 30);
   }
   function closeShipment(){ shipOverlay.classList.remove('open'); document.body.style.overflow = ''; sh = null; }
-  function renderShipForm(){
+  function renderShipDetail(){
+    const cur = topStage(sh.events);
     const evs = [...sh.events].sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
-    const items = sh.isNew
-      ? (sh.pickList.length ? `<div class="ship-pick" id="shipPick">${sh.pickList.map(p => `<label><input type="checkbox" data-pick="${esc(p.id)}" ${sh.picks.has(p.id) ? 'checked' : ''}><span><b>${esc(pName(p))}</b><small>${esc(p.sku)} · Buyer: ${esc(p.soldTo || '—')}</small></span></label>`).join('')}</div>`
-        : '<p class="fld-note">No Claimed items are waiting to ship. Mark an item Claimed (with the buyer) in Products first.</p>')
-      : `<div class="ship-pick">${sh.items.map(i => `<label style="cursor:default;"><span><b>${esc(i.name)}</b><small>${esc(i.sku || '')}</small></span></label>`).join('')}</div>`;
-    const stageOpts = SHIP_STAGES.map(st => `<option value="${st.key}">${esc(st.title)}</option>`).join('');
     document.getElementById('shipBodyForm').innerHTML = `
-      <div class="ship-sec"><h3>${sh.isNew ? 'Items in this parcel' : 'Items'}</h3>${items}</div>
-      <div class="ship-sec"><h3>Courier details</h3>
-        <div class="ship-grid">
-          <div><label for="shTrack">J&amp;T tracking number</label><input id="shTrack" type="text" maxlength="30" autocomplete="off" value="${esc(sh.trackingNumber)}" placeholder="Add when J&amp;T gives you the waybill"></div>
-          <div><label for="shEta">Estimated delivery (optional)</label><input id="shEta" type="date" value="${esc(sh.eta)}"></div>
-        </div>
-        ${sh.isNew ? '' : `<p class="fld-note" style="margin-top:10px;">Public link for the buyer:</p><div class="ship-url">${esc(trackUrl(sh.orderNo))}</div>`}
-      </div>
-      <div class="ship-sec"><h3>Tracking timeline</h3>
-        <ul class="ship-ev" id="shEvents">${evs.length ? evs.map(e => `<li><div class="grow"><b>${esc(stageTitle(e.stage))}</b> — ${esc(e.description || '')}<small>${e.timestamp ? esc(fmtManila(e.timestamp)) : 'time not recorded'}${e.location ? ' · ' + esc(e.location) : ''} · ${e.source === 'jnt' ? 'From J&T' : 'Vestige'}</small></div><button type="button" class="icon-btn" data-ev-del="${sh.events.indexOf(e)}" aria-label="Remove step">✕</button></li>`).join('') : '<li><div class="grow"><small>No steps yet. Add the first one below.</small></div></li>'}</ul>
-        <p class="gate-note-lite" id="tlLockNote" ${sh.isNew && !sh.picks.size ? '' : 'hidden'}>Select the item(s) for this shipment above first — then you can add tracking steps.</p>
-        <fieldset id="tlSet" class="tl-set" ${sh.isNew && !sh.picks.size ? 'disabled' : ''}>
-          <div class="ds-row">
-            <div><label for="dsTpl">Default steps</label><select id="dsTpl">${templatesList().map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>
-            <div><label for="dsUpTo">Current status</label><select id="dsUpTo"></select></div>
-            <div class="ds-btns"><button type="button" class="btn btn-gold" id="dsApply">Apply steps</button><button type="button" class="btn btn-outline" id="dsManage">Manage</button></div>
-          </div>
-          <p class="fld-note" style="margin:6px 0 14px;">Pick where this parcel is now — every step up to it is added in one click (earlier steps show no time; the selected one uses the date &amp; time below).</p>
+      <div class="ship-sec"><h3>Items</h3><div class="ship-pick">${sh.items.map(i => `<label style="cursor:default;"><span><b>${esc(i.name)}</b><small>${esc(i.sku || '')}${sh.buyer ? ' · Buyer: ' + esc(sh.buyer) : ''}</small></span></label>`).join('')}</div></div>
+      <div class="ship-sec"><h3>Update status</h3>
+        <p class="fld-note" style="margin:0;">Now: ${cur >= 0 ? stagePill(SHIP_STAGES[cur].key) : '—'} &nbsp;Pick the new status:</p>
+        <div class="stg-row" id="stgRow">${SHIP_STAGES.map((st, k) => `<button type="button" class="stg-btn ${st.key === sh.sel ? 'on' : ''} ${k === cur ? 'cur' : ''}" data-stage="${st.key}" aria-pressed="${st.key === sh.sel}">${SHORT[k]}</button>`).join('')}</div>
+        <label for="evStatus">What happened</label><select id="evStatus"></select>
+        <div id="evCustomRow" hidden style="margin-top:10px;"><label for="evCustomText">Your status text</label><input id="evCustomText" type="text" maxlength="160" placeholder="e.g. Parcel rerouted due to typhoon"></div>
+        <details class="more"><summary>Add a location or change the time (optional)</summary>
           <div class="ship-add">
-            <div class="span3"><label for="evStatus">Status update — what happened</label><select id="evStatus">
-              ${STATUS_CATALOG.map((g, gi) => `<optgroup label="${esc(stageTitle(g.stage))}">${g.items.map((t, ii) => `<option value="c:${gi}:${ii}">${esc(t)}</option>`).join('')}</optgroup>`).join('')}
-              <option value="custom">✎ Custom status…</option></select></div>
-            <div class="span3 custom-row" id="evCustomRow" hidden>
-              <div><label for="evCustomStage">Stage it belongs to</label><select id="evCustomStage">${SHIP_STAGES.map(st => `<option value="${st.key}">${esc(st.title)}</option>`).join('')}</select></div>
-              <div><label for="evCustomText">Your status text</label><input id="evCustomText" type="text" maxlength="160" placeholder="e.g. Parcel rerouted due to typhoon"></div>
-            </div>
             <div class="span3 loc-row">
               <div><label for="evPlace">Location <span style="text-transform:none;letter-spacing:0;">(search city or province, or type your own)</span></label>
                 <input id="evPlace" type="text" list="phPlaces" maxlength="80" autocomplete="off" placeholder="e.g. Quezon City"></div>
@@ -3161,67 +3244,74 @@ match /counters/{id} {
               <div class="loc-save"><button type="button" class="btn btn-outline" id="evSaveLoc" title="Save this location for next time">☆ Save</button></div>
             </div>
             <datalist id="phPlaces">${[...shipPresets.locations, ...PH_PLACES].map(p => `<option value="${esc(p)}"></option>`).join('')}</datalist>
-            <div><label for="evWhen">Date &amp; time (Manila)</label><input id="evWhen" type="datetime-local"></div>
-            <div><label for="evSrc">Source</label><select id="evSrc"><option value="vestige">Vestige</option><option value="jnt">J&amp;T Express (relayed)</option></select></div>
-            <div class="span3"><button type="button" class="btn btn-outline" id="evAdd">+ Add step</button></div>
+            <div class="span3"><label for="evWhen">Date &amp; time (Manila)</label><input id="evWhen" type="datetime-local" value="${esc(toLocalInput(new Date().toISOString()))}"></div>
           </div>
-        </fieldset>
-        <p class="fld-note" style="margin-top:10px;">Don't enter buyer names, addresses or phone numbers — everything here is visible to anyone with the order number. Never invent times or locations; use the official J&amp;T site for exact hub names.</p>
-      </div>`;
-    const evStatus = document.getElementById('evStatus');
-    const srcFor = (stage) => stage === 'confirmed' || stage === 'preparing' ? 'vestige' : 'jnt';
-    const syncStatus = () => {
-      const custom = evStatus.value === 'custom';
-      document.getElementById('evCustomRow').hidden = !custom;
-      const stage = custom ? document.getElementById('evCustomStage').value : STATUS_CATALOG[+evStatus.value.split(':')[1]].stage;
-      document.getElementById('evSrc').value = srcFor(stage);
-    };
-    evStatus.addEventListener('change', syncStatus);
-    document.getElementById('evCustomStage').addEventListener('change', syncStatus);
-    // default: suggest the next status in the flow
-    const top = sh.events.length ? Math.max(...sh.events.map(e => stageIdx(e.stage))) : -1;
-    const gi = Math.min(STATUS_CATALOG.length - 1, top + 1); evStatus.value = `c:${gi}:0`; syncStatus();
+        </details>
+        <label class="chk"><input type="checkbox" id="evFill" checked> Fill in skipped steps automatically</label>
+        <button type="button" class="btn btn-gold" id="stPost">Post update</button>
+      </div>
+      <div class="ship-sec"><h3>Courier details</h3>
+        <div class="ship-grid">
+          <div><label for="shTrack">J&amp;T tracking number</label><input id="shTrack" type="text" maxlength="30" autocomplete="off" value="${esc(sh.trackingNumber)}" placeholder="Add when J&amp;T gives you the waybill"></div>
+          <div><label for="shEta">Estimated delivery (optional)</label><input id="shEta" type="date" value="${esc(sh.eta)}"></div>
+        </div>
+        <p class="fld-note" style="margin-top:10px;">Public link for the buyer:</p><div class="ship-url">${esc(trackUrl(sh.orderNo))}</div>
+      </div>
+      <div class="ship-sec"><h3>History</h3>
+        <ul class="ship-ev" id="shEvents">${evs.length ? evs.map(e => `<li><div class="grow"><b>${esc(stageTitle(e.stage))}</b> — ${esc(e.description || '')}<small>${e.timestamp ? esc(fmtManila(e.timestamp)) : 'time not recorded'}${e.location ? ' · ' + esc(e.location) : ''} · ${e.source === 'jnt' ? 'From J&T' : 'Vestige'}</small></div><button type="button" class="icon-btn" data-ev-del="${sh.events.indexOf(e)}" aria-label="Remove step">✕</button></li>`).join('') : '<li><div class="grow"><small>No steps yet.</small></div></li>'}</ul>
+        ${sh.dirty ? '<p class="gate-note-lite">Removed steps are saved when you press <b>Save changes</b>.</p>' : ''}
+        <p class="fld-note">Don't enter buyer names, addresses or phone numbers — everything here is visible to anyone with the order number. Never invent times or locations.</p>
+      </div>
+      <details class="more ship-sec"><summary>Default step sets (advanced)</summary>
+        <div class="ds-row">
+          <div><label for="dsTpl">Step set</label><select id="dsTpl">${templatesList().map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>
+          <div><label for="dsUpTo">Current status</label><select id="dsUpTo"></select></div>
+          <div class="ds-btns"><button type="button" class="btn btn-outline" id="dsApply">Apply &amp; save</button><button type="button" class="btn btn-outline" id="dsManage">Manage</button></div>
+        </div>
+        <p class="fld-note" style="margin-top:8px;">Adds every step of the set up to the one you choose in one go (earlier steps show no time).</p>
+      </details>`;
+    fillStatusOptions();
     const tplSel = document.getElementById('dsTpl');
     const fillUpTo = () => {
       const t = templatesList().find(x => x.id === tplSel.value) || templatesList()[0];
       document.getElementById('dsUpTo').innerHTML = t.steps.map((st, i) => `<option value="${i}">${i + 1}. ${esc(st.description)}</option>`).join('');
     };
     tplSel.addEventListener('change', fillUpTo); fillUpTo();
-    document.getElementById('evWhen').value = toLocalInput(new Date().toISOString());
   }
-  document.getElementById('shipBodyForm').addEventListener('change', (e) => {
-    const c = e.target.closest('[data-pick]'); if (!c || !sh) return;
-    c.checked ? sh.picks.add(c.dataset.pick) : sh.picks.delete(c.dataset.pick);
-    const locked = sh.isNew && !sh.picks.size;
-    const set = document.getElementById('tlSet'), note = document.getElementById('tlLockNote');
-    if (set) set.disabled = locked; if (note) note.hidden = !locked;
+  function fillStatusOptions(){
+    const g = STATUS_CATALOG[stageIdx(sh.sel)], sel = document.getElementById('evStatus');
+    sel.innerHTML = g.items.map((t, i) => `<option value="${i}">${esc(t)}</option>`).join('') + '<option value="custom">✎ Custom status…</option>';
+    const d = g.items.indexOf(DEFAULT_TEXT[stageIdx(sh.sel)]); sel.value = String(d < 0 ? 0 : d);
+    document.getElementById('evCustomRow').hidden = true;
+  }
+  const shForm = document.getElementById('shipBodyForm');
+  shForm.addEventListener('change', (e) => {
+    if (!sh) return;
+    if (e.target.id === 'evStatus') document.getElementById('evCustomRow').hidden = e.target.value !== 'custom';
   });
-  document.getElementById('shipBodyForm').addEventListener('input', (e) => {
+  shForm.addEventListener('input', (e) => {
     if (!sh) return;
     if (e.target.id === 'shTrack') sh.trackingNumber = e.target.value;
     if (e.target.id === 'shEta') sh.eta = e.target.value;
   });
-  document.getElementById('shipBodyForm').addEventListener('click', (e) => {
+  shForm.addEventListener('click', async (e) => {
     if (!sh) return;
-    const del = e.target.closest('[data-ev-del]');
-    if (del){ sh.events.splice(Number(del.dataset.evDel), 1); renderShipForm(); return; }
-    const need = () => { if (sh.isNew && !sh.picks.size){ showToast({ type: 'err', title: 'Select an item first', message: 'Choose the item(s) in this shipment before adding tracking steps.' }); return true; } return false; };
-    const pickedStatus = () => {
-      const v = document.getElementById('evStatus').value;
-      if (v === 'custom'){
-        const text = document.getElementById('evCustomText').value.trim();
-        return text ? { stage: document.getElementById('evCustomStage').value, text } : null;
-      }
-      const [, gi, ii] = v.split(':'); return { stage: STATUS_CATALOG[+gi].stage, text: STATUS_CATALOG[+gi].items[+ii] };
-    };
+    let el;
+    if ((el = e.target.closest('[data-stage]'))){
+      sh.sel = el.dataset.stage;
+      shForm.querySelectorAll('.stg-btn').forEach(b => { const on = b.dataset.stage === sh.sel; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+      fillStatusOptions(); return;
+    }
+    if ((el = e.target.closest('[data-ev-del]'))){ sh.events.splice(Number(el.dataset.evDel), 1); sh.dirty = true; renderShipDetail(); return; }
     const place = () => composeLocation(document.getElementById('evPlace').value, document.getElementById('evFac').value);
-    if (e.target.closest('#evAdd')){
-      if (need()) return;
-      const when = fromLocalInput(document.getElementById('evWhen').value), st = pickedStatus();
-      if (!st){ showToast({ type: 'err', title: 'Status needed', message: 'Type your custom status text.' }); return; }
-      if (!when){ showToast({ type: 'err', title: 'Date needed', message: 'Enter the date and time this step happened.' }); return; }
-      sh.events.push({ stage: st.stage, description: st.text, location: place() || null, timestamp: when, source: document.getElementById('evSrc').value === 'jnt' ? 'jnt' : 'vestige' });
-      renderShipForm(); return;
+    if (e.target.closest('#stPost')){
+      const v = document.getElementById('evStatus').value;
+      const text = v === 'custom' ? document.getElementById('evCustomText').value.trim() : STATUS_CATALOG[stageIdx(sh.sel)].items[+v];
+      if (!text){ showToast({ type: 'err', title: 'Status needed', message: 'Type your custom status text.' }); return; }
+      const when = fromLocalInput(document.getElementById('evWhen').value) || new Date().toISOString();
+      const copy = { ...sh, events: sh.events.map(x => ({ ...x })) };
+      applyStatus(copy, { stage: sh.sel, text, location: place(), when, fill: document.getElementById('evFill').checked });
+      await persistShipment(copy, el || e.target, 'updated', `Updated to ${stageTitle(sh.sel)}`); return;
     }
     if (e.target.closest('#evSaveLoc')){
       const loc = place(); if (!loc){ showToast({ type: 'err', title: 'Nothing to save', message: 'Enter a location first.' }); return; }
@@ -3231,18 +3321,15 @@ match /counters/{id} {
       document.getElementById('phPlaces').insertAdjacentHTML('afterbegin', `<option value="${esc(loc)}"></option>`); return;
     }
     if (e.target.closest('#dsApply')){
-      if (need()) return;
       const t = templatesList().find(x => x.id === document.getElementById('dsTpl').value) || templatesList()[0], upTo = +document.getElementById('dsUpTo').value;
-      const when = fromLocalInput(document.getElementById('evWhen').value);
-      if (!when){ showToast({ type: 'err', title: 'Date needed', message: 'Enter the date and time of the current status.' }); return; }
+      const when = new Date().toISOString(), copy = { ...sh, events: sh.events.map(x => ({ ...x })) };
       let added = 0;
       t.steps.slice(0, upTo + 1).forEach((st, i) => {
-        if (sh.events.some(ev => ev.stage === st.stage && ev.description === st.description)) return;
-        sh.events.push({ stage: st.stage, description: st.description, location: null, timestamp: i === upTo ? when : null, source: st.stage === 'confirmed' || st.stage === 'preparing' ? 'vestige' : 'jnt' });
-        added++;
+        if (copy.events.some(ev => ev.stage === st.stage && ev.description === st.description)) return;
+        copy.events.push({ stage: st.stage, description: st.description, location: null, timestamp: i === upTo ? when : null, source: srcFor(st.stage) }); added++;
       });
-      showToast({ type: added ? 'ok' : 'err', title: added ? 'Steps added' : 'Nothing new', message: added ? `${added} step${added === 1 ? '' : 's'} added up to “${t.steps[upTo].description}”.` : 'Those steps are already on this shipment.' });
-      renderShipForm(); return;
+      if (!added){ showToast({ type: 'err', title: 'Nothing new', message: 'Those steps are already on this shipment.' }); return; }
+      await persistShipment(copy, e.target, 'updated', `${added} step${added === 1 ? '' : 's'} added up to “${t.steps[upTo].description}”`); return;
     }
     if (e.target.closest('#dsManage')){ openPresetManager(); return; }
   });
@@ -3303,76 +3390,76 @@ match /counters/{id} {
     shipPresets = { templates: cleanTemplates(pm.templates), locations: pm.locations };
     try{ await persistPresets(); } catch(err){ console.error(err); return showToast({ type: 'err', title: 'Not saved', message: 'Check your connection and Firestore rules.' }); }
     closePm();
-    if (sh) renderShipForm();
+    if (sh) renderShipDetail();
     showToast({ type: 'ok', title: 'Defaults saved', message: 'Your step sets and locations are ready to use.' });
   });
   document.getElementById('shipClose').addEventListener('click', closeShipment);
   document.getElementById('shipCancel').addEventListener('click', closeShipment);
   shipOverlay.addEventListener('mousedown', (e) => { if (e.target === shipOverlay) closeShipment(); });
-  document.getElementById('shipNewBtn').addEventListener('click', () => openShipment(null));
   document.getElementById('shipCopy').addEventListener('click', async () => {
     if (!sh) return;
     try{ await navigator.clipboard.writeText(trackUrl(sh.orderNo)); showToast({ type: 'ok', title: 'Link copied', message: 'Send it to the buyer.' }); }
     catch(e){ showToast({ type: 'err', title: 'Copy failed', message: trackUrl(sh.orderNo) , duration: 9000 }); }
   });
 
-  function shipProblem(){
-    if (sh.isNew && !sh.picks.size) return 'Pick at least one claimed item for this shipment.';
-    const t = trackKey(sh.trackingNumber);
-    if (sh.trackingNumber.trim() && (t.length < 6 || t.length > 30)) return 'The tracking number looks wrong — use 6 to 30 letters and numbers.';
-    const top = sh.events.length ? Math.max(...sh.events.map(e => stageIdx(e.stage))) : -1;
-    if (top >= 2 && !t) return 'Add the J&T tracking number before posting a courier step (picked up, in transit…).';
+  function shipProblem(s){
+    if (s.isNew && !s.picks.size) return 'Select at least one item for this shipment.';
+    const t = trackKey(s.trackingNumber);
+    if (s.trackingNumber.trim() && (t.length < 6 || t.length > 30)) return 'The tracking number looks wrong — use 6 to 30 letters and numbers.';
+    if (topStage(s.events) >= 2 && !t) return 'Add the J&T tracking number before posting a courier step (picked up, in transit…).';
     return '';
   }
-  async function saveShipment(){
-    const problem = shipProblem();
-    if (problem){ showToast({ type: 'err', title: 'Check the shipment', message: problem, duration: 6000 }); return; }
-    const btn = document.getElementById('shipSave'); btn.disabled = true; btn.textContent = 'Saving…';
+  // Saves one shipment atomically (shipment + private + tracking index + waybill sync). Returns the order number, or null.
+  async function persistShipment(s, btn, kind, message){
+    const problem = shipProblem(s);
+    if (problem){ showToast({ type: 'err', title: 'Check the shipment', message: problem, duration: 6000 }); return null; }
+    const label = btn ? btn.textContent : ''; if (btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
     try{
-      const now = new Date().toISOString(), track = trackKey(sh.trackingNumber);
-      const chosen = sh.isNew ? sh.pickList.filter(p => sh.picks.has(p.id)) : [];
-      const orderNo = sh.isNew ? newOrderNo() : sh.orderNo;
-      const items = sh.isNew ? chosen.map(p => ({ name: pName(p), image: (p.images || [])[0] || '', qty: 1, sku: p.sku || '' })) : sh.items;
-      const productIds = sh.isNew ? chosen.map(p => p.id) : sh.productIds;
-      const buyer = sh.isNew ? [...new Set(chosen.map(p => (p.soldTo || '').trim()).filter(Boolean))].join(', ') : sh.buyer;
-      let events = sh.events.map(e => ({ stage: e.stage, description: e.description, location: e.location || null, timestamp: e.timestamp, source: e.source }));
-      if (sh.isNew && !events.some(e => e.stage === 'confirmed')){
+      const now = new Date().toISOString(), track = trackKey(s.trackingNumber);
+      const chosen = s.isNew ? s.pickList.filter(p => s.picks.has(p.id)) : [];
+      const orderNo = s.isNew ? newOrderNo() : s.orderNo;
+      const items = s.isNew ? chosen.map(p => ({ name: pName(p), image: (p.images || [])[0] || '', qty: 1, sku: p.sku || '' })) : s.items;
+      const productIds = s.isNew ? chosen.map(p => p.id) : s.productIds;
+      const buyer = s.isNew ? [...new Set(chosen.map(p => (p.soldTo || '').trim()).filter(Boolean))].join(', ') : s.buyer;
+      let events = s.events.map(e => ({ stage: e.stage, description: e.description, location: e.location || null, timestamp: e.timestamp || null, source: e.source }));
+      if (!events.some(e => e.stage === 'confirmed') && (s.isNew || events.length)){
         const earliest = events.map(e => e.timestamp).filter(Boolean).sort()[0];
         events.push({ stage: 'confirmed', description: SHIP_STAGES[0].text, location: null, timestamp: earliest && earliest < now ? earliest : now, source: 'vestige' });
       }
       events.sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
-      const top = Math.max(...events.map(e => stageIdx(e.stage)));
+      const top = topStage(events);
       const firstOf = (k) => (events.find(e => e.stage === k) || {}).timestamp || null;
       const pub = {
-        orderNo, trackingNumber: sh.trackingNumber.trim(), courier: 'J&T Express', status: SHIP_STAGES[top].key,
-        items, orderedAt: sh.orderedAt || now,
+        orderNo, trackingNumber: s.trackingNumber.trim(), courier: 'J&T Express', status: SHIP_STAGES[Math.max(0, top)].key,
+        items, orderedAt: s.orderedAt || now,
         shippedAt: firstOf('picked_up') || events.filter(e => e.timestamp && stageIdx(e.stage) >= 2).map(e => e.timestamp).sort()[0] || null,
-        estimatedDelivery: sh.eta ? sh.eta + 'T00:00:00+08:00' : null, deliveredAt: firstOf('delivered'),
+        estimatedDelivery: s.eta ? s.eta + 'T00:00:00+08:00' : null, deliveredAt: firstOf('delivered'),
         lastUpdated: now, events
       };
-      const oldTrack = sh.isNew ? '' : trackKey((ships.find(x => x.orderNo === orderNo) || {}).trackingNumber);
+      const oldTrack = s.isNew ? '' : trackKey((ships.find(x => x.orderNo === orderNo) || {}).trackingNumber);
       await runTransaction(db, async (tx) => {
         const existing = await tx.get(doc(db, 'shipments', orderNo));
-        if (sh.isNew && existing.exists()) throw new Error('Order number collision — try again.');
-        let idxSnap = null;
-        if (track){ idxSnap = await tx.get(doc(db, 'shipmentIndex', track)); if (idxSnap.exists() && idxSnap.data().orderNo !== orderNo) { const e = new Error('dup'); e.code = 'dup-tracking'; throw e; } }
+        if (s.isNew && existing.exists()) throw new Error('Order number collision — try again.');
+        if (track){ const idxSnap = await tx.get(doc(db, 'shipmentIndex', track)); if (idxSnap.exists() && idxSnap.data().orderNo !== orderNo){ const e = new Error('dup'); e.code = 'dup-tracking'; throw e; } }
         const priv = [];
         if (track) for (const id of productIds){ priv.push([id, await tx.get(doc(db, 'productPrivate', id))]); }
         tx.set(doc(db, 'shipments', orderNo), pub);
-        tx.set(doc(db, 'shipmentPrivate', orderNo), { productIds, buyer, createdAt: sh.isNew ? now : ((shipPriv[orderNo] || {}).createdAt || now), updatedAt: now });
+        tx.set(doc(db, 'shipmentPrivate', orderNo), { productIds, buyer, createdAt: s.isNew ? now : ((shipPriv[orderNo] || {}).createdAt || now), updatedAt: now });
         if (oldTrack && oldTrack !== track) tx.delete(doc(db, 'shipmentIndex', oldTrack));
         if (track) tx.set(doc(db, 'shipmentIndex', track), { orderNo });
-        for (const [id, snap] of priv) tx.set(doc(db, 'productPrivate', id), { ...(snap.exists() ? snap.data() : {}), waybill: sh.trackingNumber.trim(), updatedAt: now });
+        for (const [id, snap] of priv) tx.set(doc(db, 'productPrivate', id), { ...(snap.exists() ? snap.data() : {}), waybill: s.trackingNumber.trim(), updatedAt: now });
       });
-      closeShipment();
-      await loadShipments();
-      showToast({ type: 'ok', title: 'Shipment Saved', message: `${orderNo} is live on the Track Order page.`, duration: 6000 });
+      if (sh) closeShipment();
+      await loadShipments(s.isNew ? undefined : false);
+      showToast({ type: 'ok', title: s.isNew ? 'Shipment Created' : 'Shipment Updated', message: message || (s.isNew ? `${orderNo} is live on the Track Order page. Find it under In progress.` : `${orderNo} was saved.`), duration: 6000 });
+      return orderNo;
     } catch(err){
       console.error(err);
       showToast({ type: 'err', title: 'Could Not Save', message: err && err.code === 'dup-tracking' ? 'That tracking number already belongs to another shipment.' : err && err.code === 'permission-denied' ? 'Firestore rules are missing for shipments.' : 'Check your connection and try again.', duration: 7000 });
-    } finally { btn.disabled = false; btn.textContent = 'Save shipment'; }
+      return null;
+    } finally { if (btn && btn.isConnected){ btn.disabled = false; btn.textContent = label; } }
   }
-  document.getElementById('shipSave').addEventListener('click', saveShipment);
+  document.getElementById('shipSave').addEventListener('click', () => { if (sh) persistShipment({ ...sh, events: sh.events.map(x => ({ ...x })) }, document.getElementById('shipSave'), 'updated'); });
   document.getElementById('shipDelete').addEventListener('click', async () => {
     if (!sh || sh.isNew) return;
     if (!confirm(`Delete shipment ${sh.orderNo}? The buyer's tracking link will stop working. (The products are not changed.)`)) return;
@@ -3402,7 +3489,7 @@ match /counters/{id} {
     el('ovDate').textContent = new Intl.DateTimeFormat('en-PH', { timeZone: TZ, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()) + ' · Philippine time';
     let products = null, batches = null, shipOk = true;
     try{ [products, batches] = await Promise.all([fetchAllProducts(), fetchBatches()]); } catch(err){ console.error('Overview data:', err); }
-    try{ await loadShipments(); shipOk = !document.getElementById('shipBlocked') || document.getElementById('shipBlocked').style.display === 'none'; } catch(err){ shipOk = false; }
+    try{ await loadShipments(products); shipOk = !document.getElementById('shipBlocked') || document.getElementById('shipBlocked').style.display === 'none'; } catch(err){ shipOk = false; }
     ovBusy = false;
     products = products || []; batches = batches || allBatches || [];
     const avail = products.filter(p => (p.status || 'Available') === 'Available').length;
