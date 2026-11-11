@@ -387,6 +387,13 @@
   .ship-ev .grow{ flex:1; min-width:0; } .ship-ev small{ color:rgba(20,32,28,.55); display:block; }
   .ship-add{ display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px; padding:14px; background:var(--paper); border:1px dashed var(--line); border-radius:12px; }
   .ship-add .span3{ grid-column:1/-1; }
+  .tl-set{ border:none; margin:0; padding:0; min-width:0; } .tl-set[disabled]{ opacity:.45; pointer-events:none; }
+  .gate-note-lite{ background:rgba(201,164,104,.14); border:1px solid rgba(201,164,104,.35); border-radius:10px; padding:10px 12px; font-size:.84rem; margin:0 0 12px; }
+  .ds-row{ display:grid; grid-template-columns:1.3fr 1.6fr auto; gap:10px; align-items:end; } .ds-btns{ display:flex; gap:8px; }
+  .custom-row,.loc-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; } .loc-row{ grid-template-columns:1.6fr 1fr auto; align-items:end; }
+  .pm-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:4px 6px 4px 12px; font-size:.8rem; margin:0 6px 6px 0; } .pm-chip button{ border:none; background:none; cursor:pointer; color:var(--danger); font-size:.9rem; }
+  .pm-step{ display:grid; grid-template-columns:1fr 2fr auto auto auto; gap:8px; align-align:center; margin-bottom:8px; align-items:center; } .pm-step input,.pm-step select{ margin:0; }
+  @media (max-width:640px){ .ds-row,.custom-row,.loc-row,.pm-step{ grid-template-columns:1fr; } }
   .ship-url{ font-family:'Space Mono',monospace; font-size:.74rem; word-break:break-all; background:var(--paper); border-radius:8px; padding:8px 10px; }
   @media (max-width:640px){ .ship-grid,.ship-add{ grid-template-columns:1fr; } .ship-body{ padding:6px 16px 16px; } .ship-foot .btn{ flex:1; } }
   .overlay{
@@ -821,6 +828,14 @@
       <table class="inv-table im-table"><thead><tr id="imHead"></tr></thead><tbody id="imBody"></tbody><tfoot id="imFoot"></tfoot></table>
     </div>
     <p class="folder-hint" id="imHint"></p>
+  </div>
+</div>
+
+<div class="overlay" id="presetOverlay" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+  <div class="ship-modal" style="max-width:720px;">
+    <div class="im-head"><div><h2 id="pmTitle">Default steps &amp; saved locations</h2><p>Build your own step sets so you never start from scratch on each shipment.</p></div><button type="button" class="icon-btn" id="pmClose" aria-label="Close">✕</button></div>
+    <div class="ship-body" id="pmBody"></div>
+    <div class="ship-foot"><div class="left"><button type="button" class="btn btn-outline" id="pmReset">Reset to built-in</button></div><button type="button" class="btn btn-outline" id="pmCancel">Cancel</button><button type="button" class="btn btn-gold" id="pmSave">Save changes</button></div>
   </div>
 </div>
 
@@ -2983,6 +2998,66 @@ match /counters/{id} {
 
   let ships = [], shipPriv = {}, shipChip = 'all', shipQ = '', sh = null;
 
+  // ----- status catalogue, locations and default-step templates -----
+  const COURIER = 'J&T Express';
+  const STATUS_CATALOG = [
+    { stage: 'confirmed', items: ['Order confirmed', 'Payment received — order confirmed'] },
+    { stage: 'preparing', items: ['Item checked and being packed', 'Packed and ready for pickup', 'Waiting for courier pickup'] },
+    { stage: 'picked_up', items: ['Picked up by ' + COURIER, 'Received at origin hub'] },
+    { stage: 'in_transit', items: ['Departed origin hub', 'Arrived at sorting hub', 'Departed sorting hub', 'Arrived at destination hub', 'In transit to next facility', 'Delayed — weather or high parcel volume'] },
+    { stage: 'out_for_delivery', items: ['Out for delivery', 'Delivery attempted — recipient unavailable', 'Delivery rescheduled', 'On hold — delivery address needs confirmation'] },
+    { stage: 'delivered', items: ['Delivered', 'Delivered — received by recipient', 'Delivered — left with authorized representative'] }
+  ];
+  const FACILITIES = ['Hub', 'Sorting Center', 'Delivery Station', 'Branch'];
+  const FACILITY_RE = /(hub|sorting\s*cent(er|re)|delivery\s*station|branch|depot|warehouse|facility|station)\s*$/i;
+  // Cities and provinces across Luzon, Visayas and Mindanao. These are PLACES, not an official J&T hub list —
+  // pick a place + facility type, or type the exact name shown on J&T's tracking page.
+  const PH_PLACES = [
+    'Manila','Quezon City','Caloocan','Las Piñas','Makati','Malabon','Mandaluyong','Marikina','Muntinlupa','Navotas','Parañaque','Pasay','Pasig','San Juan','Taguig','Valenzuela','Pateros',
+    'Angeles, Pampanga','San Fernando, Pampanga','Mabalacat, Pampanga','Olongapo, Zambales','Iba, Zambales','Balanga, Bataan','Malolos, Bulacan','Meycauayan, Bulacan','San Jose del Monte, Bulacan','Baliuag, Bulacan',
+    'Cabanatuan, Nueva Ecija','Gapan, Nueva Ecija','San Jose, Nueva Ecija','Tarlac City, Tarlac','Dagupan, Pangasinan','San Carlos, Pangasinan','Urdaneta, Pangasinan','Alaminos, Pangasinan','Lingayen, Pangasinan',
+    'Baguio, Benguet','La Trinidad, Benguet','Laoag, Ilocos Norte','Vigan, Ilocos Sur','San Fernando, La Union','Tuguegarao, Cagayan','Aparri, Cagayan','Ilagan, Isabela','Santiago, Isabela','Cauayan, Isabela','Bayombong, Nueva Vizcaya',
+    'Batangas City, Batangas','Lipa, Batangas','Tanauan, Batangas','Calamba, Laguna','Santa Rosa, Laguna','Biñan, Laguna','San Pablo, Laguna','Los Baños, Laguna','Cabuyao, Laguna','San Pedro, Laguna','Santa Cruz, Laguna',
+    'Dasmariñas, Cavite','Bacoor, Cavite','Imus, Cavite','Cavite City, Cavite','General Trias, Cavite','Tagaytay, Cavite','Trece Martires, Cavite','Antipolo, Rizal','Cainta, Rizal','Taytay, Rizal','Rodriguez, Rizal',
+    'Lucena, Quezon','Tayabas, Quezon','Calapan, Oriental Mindoro','San Jose, Occidental Mindoro','Puerto Princesa, Palawan','Romblon, Romblon','Naga, Camarines Sur','Iriga, Camarines Sur','Legazpi, Albay','Tabaco, Albay','Sorsogon City, Sorsogon','Masbate City, Masbate','Daet, Camarines Norte','Virac, Catanduanes',
+    'Cebu City, Cebu','Mandaue, Cebu','Lapu-Lapu, Cebu','Talisay, Cebu','Danao, Cebu','Toledo, Cebu','Carcar, Cebu','Bogo, Cebu','Tagbilaran, Bohol','Dumaguete, Negros Oriental','Bais, Negros Oriental',
+    'Bacolod, Negros Occidental','Silay, Negros Occidental','Bago, Negros Occidental','Kabankalan, Negros Occidental','Sagay, Negros Occidental','Iloilo City, Iloilo','Passi, Iloilo','Roxas City, Capiz','Kalibo, Aklan','Malay (Boracay), Aklan','San Jose, Antique',
+    'Tacloban, Leyte','Ormoc, Leyte','Baybay, Leyte','Maasin, Southern Leyte','Calbayog, Samar','Catbalogan, Samar','Borongan, Eastern Samar','Catarman, Northern Samar',
+    'Davao City, Davao del Sur','Digos, Davao del Sur','Tagum, Davao del Norte','Panabo, Davao del Norte','Mati, Davao Oriental','General Santos, South Cotabato','Koronadal, South Cotabato','Kidapawan, Cotabato','Cotabato City, Maguindanao',
+    'Tacurong, Sultan Kudarat','Isulan, Sultan Kudarat','Zamboanga City, Zamboanga del Sur','Pagadian, Zamboanga del Sur','Dipolog, Zamboanga del Norte','Dapitan, Zamboanga del Norte','Oroquieta, Misamis Occidental','Ozamiz, Misamis Occidental',
+    'Cagayan de Oro, Misamis Oriental','Gingoog, Misamis Oriental','Iligan, Lanao del Norte','Marawi, Lanao del Sur','Valencia, Bukidnon','Malaybalay, Bukidnon','Butuan, Agusan del Norte','Cabadbaran, Agusan del Norte',
+    'Surigao City, Surigao del Norte','Bislig, Surigao del Sur','Tandag, Surigao del Sur','Jolo, Sulu','Bongao, Tawi-Tawi','Lamitan, Basilan'
+  ];
+  const BUILTIN_TEMPLATE = { id: 'standard', name: 'Standard ' + COURIER + ' delivery', steps: [
+    { stage: 'confirmed', description: 'Order confirmed' }, { stage: 'preparing', description: 'Item checked and being packed' },
+    { stage: 'preparing', description: 'Packed and ready for pickup' }, { stage: 'picked_up', description: 'Picked up by ' + COURIER },
+    { stage: 'in_transit', description: 'Arrived at sorting hub' }, { stage: 'in_transit', description: 'Departed sorting hub' },
+    { stage: 'in_transit', description: 'Arrived at destination hub' }, { stage: 'out_for_delivery', description: 'Out for delivery' }, { stage: 'delivered', description: 'Delivered' }
+  ] };
+  const presetsRef = doc(db, 'counters', 'shipmentPresets');   // admin-only (covered by the counters rule)
+  let shipPresets = { templates: null, locations: [] };
+  const cleanTemplates = (arr) => (Array.isArray(arr) ? arr : []).slice(0, 20).map((t, i) => ({
+    id: String(t && t.id || 't' + i).slice(0, 30), name: String(t && t.name || 'Default steps').slice(0, 40),
+    steps: (Array.isArray(t && t.steps) ? t.steps : []).slice(0, 30).filter(x => x && stageIdx(x.stage) >= 0).map(x => ({ stage: x.stage, description: String(x.description || '').slice(0, 160) }))
+  })).filter(t => t.steps.length);
+  async function loadShipPresets(){
+    try{
+      const d = (await getDoc(presetsRef)).data() || {};
+      const t = cleanTemplates(d.templates);
+      shipPresets = { templates: t.length ? t : null, locations: (Array.isArray(d.locations) ? d.locations : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 200) };
+    } catch(err){ console.error('Shipment presets unavailable:', err); }
+  }
+  const templatesList = () => shipPresets.templates || [BUILTIN_TEMPLATE];
+  async function persistPresets(){
+    await setDoc(presetsRef, { templates: templatesList(), locations: shipPresets.locations, updatedAt: new Date().toISOString() });
+  }
+  function composeLocation(place, facility){
+    const p = String(place || '').trim(); if (!p) return '';
+    if (!facility || FACILITY_RE.test(p)) return p;
+    return p + ' ' + facility;
+  }
+
+
   async function loadShipments(){
     try{
       const [a, b] = await Promise.all([getDocs(shipCol), getDocs(shipPrivCol)]);
@@ -3035,6 +3110,7 @@ match /counters/{id} {
       sh = { isNew: true, orderNo: '', trackingNumber: '', eta: '', events: [], items: [], productIds: [], buyer: '', orderedAt: new Date().toISOString(), picks: new Set(),
         pickList: list.filter(p => p.status === 'Claimed' && !used.has(p.id)) };
     }
+    await loadShipPresets();
     document.getElementById('shipTitle').textContent = sh.isNew ? 'New shipment' : `Shipment ${sh.orderNo}`;
     document.getElementById('shipSub').textContent = sh.isNew ? 'Pick the claimed item(s) in this parcel. An order number is created when you save.' : 'Update the tracking number and post each tracking step as it happens.';
     document.getElementById('shipDelete').style.display = sh.isNew ? 'none' : '';
@@ -3060,27 +3136,64 @@ match /counters/{id} {
         ${sh.isNew ? '' : `<p class="fld-note" style="margin-top:10px;">Public link for the buyer:</p><div class="ship-url">${esc(trackUrl(sh.orderNo))}</div>`}
       </div>
       <div class="ship-sec"><h3>Tracking timeline</h3>
-        <ul class="ship-ev" id="shEvents">${evs.length ? evs.map(e => `<li><div class="grow"><b>${esc(stageTitle(e.stage))}</b> — ${esc(e.description || '')}<small>${esc(fmtManila(e.timestamp))}${e.location ? ' · ' + esc(e.location) : ''} · ${e.source === 'jnt' ? 'From J&T' : 'Vestige'}</small></div><button type="button" class="icon-btn" data-ev-del="${sh.events.indexOf(e)}" aria-label="Remove step">✕</button></li>`).join('') : '<li><div class="grow"><small>No steps yet. Add the first one below.</small></div></li>'}</ul>
-        <div class="ship-add">
-          <div><label for="evStage">Step</label><select id="evStage">${stageOpts}</select></div>
-          <div><label for="evWhen">Date &amp; time (Manila)</label><input id="evWhen" type="datetime-local"></div>
-          <div><label for="evSrc">Source</label><select id="evSrc"><option value="vestige">Vestige</option><option value="jnt">J&amp;T Express (relayed)</option></select></div>
-          <div class="span3"><label for="evDesc">What happened</label><input id="evDesc" type="text" maxlength="160" placeholder=""></div>
-          <div class="span3"><label for="evLoc">Location (only if J&amp;T shows one)</label><input id="evLoc" type="text" maxlength="80" placeholder="e.g. Manila Sorting Hub"></div>
-          <div class="span3"><button type="button" class="btn btn-outline" id="evAdd">+ Add step</button></div>
-        </div>
-        <p class="fld-note" style="margin-top:10px;">Don't enter buyer names, addresses or phone numbers — everything here is visible to anyone with the order number. Never invent times or locations.</p>
+        <ul class="ship-ev" id="shEvents">${evs.length ? evs.map(e => `<li><div class="grow"><b>${esc(stageTitle(e.stage))}</b> — ${esc(e.description || '')}<small>${e.timestamp ? esc(fmtManila(e.timestamp)) : 'time not recorded'}${e.location ? ' · ' + esc(e.location) : ''} · ${e.source === 'jnt' ? 'From J&T' : 'Vestige'}</small></div><button type="button" class="icon-btn" data-ev-del="${sh.events.indexOf(e)}" aria-label="Remove step">✕</button></li>`).join('') : '<li><div class="grow"><small>No steps yet. Add the first one below.</small></div></li>'}</ul>
+        <p class="gate-note-lite" id="tlLockNote" ${sh.isNew && !sh.picks.size ? '' : 'hidden'}>Select the item(s) for this shipment above first — then you can add tracking steps.</p>
+        <fieldset id="tlSet" class="tl-set" ${sh.isNew && !sh.picks.size ? 'disabled' : ''}>
+          <div class="ds-row">
+            <div><label for="dsTpl">Default steps</label><select id="dsTpl">${templatesList().map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>
+            <div><label for="dsUpTo">Current status</label><select id="dsUpTo"></select></div>
+            <div class="ds-btns"><button type="button" class="btn btn-gold" id="dsApply">Apply steps</button><button type="button" class="btn btn-outline" id="dsManage">Manage</button></div>
+          </div>
+          <p class="fld-note" style="margin:6px 0 14px;">Pick where this parcel is now — every step up to it is added in one click (earlier steps show no time; the selected one uses the date &amp; time below).</p>
+          <div class="ship-add">
+            <div class="span3"><label for="evStatus">Status update — what happened</label><select id="evStatus">
+              ${STATUS_CATALOG.map((g, gi) => `<optgroup label="${esc(stageTitle(g.stage))}">${g.items.map((t, ii) => `<option value="c:${gi}:${ii}">${esc(t)}</option>`).join('')}</optgroup>`).join('')}
+              <option value="custom">✎ Custom status…</option></select></div>
+            <div class="span3 custom-row" id="evCustomRow" hidden>
+              <div><label for="evCustomStage">Stage it belongs to</label><select id="evCustomStage">${SHIP_STAGES.map(st => `<option value="${st.key}">${esc(st.title)}</option>`).join('')}</select></div>
+              <div><label for="evCustomText">Your status text</label><input id="evCustomText" type="text" maxlength="160" placeholder="e.g. Parcel rerouted due to typhoon"></div>
+            </div>
+            <div class="span3 loc-row">
+              <div><label for="evPlace">Location <span style="text-transform:none;letter-spacing:0;">(search city or province, or type your own)</span></label>
+                <input id="evPlace" type="text" list="phPlaces" maxlength="80" autocomplete="off" placeholder="e.g. Quezon City"></div>
+              <div><label for="evFac">Facility</label><select id="evFac">${FACILITIES.map((f, i) => `<option value="${esc(f)}" ${i === 0 ? 'selected' : ''}>${esc(f)}</option>`).join('')}<option value="">(use text as typed)</option></select></div>
+              <div class="loc-save"><button type="button" class="btn btn-outline" id="evSaveLoc" title="Save this location for next time">☆ Save</button></div>
+            </div>
+            <datalist id="phPlaces">${[...shipPresets.locations, ...PH_PLACES].map(p => `<option value="${esc(p)}"></option>`).join('')}</datalist>
+            <div><label for="evWhen">Date &amp; time (Manila)</label><input id="evWhen" type="datetime-local"></div>
+            <div><label for="evSrc">Source</label><select id="evSrc"><option value="vestige">Vestige</option><option value="jnt">J&amp;T Express (relayed)</option></select></div>
+            <div class="span3"><button type="button" class="btn btn-outline" id="evAdd">+ Add step</button></div>
+          </div>
+        </fieldset>
+        <p class="fld-note" style="margin-top:10px;">Don't enter buyer names, addresses or phone numbers — everything here is visible to anyone with the order number. Never invent times or locations; use the official J&amp;T site for exact hub names.</p>
       </div>`;
-    const stageSel = document.getElementById('evStage');
-    const sync = () => { const st = SHIP_STAGES[stageIdx(stageSel.value)]; document.getElementById('evDesc').placeholder = st.text; document.getElementById('evSrc').value = st.src; };
-    stageSel.addEventListener('change', sync);
-    const next = Math.min(SHIP_STAGES.length - 1, sh.events.length ? Math.max(...sh.events.map(e => stageIdx(e.stage))) + 1 : 0);
-    stageSel.value = SHIP_STAGES[next].key; sync();
+    const evStatus = document.getElementById('evStatus');
+    const srcFor = (stage) => stage === 'confirmed' || stage === 'preparing' ? 'vestige' : 'jnt';
+    const syncStatus = () => {
+      const custom = evStatus.value === 'custom';
+      document.getElementById('evCustomRow').hidden = !custom;
+      const stage = custom ? document.getElementById('evCustomStage').value : STATUS_CATALOG[+evStatus.value.split(':')[1]].stage;
+      document.getElementById('evSrc').value = srcFor(stage);
+    };
+    evStatus.addEventListener('change', syncStatus);
+    document.getElementById('evCustomStage').addEventListener('change', syncStatus);
+    // default: suggest the next status in the flow
+    const top = sh.events.length ? Math.max(...sh.events.map(e => stageIdx(e.stage))) : -1;
+    const gi = Math.min(STATUS_CATALOG.length - 1, top + 1); evStatus.value = `c:${gi}:0`; syncStatus();
+    const tplSel = document.getElementById('dsTpl');
+    const fillUpTo = () => {
+      const t = templatesList().find(x => x.id === tplSel.value) || templatesList()[0];
+      document.getElementById('dsUpTo').innerHTML = t.steps.map((st, i) => `<option value="${i}">${i + 1}. ${esc(st.description)}</option>`).join('');
+    };
+    tplSel.addEventListener('change', fillUpTo); fillUpTo();
     document.getElementById('evWhen').value = toLocalInput(new Date().toISOString());
   }
   document.getElementById('shipBodyForm').addEventListener('change', (e) => {
     const c = e.target.closest('[data-pick]'); if (!c || !sh) return;
     c.checked ? sh.picks.add(c.dataset.pick) : sh.picks.delete(c.dataset.pick);
+    const locked = sh.isNew && !sh.picks.size;
+    const set = document.getElementById('tlSet'), note = document.getElementById('tlLockNote');
+    if (set) set.disabled = locked; if (note) note.hidden = !locked;
   });
   document.getElementById('shipBodyForm').addEventListener('input', (e) => {
     if (!sh) return;
@@ -3091,14 +3204,105 @@ match /counters/{id} {
     if (!sh) return;
     const del = e.target.closest('[data-ev-del]');
     if (del){ sh.events.splice(Number(del.dataset.evDel), 1); renderShipForm(); return; }
+    const need = () => { if (sh.isNew && !sh.picks.size){ showToast({ type: 'err', title: 'Select an item first', message: 'Choose the item(s) in this shipment before adding tracking steps.' }); return true; } return false; };
+    const pickedStatus = () => {
+      const v = document.getElementById('evStatus').value;
+      if (v === 'custom'){
+        const text = document.getElementById('evCustomText').value.trim();
+        return text ? { stage: document.getElementById('evCustomStage').value, text } : null;
+      }
+      const [, gi, ii] = v.split(':'); return { stage: STATUS_CATALOG[+gi].stage, text: STATUS_CATALOG[+gi].items[+ii] };
+    };
+    const place = () => composeLocation(document.getElementById('evPlace').value, document.getElementById('evFac').value);
     if (e.target.closest('#evAdd')){
-      const stage = document.getElementById('evStage').value, when = fromLocalInput(document.getElementById('evWhen').value);
+      if (need()) return;
+      const when = fromLocalInput(document.getElementById('evWhen').value), st = pickedStatus();
+      if (!st){ showToast({ type: 'err', title: 'Status needed', message: 'Type your custom status text.' }); return; }
       if (!when){ showToast({ type: 'err', title: 'Date needed', message: 'Enter the date and time this step happened.' }); return; }
-      const st = SHIP_STAGES[stageIdx(stage)];
-      sh.events.push({ stage, description: document.getElementById('evDesc').value.trim() || st.text, location: document.getElementById('evLoc').value.trim() || null,
-        timestamp: when, source: document.getElementById('evSrc').value === 'jnt' ? 'jnt' : 'vestige' });
-      renderShipForm();
+      sh.events.push({ stage: st.stage, description: st.text, location: place() || null, timestamp: when, source: document.getElementById('evSrc').value === 'jnt' ? 'jnt' : 'vestige' });
+      renderShipForm(); return;
     }
+    if (e.target.closest('#evSaveLoc')){
+      const loc = place(); if (!loc){ showToast({ type: 'err', title: 'Nothing to save', message: 'Enter a location first.' }); return; }
+      if (shipPresets.locations.some(x => x.toLowerCase() === loc.toLowerCase())){ showToast({ type: 'ok', title: 'Already saved', message: loc }); return; }
+      shipPresets.locations = [loc, ...shipPresets.locations].slice(0, 200);
+      persistPresets().then(() => showToast({ type: 'ok', title: 'Location saved', message: loc + ' will appear in the search list.' })).catch(() => showToast({ type: 'err', title: 'Not saved', message: 'Check your connection and try again.' }));
+      document.getElementById('phPlaces').insertAdjacentHTML('afterbegin', `<option value="${esc(loc)}"></option>`); return;
+    }
+    if (e.target.closest('#dsApply')){
+      if (need()) return;
+      const t = templatesList().find(x => x.id === document.getElementById('dsTpl').value) || templatesList()[0], upTo = +document.getElementById('dsUpTo').value;
+      const when = fromLocalInput(document.getElementById('evWhen').value);
+      if (!when){ showToast({ type: 'err', title: 'Date needed', message: 'Enter the date and time of the current status.' }); return; }
+      let added = 0;
+      t.steps.slice(0, upTo + 1).forEach((st, i) => {
+        if (sh.events.some(ev => ev.stage === st.stage && ev.description === st.description)) return;
+        sh.events.push({ stage: st.stage, description: st.description, location: null, timestamp: i === upTo ? when : null, source: st.stage === 'confirmed' || st.stage === 'preparing' ? 'vestige' : 'jnt' });
+        added++;
+      });
+      showToast({ type: added ? 'ok' : 'err', title: added ? 'Steps added' : 'Nothing new', message: added ? `${added} step${added === 1 ? '' : 's'} added up to “${t.steps[upTo].description}”.` : 'Those steps are already on this shipment.' });
+      renderShipForm(); return;
+    }
+    if (e.target.closest('#dsManage')){ openPresetManager(); return; }
+  });
+
+  // ----- manage default steps + saved locations -----
+  const pmOverlay = document.getElementById('presetOverlay');
+  let pm = null;
+  const stageOptions = (sel) => SHIP_STAGES.map(st => `<option value="${st.key}" ${st.key === sel ? 'selected' : ''}>${esc(st.title)}</option>`).join('');
+  function openPresetManager(){
+    pm = { templates: JSON.parse(JSON.stringify(templatesList())), locations: [...shipPresets.locations], idx: 0 };
+    renderPresetManager(); pmOverlay.classList.add('open');
+  }
+  function renderPresetManager(){
+    const t = pm.templates[pm.idx];
+    document.getElementById('pmBody').innerHTML = `
+      <div class="ship-sec"><h3>Default step sets</h3>
+        <div class="ds-row" style="grid-template-columns:1fr auto auto;"><div><label for="pmTpl">Set</label><select id="pmTpl">${pm.templates.map((x, i) => `<option value="${i}" ${i === pm.idx ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+          <button type="button" class="btn btn-outline" id="pmNew">+ New set</button><button type="button" class="btn btn-outline" id="pmDelTpl" ${pm.templates.length < 2 ? 'disabled' : ''} style="color:var(--danger);">Delete</button></div>
+        <label for="pmName" style="margin-top:12px;">Set name</label><input id="pmName" type="text" maxlength="40" value="${esc(t.name)}">
+        <p class="fld-note">Steps run in this order. When you apply a set to a shipment, you choose how far along it is.</p>
+        ${t.steps.map((st, i) => `<div class="pm-step" data-pm-step="${i}"><select data-pm="stage" aria-label="Stage">${stageOptions(st.stage)}</select>
+          <input data-pm="desc" type="text" maxlength="160" value="${esc(st.description)}" aria-label="Step text">
+          <button type="button" class="icon-btn" data-pm-up="${i}" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" class="icon-btn" data-pm-down="${i}" aria-label="Move down" ${i === t.steps.length - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" class="icon-btn" data-pm-del="${i}" aria-label="Remove step">✕</button></div>`).join('')}
+        <button type="button" class="btn btn-outline" id="pmAddStep">+ Add step</button></div>
+      <div class="ship-sec"><h3>Saved locations</h3>${pm.locations.length ? pm.locations.map((l, i) => `<span class="pm-chip">${esc(l)}<button type="button" data-pm-loc="${i}" aria-label="Remove ${esc(l)}">✕</button></span>`).join('') : '<p class="fld-note">None yet — use “☆ Save” next to the location field to keep a location you use often.</p>'}</div>`;
+  }
+  const pmBody = document.getElementById('pmBody');
+  pmBody.addEventListener('change', (e) => { if (e.target.id === 'pmTpl'){ pm.idx = +e.target.value; renderPresetManager(); } });
+  pmBody.addEventListener('input', (e) => {
+    const t = pm.templates[pm.idx];
+    if (e.target.id === 'pmName'){ t.name = e.target.value; return; }
+    const row = e.target.closest('[data-pm-step]'); if (!row) return;
+    const st = t.steps[+row.dataset.pmStep]; if (e.target.dataset.pm === 'desc') st.description = e.target.value; if (e.target.dataset.pm === 'stage') st.stage = e.target.value;
+  });
+  pmBody.addEventListener('click', (e) => {
+    const t = pm.templates[pm.idx], q = (a) => e.target.closest(`[${a}]`);
+    let el;
+    if ((el = q('data-pm-up'))){ const i = +el.dataset.pmUp; [t.steps[i - 1], t.steps[i]] = [t.steps[i], t.steps[i - 1]]; renderPresetManager(); }
+    else if ((el = q('data-pm-down'))){ const i = +el.dataset.pmDown; [t.steps[i + 1], t.steps[i]] = [t.steps[i], t.steps[i + 1]]; renderPresetManager(); }
+    else if ((el = q('data-pm-del'))){ t.steps.splice(+el.dataset.pmDel, 1); renderPresetManager(); }
+    else if ((el = q('data-pm-loc'))){ pm.locations.splice(+el.dataset.pmLoc, 1); renderPresetManager(); }
+    else if (e.target.closest('#pmAddStep')){ t.steps.push({ stage: 'in_transit', description: '' }); renderPresetManager(); }
+    else if (e.target.closest('#pmNew')){ pm.templates.push({ id: 't' + Date.now().toString(36), name: 'My default steps', steps: [{ stage: 'confirmed', description: 'Order confirmed' }, { stage: 'picked_up', description: 'Picked up by ' + COURIER }, { stage: 'delivered', description: 'Delivered' }] }); pm.idx = pm.templates.length - 1; renderPresetManager(); }
+    else if (e.target.closest('#pmDelTpl')){ if (pm.templates.length > 1 && confirm(`Delete “${t.name}”?`)){ pm.templates.splice(pm.idx, 1); pm.idx = 0; renderPresetManager(); } }
+  });
+  const closePm = () => { pmOverlay.classList.remove('open'); pm = null; };
+  document.getElementById('pmClose').addEventListener('click', closePm);
+  document.getElementById('pmCancel').addEventListener('click', closePm);
+  document.getElementById('pmReset').addEventListener('click', () => { if (confirm('Replace your default step sets with the built-in set?')){ pm.templates = [JSON.parse(JSON.stringify(BUILTIN_TEMPLATE))]; pm.idx = 0; renderPresetManager(); } });
+  document.getElementById('pmSave').addEventListener('click', async () => {
+    for (const t of pm.templates){
+      if (!t.name.trim()) return showToast({ type: 'err', title: 'Name needed', message: 'Give every step set a name.' });
+      if (!t.steps.length) return showToast({ type: 'err', title: 'Empty set', message: `“${t.name}” needs at least one step.` });
+      if (t.steps.some(x => !x.description.trim())) return showToast({ type: 'err', title: 'Step text needed', message: `Fill in or remove the blank step in “${t.name}”.` });
+    }
+    shipPresets = { templates: cleanTemplates(pm.templates), locations: pm.locations };
+    try{ await persistPresets(); } catch(err){ console.error(err); return showToast({ type: 'err', title: 'Not saved', message: 'Check your connection and Firestore rules.' }); }
+    closePm();
+    if (sh) renderShipForm();
+    showToast({ type: 'ok', title: 'Defaults saved', message: 'Your step sets and locations are ready to use.' });
   });
   document.getElementById('shipClose').addEventListener('click', closeShipment);
   document.getElementById('shipCancel').addEventListener('click', closeShipment);
@@ -3131,15 +3335,16 @@ match /counters/{id} {
       const buyer = sh.isNew ? [...new Set(chosen.map(p => (p.soldTo || '').trim()).filter(Boolean))].join(', ') : sh.buyer;
       let events = sh.events.map(e => ({ stage: e.stage, description: e.description, location: e.location || null, timestamp: e.timestamp, source: e.source }));
       if (sh.isNew && !events.some(e => e.stage === 'confirmed')){
-        const earliest = events.map(e => e.timestamp).sort()[0];
+        const earliest = events.map(e => e.timestamp).filter(Boolean).sort()[0];
         events.push({ stage: 'confirmed', description: SHIP_STAGES[0].text, location: null, timestamp: earliest && earliest < now ? earliest : now, source: 'vestige' });
       }
-      events.sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
+      events.sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
       const top = Math.max(...events.map(e => stageIdx(e.stage)));
       const firstOf = (k) => (events.find(e => e.stage === k) || {}).timestamp || null;
       const pub = {
         orderNo, trackingNumber: sh.trackingNumber.trim(), courier: 'J&T Express', status: SHIP_STAGES[top].key,
-        items, orderedAt: sh.orderedAt || now, shippedAt: firstOf('picked_up'),
+        items, orderedAt: sh.orderedAt || now,
+        shippedAt: firstOf('picked_up') || events.filter(e => e.timestamp && stageIdx(e.stage) >= 2).map(e => e.timestamp).sort()[0] || null,
         estimatedDelivery: sh.eta ? sh.eta + 'T00:00:00+08:00' : null, deliveredAt: firstOf('delivered'),
         lastUpdated: now, events
       };
