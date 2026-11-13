@@ -424,6 +424,52 @@
   details.more > summary{ cursor:pointer; color:var(--green-deep); font-weight:600; font-size:.86rem; margin:12px 0; }
   .chk{ display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0; font-family:'Work Sans',sans-serif; font-size:.84rem; margin:12px 0; cursor:pointer; } .chk input{ width:auto; margin:0; }
   @media (max-width:640px){ .stg-row{ grid-template-columns:repeat(3,1fr); } .rd-foot{ grid-template-columns:1fr; } .stepper li{ font-size:.58rem; } .sc-foot .btn{ flex:1; } }
+  #claimOverlay{ z-index:960; }
+  .folder-bulk{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; background:rgba(201,164,104,.16); border:1px solid rgba(201,164,104,.4); border-radius:12px; padding:10px 14px; margin:0 0 12px; font-size:.86rem; } .folder-bulk[hidden]{ display:none; }
+  .fchk{ width:36px; text-align:center; } .fchk input{ width:auto; margin:0; cursor:pointer; }
+  .btn-xs{ padding:6px 14px !important; font-size:.76rem !important; }
+  .qs-tabs{ display:flex; gap:8px; padding:0 24px 8px; } .qs-tools{ display:grid; grid-template-columns:1fr 170px; gap:10px; padding:0 24px 10px; } .qs-tools input,.qs-tools select{ margin:0; }
+  .qs-row{ display:flex; gap:12px; align-items:center; padding:10px 4px; border-bottom:1px solid var(--line); } .qs-row:last-child{ border-bottom:none; }
+  .qs-row input[type=checkbox]{ width:auto; margin:0; } .qs-gap{ width:13px; flex:none; }
+  .qs-row .hot-info{ flex:1; min-width:0; } .qs-claim{ color:#6b4a12; }
+  .cl-row{ display:flex; gap:12px; align-items:center; padding:9px 0; border-top:1px solid var(--line); } .cl-row:first-child{ border-top:none; }
+  .cl-row .hot-info{ flex:1; min-width:0; } .cl-row input{ margin:0; width:120px; }
+  .st-line{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px; }
+  .tl{ list-style:none; margin:8px 0 0; padding:0 0 0 18px; border-left:2px solid var(--line); }
+  .tl li{ position:relative; padding:0 0 14px 14px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; font-size:.86rem; }
+  .tl li::before{ content:''; position:absolute; left:-25px; top:5px; width:12px; height:12px; border-radius:50%; background:#cfc8b6; border:2px solid #fff; }
+  .tl li.tl-claim::before{ background:#c9a468; } .tl li.tl-avail::before{ background:var(--green-deep); }
+  .tl li span{ color:rgba(20,32,28,.6); font-family:'Space Mono',monospace; font-size:.74rem; } .tl li em{ font-style:normal; background:rgba(201,164,104,.2); border-radius:999px; padding:2px 10px; font-size:.76rem; }
+  .tl li small{ flex-basis:100%; color:rgba(20,32,28,.6); }
+  @media (max-width:640px){ .qs-tools{ grid-template-columns:1fr; } .qs-tabs,.qs-tools{ padding-left:16px; padding-right:16px; } .cl-row{ flex-wrap:wrap; } .cl-row input{ width:100%; } }
+  .head-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .bhero{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; padding:16px 20px; margin-bottom:14px; }
+  .bhero-main{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; } .bhero h2{ margin:0; font-size:1.15rem; } .bhero .status-pill{ margin-left:0; }
+  .bhero .btn{ padding:9px 16px; font-size:.8rem; }
+  .bsteps{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:0 0 16px; }
+  .bstep{ display:flex; gap:12px; align-items:center; text-align:left; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; cursor:pointer; font-family:inherit; color:var(--ink); min-width:0; }
+  .bstep i{ font-style:normal; width:30px; height:30px; border-radius:50%; background:#e4e0d8; display:grid; place-items:center; font-weight:700; font-size:.85rem; flex:none; }
+  .bstep b{ display:block; font-size:.9rem; } .bstep small{ display:block; color:rgba(20,32,28,.58); font-size:.74rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bstep.active{ border-color:var(--green-deep); box-shadow:0 0 0 2px rgba(15,36,28,.12); } .bstep.active i{ background:var(--green-deep); color:var(--cream-soft); }
+  .bstep.done i{ background:#dfeadf; color:#1b4a30; } .bstep.warn i{ background:#f3e3c2; color:#6b4a12; }
+  .bpanel{ display:none; } .bpanel.active{ display:block; }
+  .bp-title{ font-size:1.05rem; margin:0 0 14px; }
+  .bnav{ display:flex; justify-content:space-between; gap:10px; margin-top:22px; padding-top:16px; border-top:1px solid var(--line); } .bnav .btn{ padding:11px 22px; }
+  .quick-dates{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:2px 0 12px; font-size:.82rem; color:rgba(20,32,28,.65); }
+  .chip-btn{ border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 14px; font-size:.8rem; cursor:pointer; font-family:inherit; color:var(--ink); } .chip-btn:hover{ border-color:var(--gold); background:rgba(201,164,104,.14); }
+  .bid-summary{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:.88rem; margin-bottom:12px; } .bid-summary b{ color:var(--green-deep); } .bid-summary .muted{ color:rgba(20,32,28,.55); }
+  .sku-add{ display:flex; gap:10px; margin:0 0 14px; align-items:flex-start; } .sku-add input,.sku-add textarea{ margin:0; flex:1; min-height:44px; } .sku-add textarea{ resize:vertical; } .sku-add .btn{ padding:11px 20px; }
+  .bfilter{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 12px; } .bfilter input{ margin:0; flex:1; min-width:200px; }
+  .hot-slot{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:100%; border:2px dashed var(--line); background:transparent; border-radius:14px; padding:16px; margin-bottom:10px; cursor:pointer; color:var(--green-deep); font-family:inherit; font-weight:600; font-size:.9rem; } .hot-slot small{ font-weight:400; color:rgba(20,32,28,.55); } .hot-slot:hover{ border-color:var(--gold); background:rgba(201,164,104,.08); }
+  .hot-line3{ font-size:.78rem; color:#6b4a12; margin-top:3px; }
+  .hot-actions .btn-xs{ white-space:nowrap; }
+  .rv-stats{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:16px; } .rv-stat{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; } .rv-stat .l{ font-family:'Space Mono',monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:rgba(20,32,28,.55); } .rv-stat .v{ font-size:1.3rem; font-weight:600; }
+  .rv-list{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .rv-list li{ display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fff; }
+  .rv-list li i{ font-style:normal; width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; font-weight:700; flex:none; background:#dfeadf; color:#1b4a30; }
+  .rv-list li.warn i{ background:#f3e3c2; color:#6b4a12; } .rv-list li.bad i{ background:#f3d6d0; color:#a4452f; }
+  .rv-list li div{ flex:1; min-width:0; } .rv-list li small{ display:block; color:rgba(20,32,28,.6); margin-top:2px; } .rv-list .btn{ padding:6px 14px; font-size:.76rem; }
+  @media (max-width:760px){ .bsteps{ grid-template-columns:repeat(2,minmax(0,1fr)); } .rv-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } .sku-add{ flex-direction:column; } .sku-add .btn{ width:100%; justify-content:center; } .bnav .btn{ flex:1; justify-content:center; } }
   .ship-url{ font-family:'Space Mono',monospace; font-size:.74rem; word-break:break-all; background:var(--paper); border-radius:8px; padding:8px 10px; }
   @media (max-width:640px){ .ship-grid,.ship-add{ grid-template-columns:1fr; } .ship-body{ padding:6px 16px 16px; } .ship-foot .btn{ flex:1; } }
   .overlay{
@@ -439,7 +485,7 @@
   .picker-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:22px 24px 12px; }
   .picker-head h2{ font-size:1.25rem; margin:0 0 4px; color:var(--green-deep); }
   .picker-head p{ margin:0; font-size:0.8rem; color:rgba(20,32,28,0.55); font-weight:300; }
-  .picker-filters{ display:flex; gap:10px; padding:0 24px 14px; }
+  .picker-filters{ display:flex; gap:10px; padding:0 24px 14px; flex-wrap:wrap; align-items:center; }
   .picker-filters input,.picker-filters select{ margin:0; }
   .picker-filters select{ width:200px; flex-shrink:0; }
   .picker-list{ flex:1; overflow:auto; padding:4px 24px 16px; border-top:1px solid var(--line); min-height:180px; }
@@ -849,7 +895,7 @@
     <div class="im-toolbar">
       <input type="search" id="imSearch" placeholder="Search SKU, name, brand, buyer, waybill…" autocomplete="off" aria-label="Search items">
       <select id="imRole" aria-label="Filter by role"><option value="all">Hot + regular</option><option value="hot">Hot items only</option><option value="regular">Regular only</option></select>
-      <select id="imStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="Available">Available</option><option value="1 Left">1 Left</option><option value="Claimed">Claimed</option></select>
+      <select id="imStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="Available">Available</option><option value="Claimed">Claimed</option></select>
       <div class="im-actions">
         <button type="button" class="btn btn-outline" id="imOpen">Open in Manager</button>
         <button type="button" class="btn btn-gold" id="imExport">Export CSV</button>
@@ -896,6 +942,27 @@
 </div>
 <input type="file" id="impFile" accept=".csv,.xlsx,.xls,text/csv" style="display:none;">
 
+<div class="overlay" id="claimOverlay" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
+  <div class="ship-modal" style="max-width:660px;">
+    <div class="im-head"><div style="min-width:0;"><h2 id="claimTitle">Mark as claimed</h2><p id="claimSub"></p></div><button type="button" class="icon-btn" id="claimClose" aria-label="Close">✕</button></div>
+    <div class="ship-body" id="claimBody"></div>
+    <div class="ship-foot"><button type="button" class="btn btn-outline" id="claimCancel">Cancel</button><button type="button" class="btn btn-gold" id="claimConfirm">Mark claimed</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="qsOverlay" role="dialog" aria-modal="true" aria-labelledby="qsTitle">
+  <div class="ship-modal" style="max-width:820px;">
+    <div class="im-head"><div style="min-width:0;"><h2 id="qsTitle">Update item status</h2><p>Find any item by SKU, name, brand or buyer — no need to open its category first.</p></div><button type="button" class="icon-btn" id="qsClose" aria-label="Close">✕</button></div>
+    <div class="qs-tabs"><button type="button" class="bs-chip active" data-qs-tab="update">Update status</button><button type="button" class="bs-chip" data-qs-tab="activity">Recent activity</button></div>
+    <div class="qs-tools" id="qsTools">
+      <input type="search" id="qsSearch" placeholder="Search SKU, name, brand, buyer…" autocomplete="off" aria-label="Search items">
+      <select id="qsFilter" aria-label="Show"><option value="Available">Available</option><option value="Claimed">Claimed</option><option value="all">All items</option></select>
+    </div>
+    <div class="ship-body" id="qsBody"></div>
+    <div class="ship-foot" id="qsFoot"><span class="mono" id="qsCount" style="margin-right:auto;"></span><button type="button" class="btn btn-outline" id="qsDone">Close</button><button type="button" class="btn btn-gold" id="qsClaimSel" disabled>Claim selected</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="pickerOverlay" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
   <div class="picker">
     <div class="picker-head">
@@ -908,6 +975,7 @@
     <div class="picker-filters">
       <input type="search" id="pickerSearch" placeholder="Search SKU, name or brand…" autocomplete="off" aria-label="Search products">
       <select id="pickerCategory" aria-label="Filter by category"></select>
+      <label class="chk" style="margin:0;"><input type="checkbox" id="pickerFree"> Hide items I can't add</label>
     </div>
     <div class="picker-list" id="pickerList"></div>
     <div class="picker-foot">
@@ -1009,18 +1077,34 @@ match /counters/{id} {
           <div class="dash-head">
             <div>
               <h1>Batch &amp; Listing Manager</h1>
-              <p class="lead" style="margin:0;">Every drop is its own batch with a Control No. Create one, add its items, and save to go live.</p>
+              <p class="lead" style="margin:0;">Build each drop in three steps: set the schedule, choose the hot items, then add the rest of the batch.</p>
             </div>
-            <button type="button" class="btn btn-gold" id="newBatchBtn">+ Add New Batch</button>
+            <div class="head-actions">
+              <button type="button" class="btn btn-outline" id="qsOpenBatch">⚡ Update item status</button>
+              <button type="button" class="btn btn-gold" id="newBatchBtn">+ Add New Batch</button>
+            </div>
           </div>
 
           <div class="tiles" id="dashTiles" aria-label="Summary"></div>
 
-          <div class="card">
-            <div class="batch-bar">
-              <h2 style="margin:0;">Batch Schedule <span id="batchStatusPill" class="status-pill status-upcoming">IN PROCESS</span></h2>
-              <button type="button" class="btn btn-outline" id="browseBatchesBtn">← Browse batches</button>
+          <div class="card bhero">
+            <div class="bhero-main">
+              <span class="code-chip big" id="bhControl">Control 01</span>
+              <h2 id="bhName">New batch</h2>
+              <span id="batchStatusPill" class="status-pill status-upcoming">IN PROCESS</span>
             </div>
+            <button type="button" class="btn btn-outline" id="browseBatchesBtn">← Browse batches</button>
+          </div>
+
+          <nav class="bsteps" id="bSteps" aria-label="Batch steps">
+            <button type="button" class="bstep active" data-bstep="1"><i>1</i><span><b>Schedule</b><small id="bsSub1"></small></span></button>
+            <button type="button" class="bstep" data-bstep="2"><i>2</i><span><b>Hot items</b><small id="bsSub2"></small></span></button>
+            <button type="button" class="bstep" data-bstep="3"><i>3</i><span><b>Batch items</b><small id="bsSub3"></small></span></button>
+            <button type="button" class="bstep" data-bstep="4"><i>4</i><span><b>Review</b><small id="bsSub4"></small></span></button>
+          </nav>
+
+          <section class="card bpanel active" data-bpanel="1">
+            <h2 class="bp-title">Batch details</h2>
             <div class="grid3">
               <div><label>Control No.</label><div class="ro-box mono" id="controlNoBox">01</div></div>
               <div><label for="batchNumber">Batch Number</label><input type="text" id="batchNumber" placeholder="004" autocomplete="off"><p class="field-err" id="err-batchNumber"></p></div>
@@ -1043,39 +1127,67 @@ match /counters/{id} {
               <div class="span-2"><label for="batchName">Batch Name</label><input type="text" id="batchName" placeholder="Vestige Archive Batch 09" autocomplete="off"><p class="field-err" id="err-batchName"></p></div>
               <div><label>Timezone</label><input type="text" value="Asia/Manila" disabled></div>
             </div>
+
+            <h2 class="bp-title" style="margin-top:8px;">Bidding window</h2>
             <div class="grid3">
               <div><label>Listing Date &amp; Time</label><div class="ro-box mono" id="listingBox"></div></div>
               <div><label for="biddingStart">Bidding Start</label><input type="datetime-local" id="biddingStart"><p class="field-err" id="err-biddingStart"></p></div>
               <div><label for="biddingEnd">Bidding End</label><input type="datetime-local" id="biddingEnd"><p class="field-err" id="err-biddingEnd"></p></div>
             </div>
-            <p class="lead" style="margin:0;">Listing Date &amp; Time is stamped automatically when the batch is first saved (Manila time). Bidding Start can't be earlier than it, and Bidding Start/End can't cross each other.</p>
-          </div>
+            <div class="quick-dates" id="quickDates">
+              <span>Quick set:</span>
+              <button type="button" class="chip-btn" data-qd="now">Start now</button>
+              <button type="button" class="chip-btn" data-qd-h="24">Runs 24 h</button>
+              <button type="button" class="chip-btn" data-qd-h="48">48 h</button>
+              <button type="button" class="chip-btn" data-qd-h="72">72 h</button>
+              <button type="button" class="chip-btn" data-qd-h="168">1 week</button>
+              <button type="button" class="chip-btn" data-qd="defaults">Use my defaults</button>
+            </div>
+            <div class="bid-summary" id="bidSummary"></div>
+            <p class="fld-note">Listing Date &amp; Time is stamped when the batch is first saved (Manila time). Bidding Start can't be earlier than it, and Start/End can't cross each other.</p>
+            <div class="bnav"><span></span><button type="button" class="btn btn-gold" data-bgo="2">Next: Hot items →</button></div>
+          </section>
 
-          <div class="card">
+          <section class="card bpanel" data-bpanel="2">
             <div class="hot-head">
-              <h2>Hot Items — This Batch <span class="count-pill" id="hotCount">0 / 3</span></h2>
+              <h2>Hot items <span class="count-pill" id="hotCount">0 / 3</span></h2>
               <div class="limit-box">
                 <label for="hotLimit">Max hot items</label>
                 <input type="number" id="hotLimit" min="1" max="30" step="1" value="3">
               </div>
             </div>
-            <p class="hot-note">Pick from your Products — only items with status <strong>Available</strong> can be added. Only the items listed here appear on the live site.</p>
+            <p class="hot-note">Hot items are featured on the home page. Pick from your Products — only <strong>Available</strong> items can be added.</p>
             <div class="hot-warn" id="hotWarn" style="display:none;"></div>
+            <div class="sku-add"><input type="text" id="hotSku" placeholder="Quick add by SKU — e.g. VG-WIN-0012" autocomplete="off" aria-label="Add hot item by SKU"><button type="button" class="btn btn-outline" id="hotSkuBtn">Add</button></div>
             <div id="itemsContainer"></div>
             <button class="btn btn-add" id="addItemBtn">+ Add from Products</button>
-          </div>
+            <div class="bnav"><button type="button" class="btn btn-outline" data-bgo="1">← Back</button><button type="button" class="btn btn-gold" data-bgo="3">Next: Batch items →</button></div>
+          </section>
 
-          <div class="card">
+          <section class="card bpanel" data-bpanel="3">
             <div class="hot-head">
-              <h2>Batch Items — This Batch <span class="count-pill" id="batchCount">0</span></h2>
+              <h2>Batch items <span class="count-pill" id="batchCount">0</span></h2>
               <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear all</button>
             </div>
-            <p class="hot-note">Choose which <strong>Available</strong> products belong to this batch. They are listed on the shop's <strong>This Week's Batch</strong> page. Your hot items are included there automatically.</p>
+            <p class="hot-note">The rest of this batch — listed on the shop's <strong>This Week's Batch</strong> page. Hot items are included automatically.</p>
             <div class="batch-summary" id="batchSummary"></div>
             <div class="hot-warn" id="batchWarn" style="display:none;"></div>
+            <div class="sku-add"><textarea id="batchSku" rows="1" placeholder="Quick add by SKU — paste one or many, separated by spaces, commas or new lines" aria-label="Add batch items by SKU"></textarea><button type="button" class="btn btn-outline" id="batchSkuBtn">Add</button></div>
+            <div class="bfilter" id="batchFilterBar">
+              <input type="search" id="batchFilter" placeholder="Search items in this batch…" autocomplete="off" aria-label="Search items in this batch">
+              <div class="bs-chips" id="batchChips"></div>
+            </div>
             <div id="batchContainer"></div>
             <button class="btn btn-add" id="addBatchBtn">+ Add from Products</button>
-          </div>
+            <div class="bnav"><button type="button" class="btn btn-outline" data-bgo="2">← Back</button><button type="button" class="btn btn-gold" data-bgo="4">Next: Review →</button></div>
+          </section>
+
+          <section class="card bpanel" data-bpanel="4">
+            <h2 class="bp-title">Review &amp; publish</h2>
+            <div class="rv-stats" id="rvStats"></div>
+            <ul class="rv-list" id="reviewBody"></ul>
+            <div class="bnav"><button type="button" class="btn btn-outline" data-bgo="3">← Back</button><button type="button" class="btn btn-gold" id="rvSave">Save batch</button></div>
+          </section>
 
           <div class="save-bar" role="region" aria-label="Save batch">
             <div class="save-info">
@@ -1204,6 +1316,7 @@ match /counters/{id} {
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
             <div class="tool-row"><div><div class="set-title">Secure private product data</div><div class="set-desc" id="toolSecureInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolSecure">Secure now</button></div>
+            <div class="tool-row"><div><div class="set-title">Convert “1 Left” items</div><div class="set-desc" id="toolOneLeftInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolOneLeft">Convert to Available</button></div>
             <div class="tool-row"><div><div class="set-title">Recalculate all sizes</div><div class="set-desc">Re-works every item's saved size from its measurements using its category's sizing type and the charts above. Manual-size categories are never touched.</div></div><button type="button" class="btn btn-outline" id="toolSizes">Recalculate sizes</button></div>
             <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
             <div class="tool-row"><div><div class="set-title">Repair batch index</div><div class="set-desc">Rebuilds the Control No. counter and the Batch Number / Name lookup from your saved batches. Safe to run; it also reports any duplicates.</div></div><button type="button" class="btn btn-outline" id="toolRepair">Repair index</button></div>
@@ -1228,6 +1341,7 @@ match /counters/{id} {
               <h1>Products</h1>
               <p class="lead" style="margin:0;">Organize your catalog into categories. Click a category to manage its products.</p>
             </div>
+            <button type="button" class="btn btn-gold" id="qsOpenProducts">⚡ Update item status</button>
           </div>
 
           <div class="card">
@@ -1276,15 +1390,23 @@ match /counters/{id} {
                 <select id="folderStatus" aria-label="Filter by status">
                   <option value="all">All statuses</option>
                   <option value="Available">Available</option>
-                  <option value="1 Left">1 Left</option>
                   <option value="Claimed">Claimed</option>
                 </select>
               </div>
               <div class="tb-right">
+                <button type="button" class="btn btn-outline" id="qsOpenCat">⚡ Update status</button>
                 <button type="button" class="btn btn-outline" id="assignSkuBtn" style="display:none;">Assign SKUs</button>
                 <button type="button" class="btn btn-outline" id="openAttrBtn" disabled>Open in Attribute View</button>
                 <button type="button" class="btn btn-outline" id="importBtn">Import Products</button>
                 <button type="button" class="btn btn-gold" id="addProductBtn">+ Add Product</button>
+              </div>
+            </div>
+            <div class="folder-bulk" id="folderBulk" hidden>
+              <span id="fbText"></span>
+              <div class="bs-bulk-actions">
+                <button type="button" class="btn btn-gold" id="fbClaim">Mark claimed</button>
+                <button type="button" class="btn btn-outline" id="fbReturn">Return to Available</button>
+                <button type="button" class="btn btn-outline" id="fbClear">Clear</button>
               </div>
             </div>
             <div class="folder-stats mono" id="folderStats"></div>
@@ -1294,18 +1416,10 @@ match /counters/{id} {
                 <tbody id="folderTbody"></tbody>
               </table>
             </div>
-            <p class="folder-hint">Click a row to select it · double-click or press Enter to open it in Attribute View · click a column header to sort</p>
+            <p class="folder-hint">Tick items for bulk status changes · use Claim / Return on a row · double-click or press Enter to open an item · click a column header to sort</p>
           </div>
 
           <div id="attributePanel" style="display:none;"></div>
-        </div>
-
-        <div class="view" id="view-batches">
-          <div class="placeholder-view">
-            <span class="tag">Coming soon</span>
-            <h2>Batch History</h2>
-            <p>A dedicated view of past and upcoming batches, separate from the live Dashboard editor, is planned for a later phase.</p>
-          </div>
         </div>
 
         <div class="view" id="view-settings">
@@ -1340,7 +1454,9 @@ match /counters/{id} {
   // Private business data (cost, buyer, sale price, waybill, remarks) lives in an admin-only collection,
   // never in the public `products` documents that the shop can read.
   const privateCol = collection(db, "productPrivate");
-  const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks'];
+  const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks', 'statusHistory', 'claimedAt', 'claimedBatch'];
+  // Only two statuses exist now. Anything else (the old "1 Left") counts as Available.
+  const normStatus = (st) => st === 'Claimed' ? 'Claimed' : 'Available';
   function splitPrivate(obj){
     const pub = {}, priv = {};
     for (const k of Object.keys(obj)) (PRIVATE_FIELDS.includes(k) ? priv : pub)[k] = obj[k];
@@ -1992,7 +2108,9 @@ match /counters/{id} {
       item: p.item || (p.brand ? p.productName : '') || '',
       size: (s && s !== 'OVER') ? s : '',
       price: Number(p.price) || 0,
-      status: p.status || 'Available',
+      status: normStatus(p.status),
+      claimedAt: p.claimedAt || '',
+      claimedBatch: p.claimedBatch || null,
       image: (p.images && p.images[0]) || ''
     };
   }
@@ -2006,7 +2124,7 @@ match /counters/{id} {
       item: it.item || '',
       size: it.size || '—',
       price: Number(it.price) || 0,
-      status: it.status || 'Available',
+      status: normStatus(it.status),
       image: it.image || ''
     };
   }
@@ -2107,6 +2225,7 @@ match /counters/{id} {
     refreshHotSnapshots();
     batchDirty = false;
     clearFieldErrors();
+    setBStep(1);
     renderAll();
   }
 
@@ -2180,6 +2299,8 @@ match /counters/{id} {
 
   function renderBatchForm(){
     const isNew = !state.id;
+    document.getElementById('bhControl').textContent = 'Control ' + (isNew ? fmtControl(nextControlPreview) : fmtControl(state.controlNo));
+    document.getElementById('bhName').textContent = state.batchName.trim() ? `${state.batchName.trim()}${state.batchNumber.trim() ? ' · Batch ' + state.batchNumber.trim() : ''}` : (isNew ? 'New batch' : 'Untitled batch');
     document.getElementById('batchNumber').value = state.batchNumber;
     document.getElementById('batchName').value = state.batchName;
     document.getElementById('biddingStart').value = state.biddingStart;
@@ -2243,7 +2364,90 @@ match /counters/{id} {
     renderBatchForm();
     renderHotItems();
     renderBatchItems();
+    renderBidSummary();
+    renderSteps();
   }
+
+  // ---------- guided steps ----------
+  let bStep = 1;
+  function setBStep(n){
+    bStep = Math.min(4, Math.max(1, n));
+    document.querySelectorAll('[data-bpanel]').forEach(p => p.classList.toggle('active', Number(p.dataset.bpanel) === bStep));
+    document.querySelectorAll('[data-bstep]').forEach(b => b.classList.toggle('active', Number(b.dataset.bstep) === bStep));
+    if (bStep === 4) renderReview();
+  }
+  document.getElementById('bSteps').addEventListener('click', (e) => { const b = e.target.closest('[data-bstep]'); if (b) setBStep(Number(b.dataset.bstep)); });
+  document.getElementById('view-dashboard').addEventListener('click', (e) => {
+    const g = e.target.closest('[data-bgo]'); if (g){ setBStep(Number(g.dataset.bgo)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  });
+  function renderSteps(){
+    const probs = validateFields(), f = probs.length;
+    const set = (n, text, cls) => { document.getElementById('bsSub' + n).textContent = text; const b = document.querySelector(`[data-bstep="${n}"]`); b.classList.toggle('done', cls === 'done'); b.classList.toggle('warn', cls === 'warn'); };
+    set(1, f ? `${f} to fix` : 'Ready', f ? 'warn' : 'done');
+    set(2, `${state.items.length} of ${state.hotLimit} chosen`, state.items.length && state.items.length <= state.hotLimit ? 'done' : 'warn');
+    set(3, `${state.batchItems.length} item${state.batchItems.length === 1 ? '' : 's'}`, state.batchItems.length ? 'done' : '');
+    set(4, f ? 'Not ready yet' : 'Ready to publish', f ? '' : 'done');
+    if (bStep === 4) renderReview();
+  }
+  function renderReview(){
+    const probs = validateFields(), items = [...state.items, ...state.batchItems].filter(i => i.productId && !i.missing);
+    const claimedI = items.filter(i => i.status === 'Claimed'), availN = items.length - claimedI.length;
+    const soldHere = state.controlNo != null ? items.filter(i => i.status === 'Claimed' && i.claimedBatch && i.claimedBatch.controlNo === state.controlNo) : [];
+    const locked = state.status !== 'Closed' ? items.filter(i => lockedElsewhere().has(i.productId)) : [];
+    const stat = (l, v) => `<div class="rv-stat"><div class="l">${esc(l)}</div><div class="v">${v}</div></div>`;
+    document.getElementById('rvStats').innerHTML = stat('Hot items', `${state.items.length} / ${state.hotLimit}`) + stat('Batch items', state.batchItems.length) + stat('Available', availN) + stat('Claimed', `${claimedI.length}${soldHere.length ? ` <small style="font-size:.7rem;font-weight:400;">(${soldHere.length} sold in this batch)</small>` : ''}`);
+    const row = (cls, title, sub, step) => `<li class="${cls}"><i>${cls === 'ok' ? '✓' : cls === 'warn' ? '!' : '✕'}</i><div><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>${step ? `<button type="button" class="btn btn-outline" data-bgo="${step}">Fix</button>` : ''}</li>`;
+    const idProb = probs.find(p => p[0] === 'batchNumber' || p[0] === 'batchName'), dateProb = probs.find(p => p[0] === 'biddingStart' || p[0] === 'biddingEnd');
+    const out = [];
+    out.push(idProb ? row('bad', 'Batch number and name', idProb[1], 1) : row('ok', 'Batch number and name', `Batch ${state.batchNumber.trim()} · ${state.batchName.trim()}`));
+    out.push(dateProb ? row('bad', 'Bidding window', dateProb[1], 1) : state.status === 'Closed' && !state.biddingStart ? row('warn', 'Bidding window', 'No dates set — fine for a Closed batch.', 1) : row('ok', 'Bidding window', document.getElementById('bidSummary').textContent.replace(/\s+/g, ' ').trim()));
+    out.push(state.items.length > state.hotLimit ? row('bad', 'Hot items', `${state.items.length} chosen but the limit is ${state.hotLimit}.`, 2) : state.items.length ? row('ok', 'Hot items', `${state.items.length} of ${state.hotLimit} slots filled.`) : row('warn', 'Hot items', 'No hot items — the home page will show none for this batch.', 2));
+    out.push(state.batchItems.length || state.items.length ? row('ok', 'Items on the shop batch page', `${state.items.length + state.batchItems.length} item${state.items.length + state.batchItems.length === 1 ? '' : 's'} (${state.items.length} hot + ${state.batchItems.length} more).`) : row('warn', 'Items on the shop batch page', 'This batch has no items yet.', 3));
+    if (claimedI.length) out.push(row('warn', `${claimedI.length} item${claimedI.length === 1 ? ' is' : 's are'} already claimed`, 'They stay listed and show as claimed. Remove them if they should not appear.', 3));
+    if (locked.length) out.push(row('bad', `${locked.length} item${locked.length === 1 ? ' is' : 's are'} in another Active batch`, 'Remove them, or Close the other batch first.', 3));
+    if (state.items.some(i => i.missing) || state.batchItems.some(i => i.missing)) out.push(row('warn', 'Some items were deleted from Products', 'They are dropped when you save.', 3));
+    document.getElementById('reviewBody').innerHTML = out.join('');
+  }
+  document.getElementById('rvSave').addEventListener('click', () => saveBatch());
+
+  // ---------- bidding window helpers ----------
+  const addHoursLocal = (local, h) => { const o = manilaParts(new Date(localToDate(local).getTime() + h * 3600000)); return `${o.year}-${o.month}-${o.day}T${o.hour}:${o.minute}`; };
+  function fmtSpan(ms){
+    const m = Math.max(0, Math.round(ms / 60000)), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mi = m % 60;
+    return [d && `${d} day${d === 1 ? '' : 's'}`, h && `${h} hour${h === 1 ? '' : 's'}`, !d && mi && `${mi} min`].filter(Boolean).join(' ') || '0 min';
+  }
+  function fmtBid(local){ const d = localToDate(local); return new Intl.DateTimeFormat('en-PH', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).format(d); }
+  function renderBidSummary(){
+    const box = document.getElementById('bidSummary');
+    if (!state.biddingStart || !state.biddingEnd){ box.innerHTML = '<span class="muted">Set the start and end — or use a Quick set button above.</span>'; return; }
+    const st = localToDate(state.biddingStart), en = localToDate(state.biddingEnd), now = new Date();
+    const phase = now < st ? `<b>Upcoming</b> — starts in ${fmtSpan(st - now)}` : now < en ? `<b>Bidding live</b> — ends in ${fmtSpan(en - now)}` : `<b>Ended</b> ${fmtSpan(now - en)} ago`;
+    box.innerHTML = `Opens <b>${esc(fmtBid(state.biddingStart))}</b> · closes <b>${esc(fmtBid(state.biddingEnd))}</b> · runs ${esc(fmtSpan(en - st))}<br><span class="muted">${phase}</span>`;
+  }
+  function setBidding(start, end){
+    state.biddingStart = start; state.biddingEnd = end;
+    document.getElementById('biddingStart').value = start; document.getElementById('biddingEnd').value = end;
+    clearFieldError('biddingStart'); clearFieldError('biddingEnd');
+    markBatchDirty(); updateDateLimits(); renderBidSummary(); renderSteps();
+  }
+  document.getElementById('quickDates').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.qd === 'now'){
+      const start = nowLocalInput(), hrs = state.biddingStart && state.biddingEnd ? (localToDate(state.biddingEnd) - localToDate(state.biddingStart)) / 3600000 : settings.durationHours;
+      setBidding(start, addHoursLocal(start, hrs > 0 ? hrs : settings.durationHours)); return;
+    }
+    if (b.dataset.qd === 'defaults'){ const d = defaultBiddingDates(); setBidding(d.start, d.end); return; }
+    if (b.dataset.qdH){
+      const start = state.biddingStart || defaultBiddingDates().start, end = addHoursLocal(start, Number(b.dataset.qdH));
+      const msg = dateProblem('biddingStart', start, start, end);
+      if (msg){ showToast({ type: 'err', title: 'Date not allowed', message: msg, duration: 6000 }); return; }
+      setBidding(start, end);
+    }
+  });
+  // run after the field handlers below have copied the new value into `state`
+  ['biddingStart', 'biddingEnd'].forEach(id => document.getElementById(id).addEventListener('change', () => queueMicrotask(() => { renderBidSummary(); renderSteps(); })));
+  ['batchNumber', 'batchName'].forEach(id => document.getElementById(id).addEventListener('input', () => queueMicrotask(() => { renderSteps(); document.getElementById('bhName').textContent = state.batchName.trim() ? `${state.batchName.trim()}${state.batchNumber.trim() ? ' · Batch ' + state.batchNumber.trim() : ''}` : 'New batch'; })));
+
 
   // ---------- status menu (the three dots) ----------
   const statusMenu = document.getElementById('statusMenu');
@@ -2340,6 +2544,7 @@ match /counters/{id} {
     state = newBatchDraft();
     batchDirty = false;
     clearFieldErrors();
+    setBStep(1);
     renderAll();
     batchNumberEl.focus();
   }
@@ -2674,6 +2879,7 @@ match /counters/{id} {
     { key: 'size', label: 'Size', val: r => r.p ? sizeText(r.p) : '' },
     { key: 'qty', label: 'Qty on Hand', num: true, val: r => r.p ? numOrBlank(r.p.quantity) : '' },
     { key: 'status', label: 'Status', val: r => r.p ? (r.p.status || 'Available') : '', html: r => r.p ? statusPill(r.p.status || 'Available') : '' },
+    { key: 'claimed', label: 'Claimed In', val: r => r.p && r.p.status === 'Claimed' ? [r.p.claimedBatch ? fmtRef(r.p.claimedBatch) : 'Batch not recorded', r.p.claimedAt ? fmtManila(r.p.claimedAt) : ''].filter(Boolean).join(' · ') : '' },
     { key: 'invest', label: 'Investment Price', num: true, money: true, val: r => r.p ? numOrBlank(r.p.investmentPrice) : '' },
     { key: 'bid', label: 'Starting Bid', num: true, money: true, val: r => r.p ? numOrBlank(r.p.price) : '' },
     { key: 'soldTo', label: 'Sold To', val: r => r.p ? (r.p.soldTo || '') : '' },
@@ -2713,7 +2919,7 @@ match /counters/{id} {
     document.getElementById('itemsTitle').innerHTML = `Control No. ${esc(fmtControl(b.controlNo))} · ${esc(b.batchName || 'Untitled')} <span class="status-pill ${STATUS_CLASS[b.status] || ''}">${esc(b.status)}</span>`;
     document.getElementById('itemsSub').textContent = `Batch ${b.batchNumber || '—'} · Bidding ${b.biddingStart ? fmtManila(b.biddingStart) + ' → ' + fmtManila(b.biddingEnd) : 'dates not set'}`;
     document.getElementById('imStats').innerHTML =
-      stat('Items', all.length) + stat('Hot', all.filter(r => r.hot).length) + stat('Available', cnt('Available') + cnt('1 Left')) + stat('Claimed', cnt('Claimed')) +
+      stat('Items', all.length) + stat('Hot', all.filter(r => r.hot).length) + stat('Available', cnt('Available')) + stat('Claimed', cnt('Claimed')) +
       stat('Investment', peso(sumOf(all, 'invest')) || '₱0') + stat('Starting bids', peso(sumOf(all, 'bid')) || '₱0') + stat('Sold', peso(sumOf(all, 'priceSold')) || '₱0');
     document.getElementById('imHead').innerHTML = IM_COLS.map(c =>
       `<th data-im-sort="${c.key}" class="${c.num ? 'num' : ''}">${c.label}${im.sort === c.key ? `<span class="arrow">${im.dir === 'asc' ? '▲' : '▼'}</span>` : ''}</th>`).join('');
@@ -2953,8 +3159,25 @@ match /counters/{id} {
     }
     return moved;
   }
+  async function oneLeftProducts(){ return (await getDocs(productsCol)).docs.filter(d => d.data().status === '1 Left'); }
+  async function refreshOneLeftInfo(){
+    const info = $s('toolOneLeftInfo'); if (!info) return;
+    try{ const n = (await oneLeftProducts()).length; info.textContent = n ? `${n} item${n === 1 ? ' still has' : 's still have'} the old “1 Left” status. Only Available and Claimed are used now.` : '✓ No items use the old “1 Left” status.'; $s('toolOneLeft').disabled = !n; }
+    catch(err){ info.textContent = 'Could not check (permissions or connection).'; }
+  }
+  $s('toolOneLeft').addEventListener('click', async () => {
+    const btn = $s('toolOneLeft'); btn.disabled = true;
+    try{
+      const rows = await oneLeftProducts();
+      for (const d of rows) await updateDoc(doc(db, 'products', d.id), { status: 'Available', updatedAt: new Date().toISOString() });
+      await fetchAllProducts(); await syncLiveAfterBulk();
+      showToast({ type: 'ok', title: 'Converted', message: `${rows.length} item${rows.length === 1 ? '' : 's'} set to Available.` });
+    } catch(err){ console.error(err); showToast({ type: 'err', title: 'Not converted', message: 'Check your connection and Firestore rules.' }); }
+    refreshOneLeftInfo();
+  });
+  async function syncLiveAfterBulk(){ try{ await fetchBatches(); await publishLiveMirror(); } catch(err){ console.error(err); } }
   async function refreshSettingsView(){
-    refreshSecureInfo();
+    refreshSecureInfo(); refreshOneLeftInfo();
     try{ await Promise.all([fetchBatches(), loadSettings()]); await refreshControlPreview(); } catch(err){ console.error(err); }
     if (!settingsDirty) fillSettingsForm(settings);
     renderSettingsOverview();
@@ -3673,6 +3896,7 @@ match /counters/{id} {
     const problems = validateFields();
     if (problems.length){
       problems.forEach(([f, m]) => setFieldError(f, m));
+      setBStep(1);
       const dupOnly = problems.every(([f, m]) => /already exists/.test(m));
       showToast({ type: 'err', title: dupOnly ? 'Batch already exists' : 'Check the batch details', message: problems[0][1], duration: 8000 });
       return;
@@ -3683,6 +3907,7 @@ match /counters/{id} {
         return;
       }
       if (state.items.length > state.hotLimit){
+        setBStep(2);
         const over = state.items.length - state.hotLimit;
         showToast({ type: 'err', title: 'Too Many Hot Items', message: `This batch is limited to ${state.hotLimit}. Remove ${over} item${over === 1 ? '' : 's'} or raise the limit.`, duration: 7000 });
         return;
@@ -3713,7 +3938,7 @@ match /counters/{id} {
         const locked = lockedElsewhere();
         const clash = [...state.items, ...state.batchItems].filter(i => i.productId && locked.has(i.productId));
         if (clash.length){
-          renderAll();
+          renderAll(); setBStep(clash.some(i => state.items.includes(i)) ? 2 : 3);
           const names = clash.slice(0, 3).map(i => i.code || i.brand || 'item').join(', ');
           showToast({ type: 'err', title: 'Items already in another batch', message: `${clash.length} item${clash.length === 1 ? ' is' : 's are'} already in an Active batch (${names}${clash.length > 3 ? '…' : ''}). Remove ${clash.length === 1 ? 'it' : 'them'}, or Close the other batch first.`, duration: 9000 });
           return;
@@ -3759,6 +3984,12 @@ match /counters/{id} {
     saveBatch();
   });
 
+  const itemClaimLine = (it) => it.status === 'Claimed' && !it.missing
+    ? `<div class="hot-line3">Claimed ${it.claimedAt ? esc(fmtManila(it.claimedAt)) : '(date not recorded)'}${it.claimedBatch ? ' · ' + esc(fmtRef(it.claimedBatch)) : ''}</div>` : '';
+  const claimBtn = (it) => !it.productId || it.missing ? ''
+    : it.status === 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-return-item="${esc(it.productId)}">Return</button>`
+    : `<button type="button" class="btn btn-gold btn-xs" data-claim-item="${esc(it.productId)}">Claim</button>`;
+
   function renderHotItems(){
     const n = state.items.length, limit = state.hotLimit;
     const pill = document.getElementById('hotCount');
@@ -3778,47 +4009,56 @@ match /counters/{id} {
     warn.innerHTML = warnings.map(w => `<div>${esc(w)}</div>`).join('');
 
     const c = document.getElementById('itemsContainer');
-    if (!n){
-      c.innerHTML = `<div class="hot-empty">No hot items yet. Click “+ Add from Products” to choose from your Available items.</div>`;
-    } else {
-      c.innerHTML = state.items.map((it, i) => {
-        const flag = it.missing ? '<span class="hot-flag bad">Deleted from Products</span>'
-                   : !it.productId ? '<span class="hot-flag">Not linked to Products</span>' : '';
-        return `
-        <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-i="${i}">
-          ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
-          <div class="hot-info">
-            <div class="hot-line1">
-              ${it.code ? `<span class="code-chip">${esc(it.code)}</span>` : '<span class="code-chip">NO SKU</span>'}
-              <strong>${esc(it.brand || 'Untitled')}</strong>
-              ${statusPill(it.status || 'Available')}
-              ${flag}
-            </div>
-            <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
+    const rows = state.items.map((it, i) => {
+      const flag = it.missing ? '<span class="hot-flag bad">Deleted from Products</span>'
+                 : !it.productId ? '<span class="hot-flag">Not linked to Products</span>' : '';
+      return `
+      <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-i="${i}">
+        ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
+        <div class="hot-info">
+          <div class="hot-line1">
+            ${it.code ? `<span class="code-chip">${esc(it.code)}</span>` : '<span class="code-chip">NO SKU</span>'}
+            <strong>${esc(it.brand || 'Untitled')}</strong>
+            ${statusPill(it.status || 'Available')}
+            ${flag}${lockFlag(it.productId)}
           </div>
-          <div class="hot-actions">
-            <button type="button" class="icon-btn" data-hot-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
-            <button type="button" class="icon-btn" data-hot-down="${i}" ${i === n - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
-            <button type="button" class="btn btn-outline btn-danger-outline" data-hot-remove="${i}" style="padding:8px 14px; font-size:0.78rem;">Remove</button>
-          </div>
-        </div>`;
-      }).join('');
-    }
+          <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
+          ${itemClaimLine(it)}
+        </div>
+        <div class="hot-actions">
+          ${claimBtn(it)}
+          <button type="button" class="icon-btn" data-hot-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
+          <button type="button" class="icon-btn" data-hot-down="${i}" ${i === n - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
+          ${it.productId && !it.missing ? `<button type="button" class="btn btn-outline btn-xs" data-hot-demote="${i}" title="Keep it in the batch but not featured">To batch items</button>` : ''}
+          <button type="button" class="btn btn-outline btn-danger-outline btn-xs" data-hot-remove="${i}">Remove</button>
+        </div>
+      </div>`;
+    }).join('');
+    const slots = Array.from({ length: Math.max(0, Math.min(limit, 12) - n) }, (_, k) =>
+      `<button type="button" class="hot-slot" data-hot-slot>+ Add hot item<small>Slot ${n + k + 1} of ${limit}</small></button>`).join('');
+    c.innerHTML = (n ? '' : `<div class="hot-empty">No hot items yet. Fill a slot below, add by SKU, or choose from Products.</div>`) + rows + slots;
 
     const add = document.getElementById('addItemBtn');
     const full = n >= limit;
     add.disabled = full;
     add.textContent = full ? `Limit reached (${n} / ${limit}) — remove one or raise the limit` : '+ Add from Products';
     renderTiles();
+    renderSteps();
   }
 
   document.getElementById('itemsContainer').addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-claim-item]'))){ openClaimDialog([el.dataset.claimItem], 'claim'); return; }
+    if ((el = e.target.closest('[data-return-item]'))){ openClaimDialog([el.dataset.returnItem], 'return'); return; }
+    if (e.target.closest('[data-hot-slot]')){ openPicker('hot'); return; }
     const rm = e.target.closest('[data-hot-remove]');
     const up = e.target.closest('[data-hot-up]');
     const dn = e.target.closest('[data-hot-down]');
+    const de = e.target.closest('[data-hot-demote]');
     if (rm){ state.items.splice(Number(rm.dataset.hotRemove), 1); }
     else if (up){ const i = Number(up.dataset.hotUp); if (i > 0) [state.items[i-1], state.items[i]] = [state.items[i], state.items[i-1]]; }
     else if (dn){ const i = Number(dn.dataset.hotDown); if (i < state.items.length - 1) [state.items[i+1], state.items[i]] = [state.items[i], state.items[i+1]]; }
+    else if (de){ const [it] = state.items.splice(Number(de.dataset.hotDemote), 1); if (it && !state.batchItems.some(x => x.productId === it.productId)) state.batchItems.push(it); renderBatchItems(); }
     else return;
     markBatchDirty();
     renderHotItems();
@@ -3832,6 +4072,7 @@ match /counters/{id} {
   hotLimitEl.addEventListener('change', () => { hotLimitEl.value = state.hotLimit; });
 
   // ---------- Batch Items: the rest of this batch (hot items are included automatically) ----------
+  const bf = { q: '', st: 'all' };
   function renderBatchItems(){
     const n = state.batchItems.length, hot = state.items.length;
     document.getElementById('batchCount').textContent = String(n);
@@ -3847,11 +4088,19 @@ match /counters/{id} {
     warn.style.display = warnings.length ? 'block' : 'none';
     warn.innerHTML = warnings.map(w => `<div>${esc(w)}</div>`).join('');
 
+    const nAvail = state.batchItems.filter(i => i.status !== 'Claimed').length, nClaimed = n - nAvail;
+    document.getElementById('batchFilterBar').style.display = n ? '' : 'none';
+    document.getElementById('batchChips').innerHTML = [['all', 'All', n], ['Available', 'Available', nAvail], ['Claimed', 'Claimed', nClaimed]].map(([k, l, c]) => `<button type="button" class="bs-chip ${bf.st === k ? 'active' : ''}" data-bchip="${k}">${l}<b>${c}</b></button>`).join('');
+
+    const q = bf.q.trim().toLowerCase();
     const c = document.getElementById('batchContainer');
     if (!n){
-      c.innerHTML = `<div class="hot-empty">No extra items yet. Click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
+      c.innerHTML = `<div class="hot-empty">No extra items yet. Add by SKU above, or click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
     } else {
-      c.innerHTML = state.batchItems.map((it, i) => `
+      const shown = state.batchItems.map((it, i) => ({ it, i })).filter(({ it }) =>
+        (bf.st === 'all' || (bf.st === 'Claimed') === (it.status === 'Claimed')) &&
+        (!q || [it.code, it.brand, it.item].some(v => String(v || '').toLowerCase().includes(q))));
+      c.innerHTML = shown.length ? shown.map(({ it, i }) => `
         <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-bi="${i}">
           ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
           <div class="hot-info">
@@ -3859,26 +4108,40 @@ match /counters/{id} {
               <span class="code-chip">${esc(it.code || 'NO SKU')}</span>
               <strong>${esc(it.brand || 'Untitled')}</strong>
               ${statusPill(it.status || 'Available')}
-              ${it.missing ? '<span class="hot-flag bad">Deleted from Products</span>' : ''}
+              ${it.missing ? '<span class="hot-flag bad">Deleted from Products</span>' : ''}${lockFlag(it.productId)}
             </div>
             <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
+            ${itemClaimLine(it)}
           </div>
           <div class="hot-actions">
-            <button type="button" class="btn btn-outline btn-danger-outline" data-batch-remove="${i}" style="padding:8px 14px; font-size:0.78rem;">Remove</button>
+            ${claimBtn(it)}
+            ${it.productId && !it.missing && it.status !== 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-batch-promote="${i}" ${state.items.length >= state.hotLimit ? 'disabled title="No free hot slot"' : ''}>★ Make hot</button>` : ''}
+            <button type="button" class="btn btn-outline btn-danger-outline btn-xs" data-batch-remove="${i}">Remove</button>
           </div>
-        </div>`).join('');
+        </div>`).join('') : '<div class="hot-empty">No items match your search or filter.</div>';
     }
     document.getElementById('clearBatchBtn').disabled = n === 0;
     renderTiles();
+    renderSteps();
   }
 
   document.getElementById('batchContainer').addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-claim-item]'))){ openClaimDialog([el.dataset.claimItem], 'claim'); return; }
+    if ((el = e.target.closest('[data-return-item]'))){ openClaimDialog([el.dataset.returnItem], 'return'); return; }
+    if ((el = e.target.closest('[data-batch-promote]'))){
+      if (state.items.length >= state.hotLimit) return;
+      const [it] = state.batchItems.splice(Number(el.dataset.batchPromote), 1); if (it) state.items.push(it);
+      markBatchDirty(); renderHotItems(); renderBatchItems(); return;
+    }
     const rm = e.target.closest('[data-batch-remove]');
     if (!rm) return;
     state.batchItems.splice(Number(rm.dataset.batchRemove), 1);
     markBatchDirty();
     renderBatchItems();
   });
+  document.getElementById('batchFilter').addEventListener('input', (e) => { bf.q = e.target.value; renderBatchItems(); });
+  document.getElementById('batchChips').addEventListener('click', (e) => { const b = e.target.closest('[data-bchip]'); if (b){ bf.st = b.dataset.bchip; renderBatchItems(); } });
   document.getElementById('clearBatchBtn').addEventListener('click', () => {
     if (!state.batchItems.length) return;
     if (!confirm(`Remove all ${state.batchItems.length} extra items from this batch? Hot items are not affected.`)) return;
@@ -3886,6 +4149,36 @@ match /counters/{id} {
     markBatchDirty();
     renderBatchItems();
   });
+
+  // ---------- quick add by SKU ----------
+  function quickAddBySku(mode, raw){
+    const codes = [...new Set(String(raw || '').toUpperCase().split(/[\s,;]+/).filter(Boolean))];
+    if (!codes.length) return false;
+    pickerMode = mode;
+    const added = [], bad = [];
+    for (const code of codes){
+      const p = hotProducts.find(x => String(x.sku || '').toUpperCase() === code);
+      if (!p){ bad.push(`${code}: not found`); continue; }
+      if (!isAvailable(p)){ bad.push(`${code}: already claimed`); continue; }
+      const why = lockReason(p);
+      if (why){ bad.push(`${code}: ${why}`); continue; }
+      if (mode === 'hot'){
+        if (state.items.length >= state.hotLimit){ bad.push(`${code}: no free hot slot`); continue; }
+        state.items.push(toHotItem(p)); state.batchItems = state.batchItems.filter(i => i.productId !== p.id);
+      } else state.batchItems.push(toHotItem(p));
+      added.push(code);
+    }
+    if (added.length){ markBatchDirty(); renderHotItems(); renderBatchItems(); }
+    showToast({ type: added.length && !bad.length ? 'ok' : 'err', title: added.length ? `${added.length} item${added.length === 1 ? '' : 's'} added` : 'Nothing added',
+      message: bad.length ? esc(bad.slice(0, 4).join(' · ')) + (bad.length > 4 ? ` · +${bad.length - 4} more` : '') : 'Save the batch to publish the change.', duration: 7000 });
+    return added.length > 0;
+  }
+  const skuBind = (inputId, btnId, mode) => {
+    const inp = document.getElementById(inputId), go = () => { if (quickAddBySku(mode, inp.value)) inp.value = ''; };
+    document.getElementById(btnId).addEventListener('click', go);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (mode === 'hot' || !e.shiftKey)){ e.preventDefault(); go(); } });
+  };
+  skuBind('hotSku', 'hotSkuBtn', 'hot'); skuBind('batchSku', 'batchSkuBtn', 'batch');
 
   // ---------- Picker: Available products only (shared by Hot Items and Batch Items) ----------
   const pickerOverlay = document.getElementById('pickerOverlay');
@@ -3945,6 +4238,7 @@ match /counters/{id} {
     const cat = document.getElementById('pickerCategory').value;
     return hotProducts.filter(isAvailable).filter(p => {
       if (cat !== 'all' && p.categoryId !== cat) return false;
+      if (document.getElementById('pickerFree').checked && lockReason(p)) return false;
       if (!q) return true;
       return [p.sku, p.productName, p.item, p.brand, categoryName(p.categoryId)]
         .some(v => String(v || '').toLowerCase().includes(q));
@@ -4005,6 +4299,7 @@ match /counters/{id} {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pickerOverlay.classList.contains('open')) closePicker(); });
   document.getElementById('pickerSearch').addEventListener('input', renderPicker);
   document.getElementById('pickerCategory').addEventListener('change', renderPicker);
+  document.getElementById('pickerFree').addEventListener('change', renderPicker);
   document.getElementById('pickerList').addEventListener('change', (e) => {
     const id = e.target.dataset.pid;
     if (!id) return;
@@ -4039,6 +4334,225 @@ match /counters/{id} {
       showToast({ type: 'ok', title: 'Batch Items Added', message: `${chosen.length} item${chosen.length === 1 ? '' : 's'} added. Save the batch to show ${chosen.length === 1 ? 'it' : 'them'} on the shop's batch page.` });
     }
   });
+
+  // =====================================================================
+  //  Status changes: Available <-> Claimed, with buyer, price, batch and date recorded in a timeline
+  // =====================================================================
+  const fmtRef = (r) => r ? `Batch ${r.batchNumber || '—'} · Control ${fmtControl(r.controlNo)}` : 'No batch (direct sale)';
+  const batchRefOf = (b) => b ? { controlNo: b.controlNo, batchNumber: b.batchNumber || '', batchName: b.batchName || '' } : null;
+  const batchesOfProduct = (id) => allBatches.filter(b => itemIdsOf(b).includes(id));
+  const listedInText = (id) => { const l = batchesOfProduct(id); return l.length ? l.map(b => `Batch ${b.batchNumber || '—'}`).join(', ') : 'no batch'; };
+
+  function timelineHtml(p){
+    const hist = [...(p.statusHistory || [])].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    const rows = hist.map(e => e.status === 'Claimed'
+      ? `<li class="tl-claim"><b>Claimed</b><span>${esc(fmtManila(e.at))}</span><em>${esc(fmtRef(e.batch))}</em><small>${[e.soldTo && 'Sold to ' + e.soldTo, e.priceSold !== null && e.priceSold !== undefined && e.priceSold !== '' && peso(e.priceSold), e.note].filter(Boolean).map(esc).join(' · ')}</small></li>`
+      : `<li class="tl-avail"><b>Returned to Available</b><span>${esc(fmtManila(e.at))}</span>${e.note ? `<small>${esc(e.note)}</small>` : ''}</li>`);
+    if (!hist.length && p.status === 'Claimed') rows.push(`<li class="tl-claim"><b>Claimed</b><span>${p.claimedAt ? esc(fmtManila(p.claimedAt)) : 'date not recorded'}</span><em>${esc(fmtRef(p.claimedBatch))}</em></li>`);
+    if (p.createdAt) rows.push(`<li><b>Added to Products</b><span>${esc(fmtManila(p.createdAt))}</span></li>`);
+    const listed = batchesOfProduct(p.id);
+    return `<ol class="tl">${rows.join('') || '<li><small>No history yet.</small></li>'}</ol>
+      <p class="fld-note" style="margin:6px 0 0;">Listed in: ${listed.length ? listed.map(b => `Batch ${esc(b.batchNumber || '—')} (Control ${esc(fmtControl(b.controlNo))}, ${esc(b.status)})`).join(' · ') : 'no batch yet'}</p>`;
+  }
+
+  // Writes the status change for each product in its own transaction (private vault keeps buyer, price and history).
+  async function commitStatus(list, o){
+    const updated = [];
+    for (const p of list){
+      let out = null;
+      await runTransaction(db, async (tx) => {
+        const pRef = doc(db, 'products', p.id), vRef = doc(db, 'productPrivate', p.id);
+        const pSnap = await tx.get(pRef), vSnap = await tx.get(vRef);
+        if (!pSnap.exists()) throw codeErr('gone');
+        const cur = normalizeProduct(p.id, { ...pSnap.data(), ...(vSnap.exists() ? vSnap.data() : {}) });
+        if (o.status === 'Claimed' && cur.status === 'Claimed') throw codeErr('already');
+        if (o.status === 'Available' && cur.status !== 'Claimed') throw codeErr('already-available');
+        const priv = {};
+        PRIVATE_FIELDS.forEach(k => { const v = cur[k]; if (v !== '' && v !== undefined && v !== null && !(Array.isArray(v) && !v.length)) priv[k] = v; });
+        const entry = o.status === 'Claimed'
+          ? { status: 'Claimed', at: o.at, batch: o.batch || null, soldTo: o.soldTo, priceSold: o.prices[p.id], note: o.note || '', by: (G.user && G.user.email) || '' }
+          : { status: 'Available', at: o.at, note: o.note || '', by: (G.user && G.user.email) || '' };
+        const history = [...cur.statusHistory, entry].slice(-40);
+        if (o.status === 'Claimed'){
+          Object.assign(priv, { soldTo: o.soldTo, priceSold: o.prices[p.id], claimedAt: o.at, claimedBatch: o.batch || null, statusHistory: history });
+        } else {
+          ['soldTo', 'priceSold', 'waybill', 'claimedAt', 'claimedBatch'].forEach(k => { delete priv[k]; });
+          priv.statusHistory = history;
+        }
+        const now = new Date().toISOString();
+        tx.update(pRef, { status: o.status, updatedAt: now, ...dropPrivateFields() });
+        tx.set(vRef, { ...priv, updatedAt: now });
+        out = normalizeProduct(p.id, { ...cur, status: o.status, ...(o.status === 'Claimed' ? {} : { soldTo: '', priceSold: '', waybill: '', claimedAt: '', claimedBatch: null }), ...priv });
+      });
+      updated.push(out);
+    }
+    return updated;
+  }
+
+  async function afterStatusChange(updated){
+    let live = false;
+    updated.forEach(p => {
+      const hi = hotProducts.findIndex(x => x.id === p.id); if (hi >= 0) hotProducts[hi] = p;
+      const ci = categoryProducts.findIndex(x => x.id === p.id); if (ci >= 0) categoryProducts[ci] = { ...categoryProducts[ci], ...p };
+      const ai = allProductsForCounts.findIndex(x => x.id === p.id); if (ai >= 0) allProductsForCounts[ai] = { ...allProductsForCounts[ai], status: p.status };
+      folderSel.delete(p.id);
+      if (draft && draft.id === p.id) draft = { ...draft, status: p.status, soldTo: p.soldTo, priceSold: p.priceSold, waybill: p.waybill, claimedAt: p.claimedAt, claimedBatch: p.claimedBatch, statusHistory: p.statusHistory };
+    });
+    if (draft && document.getElementById('attributePanel').style.display !== 'none') renderAttribute();
+    if (currentCategoryId) renderFolder();
+    for (const p of updated){ if (await syncLiveBatchProduct(p, false)) live = true; }
+    if (qsOverlay.classList.contains('open')) renderQs();
+    renderTiles();
+    return live;
+  }
+
+  // ----- the claim / return dialog -----
+  const claimOverlay = document.getElementById('claimOverlay');
+  let cl = null;
+  async function openClaimDialog(ids, mode){
+    try{ await Promise.all([fetchAllProducts(), fetchBatches()]); } catch(err){ console.error(err); }
+    const items = ids.map(id => hotProducts.find(p => p.id === id)).filter(p => p && (mode === 'claim' ? p.status !== 'Claimed' : p.status === 'Claimed'));
+    if (!items.length){ showToast({ type: 'err', title: 'Nothing to update', message: mode === 'claim' ? 'Those items are already claimed.' : 'Those items are already available.' }); return; }
+    cl = { mode, items, inShip: {} };
+    if (mode === 'return'){
+      try{ (await getDocs(shipPrivCol)).docs.forEach(d => (d.data().productIds || []).forEach(id => { if (items.some(p => p.id === id)) cl.inShip[id] = d.id; })); } catch(err){ /* shipments are optional */ }
+    }
+    renderClaim();
+    claimOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    setTimeout(() => { const f = document.getElementById(mode === 'claim' ? 'clBuyer' : 'clNote'); if (f) f.focus(); }, 30);
+  }
+  function closeClaim(){ claimOverlay.classList.remove('open'); if (!qsOverlay.classList.contains('open')) document.body.style.overflow = ''; cl = null; }
+  function renderClaim(){
+    const claim = cl.mode === 'claim', n = cl.items.length;
+    document.getElementById('claimTitle').textContent = claim ? (n === 1 ? 'Mark as claimed' : `Mark ${n} items as claimed`) : (n === 1 ? 'Return to Available' : `Return ${n} items to Available`);
+    document.getElementById('claimSub').textContent = claim ? 'Record who bought it, for how much, and in which batch listing it sold.' : 'The buyer and sale price are cleared from the item. They stay in its timeline.';
+    document.getElementById('claimConfirm').textContent = claim ? 'Mark claimed' : 'Return to Available';
+    const live = allBatches.find(b => b.status === 'Active');
+    const buyers = [...new Set(hotProducts.map(p => p.soldTo).filter(Boolean))].slice(0, 200);
+    const ordered = [...allBatches.filter(b => b.status === 'Active'), ...allBatches.filter(b => b.status !== 'Active')];
+    const row = (p) => `<div class="cl-row">${(p.images || [])[0] ? `<img class="hot-thumb" src="${esc(p.images[0])}" alt="">` : '<div class="hot-thumb none">No photo</div>'}
+      <div class="hot-info"><div class="hot-line1"><span class="code-chip">${esc(p.sku || 'NO SKU')}</span><strong>${esc(p.productName || p.brand || 'Untitled')}</strong></div>
+        <div class="hot-line2">Listed in: ${esc(listedInText(p.id))}${!claim && p.soldTo ? ' · Buyer: ' + esc(p.soldTo) : ''}</div></div>
+      ${claim ? `<input type="number" min="0" step="0.01" data-cl-price="${esc(p.id)}" value="${esc(Number(p.price) || '')}" aria-label="Price sold for ${esc(p.sku || 'item')}" placeholder="Price ₱">` : ''}</div>`;
+    const warn = Object.keys(cl.inShip).length ? `<div class="hot-warn" style="display:block;">${Object.entries(cl.inShip).map(([id, no]) => `${esc((cl.items.find(p => p.id === id) || {}).sku || 'Item')} is already in shipment ${esc(no)}. Returning it does not cancel that shipment — edit or delete the shipment too.`).join('<br>')}</div>` : '';
+    document.getElementById('claimBody').innerHTML = `
+      <div class="ship-sec"><h3>${n === 1 ? 'Item' : 'Items'}${claim ? ' <small style="font-weight:400;color:rgba(20,32,28,.55);">· price sold (₱)</small>' : ''}</h3>${cl.items.map(row).join('')}${warn}</div>
+      <div class="ship-sec"><h3>${claim ? 'Sale' : 'Details'}</h3>
+        <div class="ship-grid">
+          ${claim ? `<div><label for="clBuyer">Sold to *</label><input id="clBuyer" type="text" list="clBuyers" maxlength="60" autocomplete="off" placeholder="Buyer name"><datalist id="clBuyers">${buyers.map(b => `<option value="${esc(b)}"></option>`).join('')}</datalist></div>
+          <div><label for="clBatch">Which batch listing was it sold in?</label><select id="clBatch">${ordered.map(b => `<option value="${esc(b.id)}" ${live && b.id === live.id ? 'selected' : ''}>Batch ${esc(b.batchNumber || '—')} · Control ${esc(fmtControl(b.controlNo))} · ${esc(b.status)}${cl.items.some(p => itemIdsOf(b).includes(p.id)) ? ' · item listed here' : ''}</option>`).join('')}<option value="" ${live ? '' : 'selected'}>No batch (direct sale)</option></select></div>` : ''}
+          <div><label for="clWhen">Date &amp; time (Manila)</label><input id="clWhen" type="datetime-local" value="${esc(nowLocalInput())}" max="${esc(nowLocalInput())}"></div>
+          <div><label for="clNote">Note (optional)</label><input id="clNote" type="text" maxlength="80" placeholder="${claim ? 'e.g. paid via GCash' : 'e.g. buyer backed out'}"></div>
+        </div>
+        ${claim ? '<p class="fld-note" id="clHint" style="margin-top:10px;"></p>' : ''}
+      </div>`;
+    if (claim) syncClaimHint();
+  }
+  function syncClaimHint(){
+    const sel = document.getElementById('clBatch'), hint = document.getElementById('clHint'); if (!sel || !hint) return;
+    const b = allBatches.find(x => x.id === sel.value);
+    const off = b ? cl.items.filter(p => !itemIdsOf(b).includes(p.id)) : [];
+    hint.textContent = !b ? 'This sale is recorded without a batch.'
+      : off.length ? `Heads-up: ${off.length === 1 ? 'this item is' : off.length + ' items are'} listed in ${[...new Set(off.flatMap(p => batchesOfProduct(p.id).map(x => 'Batch ' + (x.batchNumber || '—'))))].join(', ') || 'no batch'}, but the sale will be recorded under Batch ${b.batchNumber || '—'}. Both stay visible in the item's timeline.`
+      : `Recorded under Batch ${b.batchNumber || '—'} · Control ${fmtControl(b.controlNo)}.`;
+  }
+  document.getElementById('claimBody').addEventListener('change', (e) => { if (e.target.id === 'clBatch') syncClaimHint(); });
+  document.getElementById('claimClose').addEventListener('click', closeClaim);
+  document.getElementById('claimCancel').addEventListener('click', closeClaim);
+  claimOverlay.addEventListener('mousedown', (e) => { if (e.target === claimOverlay) closeClaim(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && claimOverlay.classList.contains('open')) closeClaim(); });
+  document.getElementById('claimConfirm').addEventListener('click', async () => {
+    if (!cl) return;
+    const claim = cl.mode === 'claim', btn = document.getElementById('claimConfirm');
+    const whenV = document.getElementById('clWhen').value, when = localToDate(whenV);
+    if (!when || isNaN(when)){ showToast({ type: 'err', title: 'Date needed', message: 'Enter the date and time.' }); return; }
+    if (when.getTime() > Date.now() + 120000){ showToast({ type: 'err', title: 'Date is in the future', message: 'Use the real date and time of the sale.' }); return; }
+    const o = { status: claim ? 'Claimed' : 'Available', at: when.toISOString(), note: document.getElementById('clNote').value.trim(), prices: {} };
+    if (claim){
+      o.soldTo = document.getElementById('clBuyer').value.trim();
+      if (!o.soldTo){ showToast({ type: 'err', title: 'Buyer needed', message: 'Enter who the item was sold to.' }); document.getElementById('clBuyer').focus(); return; }
+      for (const p of cl.items){
+        const v = document.getElementById('claimBody').querySelector(`[data-cl-price="${p.id}"]`).value;
+        if (v === '' || isNaN(Number(v)) || Number(v) < 0){ showToast({ type: 'err', title: 'Price needed', message: `Enter the price ${p.sku || 'the item'} sold for.` }); return; }
+        o.prices[p.id] = Number(v);
+      }
+      o.batch = batchRefOf(allBatches.find(b => b.id === document.getElementById('clBatch').value));
+    }
+    btn.disabled = true; const label = btn.textContent; btn.textContent = 'Saving…';
+    try{
+      const items = cl.items, updated = await commitStatus(items, o);
+      closeClaim();
+      const live = await afterStatusChange(updated);
+      const n = updated.length;
+      showToast({ type: 'ok', title: claim ? 'Marked as Claimed' : 'Returned to Available',
+        message: claim ? `${n} item${n === 1 ? '' : 's'} claimed by ${o.soldTo} · ${fmtRef(o.batch)}.${live ? ' The live batch was updated.' : ''}` : `${n} item${n === 1 ? ' is' : 's are'} Available again.${live ? ' The live batch was updated.' : ''}`, duration: 6000 });
+    } catch(err){
+      console.error(err);
+      showToast({ type: 'err', title: 'Not Updated', message: err && err.batchCode === 'already' ? 'One of these items was claimed in the meantime. Reload and check.' : err && err.batchCode === 'already-available' ? 'One of these items is no longer claimed.' : err && err.code === 'permission-denied' ? 'Firestore rules are missing for the admin-only product data.' : 'Check your connection and try again.', duration: 7000 });
+    } finally { btn.disabled = false; btn.textContent = label; }
+  });
+
+  // ----- quick status tool: search any item, claim / return it, see recent activity -----
+  const qsOverlay = document.getElementById('qsOverlay');
+  const qs = { tab: 'update', sel: new Set() };
+  async function openQuickStatus(){
+    try{ await Promise.all([fetchAllProducts(), fetchBatches()]); if (!categories.length) await refreshCategoriesView(); } catch(err){ console.error(err); }
+    qs.sel = new Set(); qs.tab = 'update';
+    document.getElementById('qsSearch').value = ''; document.getElementById('qsFilter').value = 'Available';
+    qsOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    renderQs(); setTimeout(() => document.getElementById('qsSearch').focus(), 30);
+  }
+  function closeQs(){ qsOverlay.classList.remove('open'); if (!claimOverlay.classList.contains('open')) document.body.style.overflow = ''; }
+  function qsRows(){
+    const toks = document.getElementById('qsSearch').value.trim().toLowerCase().split(/\s+/).filter(Boolean), f = document.getElementById('qsFilter').value;
+    return hotProducts.filter(p => (f === 'all' || p.status === f) &&
+      toks.every(t => [p.sku, p.productName, p.brand, p.item, p.soldTo, categoryName(p.categoryId)].some(v => String(v || '').toLowerCase().includes(t))))
+      .sort((a, b) => String(a.sku || '~').localeCompare(String(b.sku || '~'), undefined, { numeric: true }));
+  }
+  function renderQs(){
+    const body = document.getElementById('qsBody'), activity = qs.tab === 'activity';
+    document.querySelectorAll('[data-qs-tab]').forEach(b => b.classList.toggle('active', b.dataset.qsTab === qs.tab));
+    document.getElementById('qsTools').style.display = activity ? 'none' : '';
+    document.getElementById('qsClaimSel').style.display = activity ? 'none' : '';
+    if (activity){
+      const ev = hotProducts.flatMap(p => (p.statusHistory || []).map(e => ({ p, e }))).sort((a, b) => String(b.e.at).localeCompare(String(a.e.at))).slice(0, 80);
+      body.innerHTML = ev.length ? `<ol class="tl" style="margin-top:0;">${ev.map(({ p, e }) => e.status === 'Claimed'
+        ? `<li class="tl-claim"><b>${esc(p.sku || 'Item')} claimed</b><span>${esc(fmtManila(e.at))}</span><em>${esc(fmtRef(e.batch))}</em><small>${esc(p.productName || p.brand || '')}${e.soldTo ? ' · Sold to ' + esc(e.soldTo) : ''}${e.priceSold !== undefined && e.priceSold !== null ? ' · ' + esc(peso(e.priceSold)) : ''}${e.note ? ' · ' + esc(e.note) : ''}</small></li>`
+        : `<li class="tl-avail"><b>${esc(p.sku || 'Item')} returned to Available</b><span>${esc(fmtManila(e.at))}</span><small>${esc(p.productName || p.brand || '')}${e.note ? ' · ' + esc(e.note) : ''}</small></li>`).join('')}</ol>`
+        : '<div class="hot-empty">No status changes recorded yet. Claims you make from now on appear here with their batch and date.</div>';
+      document.getElementById('qsCount').textContent = ev.length ? `Last ${ev.length} change${ev.length === 1 ? '' : 's'}` : '';
+      return;
+    }
+    const all = qsRows(), rows = all.slice(0, 60);
+    body.innerHTML = rows.length ? rows.map(p => {
+      const av = p.status !== 'Claimed', s = p.size || computeSize(p.length, p.width, profileOfProduct(p));
+      return `<div class="qs-row">${av ? `<input type="checkbox" data-qs-sel="${esc(p.id)}" ${qs.sel.has(p.id) ? 'checked' : ''} aria-label="Select ${esc(p.sku || 'item')}">` : '<span class="qs-gap"></span>'}
+        ${(p.images || [])[0] ? `<img class="hot-thumb" src="${esc(p.images[0])}" alt="">` : '<div class="hot-thumb none">No photo</div>'}
+        <div class="hot-info"><div class="hot-line1"><span class="code-chip">${esc(p.sku || 'NO SKU')}</span><strong>${esc(p.productName || p.brand || 'Untitled')}</strong>${statusPill(p.status)}</div>
+          <div class="hot-line2">${esc(categoryName(p.categoryId))} · Size ${esc((s && s !== 'OVER') ? s : '—')} · ${esc(peso(p.price) || '₱0')} · Listed in: ${esc(listedInText(p.id))}</div>
+          ${av ? '' : `<div class="hot-line2 qs-claim">Claimed ${p.claimedAt ? esc(fmtManila(p.claimedAt)) : '(date not recorded)'} · ${esc(fmtRef(p.claimedBatch))}${p.soldTo ? ' · ' + esc(p.soldTo) : ''}</div>`}</div>
+        <button type="button" class="btn ${av ? 'btn-gold' : 'btn-outline'} btn-xs" data-qs-act="${esc(p.id)}">${av ? 'Claim' : 'Return'}</button></div>`;
+    }).join('') : '<div class="hot-empty">No items match.</div>';
+    document.getElementById('qsCount').textContent = all.length > 60 ? `Showing 60 of ${all.length} — refine your search` : `${all.length} item${all.length === 1 ? '' : 's'}`;
+    const n = qs.sel.size, b = document.getElementById('qsClaimSel'); b.disabled = !n; b.textContent = n ? `Claim selected (${n})` : 'Claim selected';
+  }
+  document.querySelectorAll('[data-qs-tab]').forEach(b => b.addEventListener('click', () => { qs.tab = b.dataset.qsTab; renderQs(); }));
+  document.getElementById('qsSearch').addEventListener('input', renderQs);
+  document.getElementById('qsFilter').addEventListener('change', renderQs);
+  document.getElementById('qsBody').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-qs-act]'); if (!a) return;
+    const p = hotProducts.find(x => x.id === a.dataset.qsAct); if (p) openClaimDialog([p.id], p.status === 'Claimed' ? 'return' : 'claim');
+  });
+  document.getElementById('qsBody').addEventListener('change', (e) => {
+    const c = e.target.closest('[data-qs-sel]'); if (!c) return;
+    c.checked ? qs.sel.add(c.dataset.qsSel) : qs.sel.delete(c.dataset.qsSel); renderQs();
+  });
+  document.getElementById('qsClaimSel').addEventListener('click', () => { const ids = [...qs.sel]; qs.sel = new Set(); openClaimDialog(ids, 'claim'); });
+  document.getElementById('qsClose').addEventListener('click', closeQs);
+  document.getElementById('qsDone').addEventListener('click', closeQs);
+  qsOverlay.addEventListener('mousedown', (e) => { if (e.target === qsOverlay) closeQs(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && qsOverlay.classList.contains('open') && !claimOverlay.classList.contains('open')) closeQs(); });
+  ['qsOpenProducts', 'qsOpenCat', 'qsOpenBatch'].forEach(id => document.getElementById(id).addEventListener('click', openQuickStatus));
 
   function showToast({ type = 'ok', title, message, duration = 4500 }){
     const layer = document.getElementById('toastLayer');
@@ -4358,6 +4872,7 @@ match /counters/{id} {
   let selectedId = null;       // row selected in Folder View
   let draft = null;            // working copy of the product open in Attribute View
   let dirty = false;           // unsaved edits in Attribute View
+  let folderSel = new Set();   // ticked rows in Folder View (bulk status changes)
   let sortKey = 'sku';
   let sortDir = 'asc';
 
@@ -4385,7 +4900,11 @@ match /counters/{id} {
       investmentPrice: data.investmentPrice ?? '',
       soldTo: data.soldTo || '',
       priceSold: data.priceSold ?? '',
-      waybill: data.waybill || ''
+      waybill: data.waybill || '',
+      status: normStatus(data.status),
+      statusHistory: Array.isArray(data.statusHistory) ? data.statusHistory : [],
+      claimedAt: data.claimedAt || '',
+      claimedBatch: data.claimedBatch || null
     };
   }
 
@@ -4400,8 +4919,8 @@ match /counters/{id} {
     return s === 'OVER' ? 'Over chart' : s;
   }
   function statusPill(s){
-    const cls = s === 'Claimed' ? 'pill-claimed' : s === '1 Left' ? 'pill-left' : 'pill-available';
-    return `<span class="pill ${cls}">${esc(s)}</span>`;
+    const st = normStatus(s);
+    return `<span class="pill ${st === 'Claimed' ? 'pill-claimed' : 'pill-available'}">${esc(st)}</span>`;
   }
 
   // =====================================================================
@@ -4475,10 +4994,10 @@ match /counters/{id} {
 
   function renderFolder(){
     const FC = folderColumns();
-    document.getElementById('folderThead').innerHTML = FC.map(c =>
+    document.getElementById('folderThead').innerHTML = '<th class="fchk"><input type="checkbox" id="folderAll" aria-label="Select all shown"></th>' + FC.map(c =>
       `<th class="${c.type === 'num' ? 'num' : ''}" data-sort="${c.key}">${c.label}${
         sortKey === c.key ? `<span class="arrow">${sortDir === 'asc' ? '▲' : '▼'}</span>` : ''
-      }</th>`).join('');
+      }</th>`).join('') + '<th>Quick</th>';
 
     const list = visibleProducts();
     const tbody = document.getElementById('folderTbody');
@@ -4486,18 +5005,20 @@ match /counters/{id} {
       const msg = categoryProducts.length === 0
         ? 'No products in this category yet. Click “+ Add Product” to create the first one — its SKU is assigned automatically.'
         : 'No items match your search or filter.';
-      tbody.innerHTML = `<tr><td class="empty-state" colspan="${FC.length}">${msg}</td></tr>`;
+      tbody.innerHTML = `<tr><td class="empty-state" colspan="${FC.length + 2}">${msg}</td></tr>`;
     } else {
       tbody.innerHTML = list.map(p =>
-        `<tr tabindex="0" data-id="${p.id}" class="${p.id === selectedId ? 'selected' : ''}">${FC.map(c => cellHtml(c, p)).join('')}</tr>`
+        `<tr tabindex="0" data-id="${p.id}" class="${p.id === selectedId ? 'selected' : ''}"><td class="fchk"><input type="checkbox" data-fsel="${esc(p.id)}" ${folderSel.has(p.id) ? 'checked' : ''} aria-label="Select ${esc(p.sku || 'item')}"></td>${FC.map(c => cellHtml(c, p)).join('')}<td>${p.status === 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-freturn="${esc(p.id)}">Return</button>` : `<button type="button" class="btn btn-gold btn-xs" data-fclaim="${esc(p.id)}">Claim</button>`}</td></tr>`
       ).join('');
+      const all = document.getElementById('folderAll'); if (all) all.checked = list.length > 0 && list.every(p => folderSel.has(p.id));
     }
+    renderFolderBulk();
 
     const count = s => categoryProducts.filter(p => (p.status || 'Available') === s).length;
     const units = categoryProducts.reduce((n, p) => n + (Number(p.quantity) || 0), 0);
     const shown = list.length !== categoryProducts.length ? `Showing ${list.length} of ${categoryProducts.length} · ` : '';
     document.getElementById('folderStats').textContent = categoryProducts.length
-      ? `${shown}${categoryProducts.length} item${categoryProducts.length === 1 ? '' : 's'} · ${count('Available')} available · ${count('1 Left')} 1 left · ${count('Claimed')} claimed · ${units} unit${units === 1 ? '' : 's'} on hand`
+      ? `${shown}${categoryProducts.length} item${categoryProducts.length === 1 ? '' : 's'} · ${count('Available')} available · ${count('Claimed')} claimed · ${units} unit${units === 1 ? '' : 's'} on hand`
       : '';
 
     const missing = categoryProducts.filter(p => !p.sku).length;
@@ -4507,6 +5028,15 @@ match /counters/{id} {
     syncSelectionButtons();
   }
 
+  function renderFolderBulk(){
+    folderSel = new Set([...folderSel].filter(id => categoryProducts.some(p => p.id === id)));
+    const sel = categoryProducts.filter(p => folderSel.has(p.id)), a = sel.filter(p => p.status !== 'Claimed').length, c = sel.length - a;
+    document.getElementById('folderBulk').hidden = !sel.length;
+    document.getElementById('fbText').textContent = `${sel.length} selected`;
+    const b1 = document.getElementById('fbClaim'), b2 = document.getElementById('fbReturn');
+    b1.style.display = a ? '' : 'none'; b1.textContent = `Mark claimed (${a})`;
+    b2.style.display = c ? '' : 'none'; b2.textContent = `Return to Available (${c})`;
+  }
   function syncSelectionButtons(){
     document.getElementById('openAttrBtn').disabled = !selectedId;
     const tab = document.getElementById('attrTab');
@@ -4559,13 +5089,26 @@ match /counters/{id} {
   });
   const folderBody = document.getElementById('folderTbody');
   folderBody.addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-fclaim]'))){ openClaimDialog([el.dataset.fclaim], 'claim'); return; }
+    if ((el = e.target.closest('[data-freturn]'))){ openClaimDialog([el.dataset.freturn], 'return'); return; }
+    if ((el = e.target.closest('[data-fsel]'))){ el.checked ? folderSel.add(el.dataset.fsel) : folderSel.delete(el.dataset.fsel); renderFolderBulk(); return; }
     const tr = e.target.closest('tr[data-id]');
     if (tr) selectRow(tr.dataset.id);
   });
   folderBody.addEventListener('dblclick', (e) => {
+    if (e.target.closest('button,input')) return;
     const tr = e.target.closest('tr[data-id]');
     if (tr) openAttribute(tr.dataset.id);
   });
+  document.getElementById('folderThead').addEventListener('change', (e) => {
+    if (e.target.id !== 'folderAll') return;
+    visibleProducts().forEach(p => e.target.checked ? folderSel.add(p.id) : folderSel.delete(p.id));
+    renderFolder();
+  });
+  document.getElementById('fbClaim').addEventListener('click', () => openClaimDialog(categoryProducts.filter(p => folderSel.has(p.id) && p.status !== 'Claimed').map(p => p.id), 'claim'));
+  document.getElementById('fbReturn').addEventListener('click', () => openClaimDialog(categoryProducts.filter(p => folderSel.has(p.id) && p.status === 'Claimed').map(p => p.id), 'return'));
+  document.getElementById('fbClear').addEventListener('click', () => { folderSel = new Set(); renderFolder(); });
   folderBody.addEventListener('keydown', (e) => {
     const tr = e.target.closest('tr[data-id]');
     if (!tr) return;
@@ -4692,7 +5235,7 @@ match /counters/{id} {
   function impStatus(v){
     const k = impNorm(v);
     if (k === '' || k === 'available') return 'Available';
-    if (k === '1left' || k === 'oneleft' || k === 'lastone') return '1 Left';
+    if (k === '1left' || k === 'oneleft' || k === 'lastone') return 'Available';
     if (k === 'claimed' || k === 'sold') return 'Claimed';
     return null;
   }
@@ -4731,7 +5274,7 @@ match /counters/{id} {
       const invest = num('investmentPrice', 'Investment Price'), bid = num('price', 'Starting Bid');
       if (g('price') === '') warnings.push('Starting Bid is empty — it will be ₱0.');
       const status = impStatus(g('status'));
-      if (!status) errors.push(`Status “${g('status')}” isn't valid — use Available, 1 Left or Claimed.`);
+      if (!status) errors.push(`Status “${g('status')}” isn't valid — use Available or Claimed.`);
       let soldTo = g('soldTo'), priceSold = num('priceSold', 'Price Sold'), waybill = g('waybill');
       if (status === 'Claimed'){
         if (!soldTo) errors.push('Sold To is required for Claimed items.');
@@ -4826,7 +5369,7 @@ match /counters/{id} {
       ['Brand · Item', 'Optional', 'Brand and a short description.'],
       ...impGuideMeasureRows(),
       ['Quantity on Hand', 'Optional', 'Whole number. Blank = 1.'],
-      ['Status', 'Optional', 'Available, 1 Left or Claimed. Blank = Available.'],
+      ['Status', 'Optional', 'Available or Claimed. Blank = Available.'],
       ['Investment Price · Starting Bid', 'Optional', 'Numbers only (₱ and commas are fine).'],
       ['Sold To · Price Sold', 'Claimed only', 'Required when Status is Claimed.'],
       ['Waybill No. · Remarks', 'Optional', 'Waybill can be added later.']
@@ -5122,11 +5665,8 @@ match /counters/{id} {
               <div><label>Quantity on Hand</label><input type="number" min="0" step="1" data-a-field="quantity" value="${esc(d.quantity)}" placeholder="1"></div>
               <div>
                 <label>Status</label>
-                <select data-a-field="status">
-                  <option value="Available" ${d.status === 'Available' || !d.status ? 'selected' : ''}>Available</option>
-                  <option value="1 Left" ${d.status === '1 Left' ? 'selected' : ''}>1 Left</option>
-                  <option value="Claimed" ${d.status === 'Claimed' ? 'selected' : ''}>Claimed</option>
-                </select>
+                <div class="st-line">${statusPill(d.status)}<button type="button" class="btn btn-outline btn-xs" ${isClaimed ? 'data-a-return' : 'data-a-claim'}>${isClaimed ? 'Return to Available…' : 'Mark as claimed…'}</button></div>
+                <p class="fld-note" style="margin:6px 0 0;">${isClaimed ? `Claimed ${d.claimedAt ? esc(fmtManila(d.claimedAt)) : '(date not recorded)'}${d.claimedBatch ? ' · ' + esc(fmtRef(d.claimedBatch)) : ''}` : 'Status changes are recorded in the timeline below.'}</p>
               </div>
               <div><label>Investment Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="investmentPrice" value="${esc(d.investmentPrice)}" placeholder="What you paid for it"></div>
               <div><label>Starting Bid Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="price" value="${esc(d.price)}" placeholder="1450"></div>
@@ -5140,6 +5680,11 @@ match /counters/{id} {
               <div><label>Price Sold (₱) *</label><input type="number" min="0" step="0.01" data-a-field="priceSold" value="${esc(d.priceSold)}" placeholder="1800"></div>
               <div><label>Waybill No.</label><input type="text" data-a-field="waybill" value="${esc(d.waybill)}" placeholder="Optional — add later"></div>
             </div>
+          </div>
+
+          <div class="attr-card">
+            <h3>Status timeline</h3>
+            ${timelineHtml(d)}
           </div>
         </div>
       </div>`;
@@ -5164,15 +5709,6 @@ match /counters/{id} {
       const box = document.getElementById('attrSize');
       if (box){ box.textContent = sd.text; box.classList.toggle('empty', sd.empty); }
     }
-    if (f === 'status'){
-      const sold = document.getElementById('attrSold');
-      const claimed = e.target.value === 'Claimed';
-      sold.classList.toggle('show', claimed);
-      if (claimed){
-        const soldTo = sold.querySelector('[data-a-field="soldTo"]');
-        if (soldTo && !soldTo.value) soldTo.focus();
-      }
-    }
     if (f === 'productName' || f === 'item'){
       document.getElementById('attrTitle').textContent = draft.productName || draft.item || 'Untitled product';
     }
@@ -5183,6 +5719,8 @@ match /counters/{id} {
     if (t.closest('#attrBack')) return showFolder();
     if (t.closest('#attrSave')) return saveDraft(t.closest('#attrSave'));
     if (t.closest('#attrDelete')) return deleteDraft();
+    if (t.closest('[data-a-claim]')) return openClaimDialog([draft.id], 'claim');
+    if (t.closest('[data-a-return]')) return openClaimDialog([draft.id], 'return');
     const rm = t.closest('[data-a-remove-img]');
     if (rm){
       draft.images.splice(Number(rm.dataset.aRemoveImg), 1);
@@ -5276,7 +5814,7 @@ match /counters/{id} {
         quantity: d.quantity === '' ? 0 : Number(d.quantity),
         investmentPrice: d.investmentPrice === '' ? null : Number(d.investmentPrice),
         price: Number(d.price) || 0,
-        status: d.status || 'Available',
+        status: normStatus(d.status),
         // Sale details are only kept while the item is Claimed
         soldTo: isClaimed ? (d.soldTo || '').trim() : '',
         priceSold: isClaimed ? Number(d.priceSold) : null,
@@ -5287,8 +5825,9 @@ match /counters/{id} {
       };
       const { pub, priv } = splitPrivate(payload);
       await runTransaction(db, async (tx) => {
+        const prevPriv = await tx.get(doc(db, 'productPrivate', d.id));
         tx.update(doc(db, 'products', d.id), { ...pub, ...dropPrivateFields() });
-        tx.set(doc(db, 'productPrivate', d.id), { ...priv, updatedAt: payload.updatedAt });
+        tx.set(doc(db, 'productPrivate', d.id), { ...(prevPriv.exists() ? prevPriv.data() : {}), ...priv, updatedAt: payload.updatedAt });
       });
 
       const saved = normalizeProduct(d.id, { ...d, ...payload });
@@ -5352,6 +5891,7 @@ match /counters/{id} {
   async function openCategoryDetail(cat){
     if (!confirmDiscard()) return;
     currentCategoryId = cat.id;
+    folderSel = new Set();
     selectedId = null;
     draft = null;
     dirty = false;
