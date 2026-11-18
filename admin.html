@@ -1328,7 +1328,7 @@ match /counters/{id} {
 
           <div class="card" data-pane="sizes">
             <h2>Size charts</h2>
-            <p class="hot-note">The charts behind automatic sizing. A size is the <strong>first row</strong> (top to bottom) whose limits the item is <strong>under</strong>, so keep the limits increasing. Each category picks its chart through its <em>Sizing</em> type.</p>
+            <p class="hot-note">The charts behind automatic sizing. Each row is the <strong>largest</strong> measurement for that size (the item can be exactly that big). For jackets and tops, width and length are each matched to a size, and if they differ the <strong>bigger size wins</strong> (width 18 = XS, length 26 = S → S). Keep the limits increasing. Each category picks its chart through its <em>Sizing</em> type.</p>
             <div class="chart-tabs" id="chartTabs"></div>
             <div id="chartEditor"></div>
           </div>
@@ -1558,7 +1558,7 @@ match /counters/{id} {
       measures: [{ slot: 'length', label: 'Length (in)', ph: '' }, { slot: 'width', label: 'Width (in)', ph: '' }], empty: '' }
   };
   const DEFAULT_SIZE_CHARTS = {
-    // checked top to bottom: the first row whose limits the item is UNDER wins
+    // each row = the largest width / length (inches, inclusive) for that size; width and length are matched separately and the bigger size wins
     tops: [
       { w: 18, l: 25, size: 'XS' }, { w: 19, l: 26, size: 'S' }, { w: 20, l: 27, size: 'M' }, { w: 21, l: 28, size: 'L' },
       { w: 22, l: 29, size: 'L-XL' }, { w: 23, l: 30, size: 'XL' }, { w: 24, l: 31, size: 'XL-2XL' }, { w: 25, l: 32, size: '2XL' }
@@ -1598,14 +1598,14 @@ match /counters/{id} {
     if (profile === 'manual') return '';
     if (profile === 'bottoms' || profile === 'caps'){
       if (!(W > 0)) return '';
-      for (const row of SIZE_CHARTS[profile]) if (W < row.max) return row.size;
+      for (const row of SIZE_CHARTS[profile]) if (W <= row.max + 1e-9) return row.size;
       return 'OVER';
     }
     if (!(L > 0) || !(W > 0)) return '';
-    for (const row of SIZE_CHARTS.tops){
-      if (W < row.w && L < row.l) return row.size;
-    }
-    return 'OVER';
+    const rows = SIZE_CHARTS.tops, eps = 1e-9;
+    const wi = rows.findIndex(r => W <= r.w + eps), li = rows.findIndex(r => L <= r.l + eps);
+    if (wi < 0 || li < 0) return 'OVER';
+    return rows[Math.max(wi, li)].size;
   }
   function sizeDisplay(size, profile = 'tops'){
     if (!size) return { text: (SIZE_PROFILES[profile] || SIZE_PROFILES.tops).empty || '—', empty: true };
@@ -3040,7 +3040,7 @@ match /counters/{id} {
   function renderChartEditor(){
     $s('chartTabs').innerHTML = Object.keys(CHART_NAMES).map(k => `<button type="button" class="bs-chip ${chartTab === k ? 'active' : ''}" data-chart-tab="${k}">${CHART_NAMES[k]}</button>`).join('');
     const rows = chartDraft[chartTab], tops = chartTab === 'tops';
-    const lim = tops ? ['Width under (in)', 'Length under (in)'] : [chartTab === 'caps' ? 'Head circumference under (in)' : 'Waist under (in)'];
+    const lim = tops ? ['Width up to (in)', 'Length up to (in)'] : [chartTab === 'caps' ? 'Head circumference up to (in)' : 'Waist up to (in)'];
     $s('chartEditor').innerHTML = `<div class="table-scroll" style="border:none;max-height:none;"><table class="chart-table"><thead><tr><th>Size label</th>${lim.map(l => `<th>${l}</th>`).join('')}<th></th></tr></thead><tbody>
       ${rows.map((r, i) => `<tr data-ci="${i}"><td><input type="text" data-c="size" value="${esc(r.size)}" maxlength="12" aria-label="Size label"></td>
         ${tops ? `<td><input type="number" step="0.1" min="0" data-c="w" value="${esc(r.w)}"></td><td><input type="number" step="0.1" min="0" data-c="l" value="${esc(r.l)}"></td>` : `<td><input type="number" step="0.1" min="0" data-c="max" value="${esc(r.max)}"></td>`}
