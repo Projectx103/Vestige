@@ -5581,7 +5581,7 @@ match /counters/{id} {
   const gemErr = (kind, message) => Object.assign(new Error(message || kind), { gem: kind });
 
   async function geminiCall(model, key, parts){
-    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 45000);
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 25000);
     let res;
     try{
       res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
@@ -5609,7 +5609,7 @@ match /counters/{id} {
     const key = geminiKey(); if (!key) throw gemErr('nokey');
     let last = null;
     for (const m of [...new Set([geminiModel(), ...GEM_MODELS].filter(Boolean))]){
-      try{ return await geminiCall(m, key, parts); } catch(err){ if (err.gem === 'model'){ last = err; continue; } throw err; }
+      try{ return await geminiCall(m, key, parts); } catch(err){ if (err.gem === 'model' || err.gem === 'timeout'){ last = err; continue; } throw err; }
     }
     throw last || gemErr('model');
   }
