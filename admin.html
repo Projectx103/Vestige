@@ -5605,21 +5605,41 @@ match /counters/{id} {
     if (!raw) throw gemErr('empty');
     try{ return JSON.parse(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')); } catch(e){ throw gemErr('empty'); }
   }
+  const GEM_AUTO_STORE = 'vestigeGeminiAuto';
+  // Asks Google which models this key can really use (model names change over time) and ranks the fast "flash" ones.
+  async function geminiListModels(key){
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`);
+    if (!res.ok) throw gemErr(res.status === 400 || res.status === 403 ? 'key' : 'other');
+    const list = ((await res.json()).models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => String(m.name).replace(/^models\//, ''));
+    const rank = (n) => { const v = n.match(/gemini-(\d+(?:\.\d+)?)-flash(-lite)?$/); return v ? parseFloat(v[1]) * 10 - (v[2] ? 5 : 0) : -1; };
+    const strict = list.filter(n => rank(n) >= 0).sort((x, y) => rank(y) - rank(x));
+    const loose = list.filter(n => /flash/.test(n) && !/image|tts|live|audio|embed|robotics|computer/.test(n) && !strict.includes(n));
+    return [...strict, ...loose];
+  }
   async function geminiRun(parts){
     const key = geminiKey(); if (!key) throw gemErr('nokey');
-    let last = null;
-    for (const m of [...new Set([geminiModel(), ...GEM_MODELS].filter(Boolean))]){
-      try{ return await geminiCall(m, key, parts); } catch(err){ if (err.gem === 'model' || err.gem === 'timeout'){ last = err; continue; } throw err; }
+    let last = null; const tried = new Set();
+    const attempt = async (m) => { tried.add(m); const out = await geminiCall(m, key, parts); lsSet(GEM_AUTO_STORE, m); return out; };
+    for (const m of [...new Set([geminiModel(), lsGet(GEM_AUTO_STORE), ...GEM_MODELS].filter(Boolean))]){
+      try{ return await attempt(m); } catch(err){ if (err.gem === 'model' || err.gem === 'timeout'){ last = err; continue; } throw err; }
+    }
+    if (!last || last.gem === 'model'){
+      let names = []; try{ names = await geminiListModels(key); } catch(e){ if (e.gem === 'key') throw e; }
+      for (const m of names.filter(n => !tried.has(n)).slice(0, 4)){
+        try{ return await attempt(m); } catch(err){ if (err.gem === 'model' || err.gem === 'timeout'){ last = err; continue; } throw err; }
+      }
     }
     throw last || gemErr('model');
   }
-  const gemMessage = (err) => ({
+  const gemMessage = (err) => { const base = ({
     nokey: 'Add your Gemini key first.', key: 'Google rejected the API key. Check it in Settings → Tools → Photo scan.',
     quota: 'The free Gemini limit was reached. Wait a minute and try again.', network: 'No connection to Google. Check your internet and try again.',
     timeout: 'Google took too long to answer. Try again.', busy: 'Google is busy right now. Try again in a moment.',
-    model: 'None of the Gemini models were available. Open Settings → Tools → Photo scan and enter a current model name.',
+    model: 'Google did not accept any Gemini model for this key.',
     blocked: 'Google could not process that photo. Try a different one.', empty: 'The AI did not return a usable answer. Try again or fill it in yourself.'
   }[err && err.gem] || 'The photo could not be read. Try again or fill it in yourself.');
+    const d = err && (err.gem === 'model' || err.gem === 'other') && err.message && err.message !== err.gem ? ' Google said: ' + String(err.message).slice(0, 220) : '';
+    return base + d; };
 
   // Shrinks the photo for the AI (faster + cheaper); falls back to the raw file when the browser can't resize.
   async function prepareForAi(file){
