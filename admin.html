@@ -5667,7 +5667,7 @@ match /counters/{id} {
   };
 
   const scanOverlay = document.getElementById('scanOverlay');
-  const sc = { step: 'pick', file: null, url: '', f: { categoryId: '', brand: '', productName: '' }, ai: null, created: null, setupOnly: false, busy: false };
+  const sc = { step: 'pick', file: null, url: '', f: { categoryId: '', brand: '', productName: '', description: '' }, ai: null, created: null, setupOnly: false, busy: false };
   const scanBody = document.getElementById('scanBody'), scanFoot = document.getElementById('scanFoot');
   const maskKey = (k) => k ? k.slice(0, 4) + '…' + k.slice(-3) : '';
 
@@ -5675,7 +5675,7 @@ match /counters/{id} {
     if (!categories.length){ try{ await refreshCategoriesView(); } catch(e){} }
     if (!setup && !categories.length){ showToast({ type: 'err', title: 'Create a category first', message: 'Scanned products are added to a category, such as Hoodies or Jackets.' }); return; }
     if (!setup && !confirmDiscard()) return;
-    Object.assign(sc, { file: null, url: '', ai: null, created: null, busy: false, setupOnly: setup, f: { categoryId: currentCategoryId || '', brand: '', productName: '' } });
+    Object.assign(sc, { file: null, url: '', ai: null, created: null, busy: false, setupOnly: setup, f: { categoryId: currentCategoryId || '', brand: '', productName: '', description: '' } });
     scanOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
     scanStep(setup || !geminiKey() ? 'setup' : 'pick');
   }
@@ -5718,6 +5718,7 @@ match /counters/{id} {
             <div><label for="scCat">Category${ai && sc.f.categoryId && matchCategory(ai.category) === sc.f.categoryId ? '<span class="tag">AI</span>' : ''}</label><select id="scCat"><option value="">Choose a category…</option>${categories.map(c => `<option value="${esc(c.id)}" ${c.id === sc.f.categoryId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
             <div><label for="scBrand">Brand${ai && ai.brand && sc.f.brand === ai.brand ? '<span class="tag">AI</span>' : ''}</label><input id="scBrand" type="text" list="scBrands" maxlength="60" autocomplete="off" value="${esc(sc.f.brand)}" placeholder="e.g. Fila Heritage"><datalist id="scBrands">${brands.map(b => `<option value="${esc(b)}"></option>`).join('')}</datalist></div>
             <div><label for="scName">Product name${ai && ai.productName && sc.f.productName === ai.productName ? '<span class="tag">AI</span>' : ''}</label><input id="scName" type="text" maxlength="80" autocomplete="off" value="${esc(sc.f.productName)}" placeholder="e.g. Fila Heritage Crewneck"></div>
+            <div><label for="scDesc">Description${ai && ai.description && sc.f.description === ai.description ? '<span class="tag">AI</span>' : ''}</label><input id="scDesc" type="text" maxlength="140" autocomplete="off" value="${esc(sc.f.description)}" placeholder="e.g. Embroidered crewneck · Black/Gold"></div>
           </div></div>`;
       scanFoot.innerHTML = btn('scanRetry', sc.file ? 'Choose another photo' : 'Back') + '<span style="margin-right:auto"></span>' + btn('scanCreate', 'Create product', 'btn-gold');
     } else if (step === 'photo'){
@@ -5726,7 +5727,7 @@ match /counters/{id} {
       scanFoot.innerHTML = '';
     }
   }
-  const scanSet = () => { const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; }; if (document.getElementById('scName')) sc.f = { categoryId: document.getElementById('scCat').value, brand: g('scBrand'), productName: g('scName') }; };
+  const scanSet = () => { const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; }; if (document.getElementById('scName')) sc.f = { categoryId: document.getElementById('scCat').value, brand: g('scBrand'), productName: g('scName'), description: g('scDesc') }; };
 
   async function scanHandleFile(file){
     if (!file) return;
@@ -5741,16 +5742,17 @@ match /counters/{id} {
       const brands = [...new Set(hotProducts.map(p => p.brand).filter(Boolean))].slice(0, 60);
       const out = await geminiRun([{ text:
         `You catalogue second-hand (thrift) clothing for an online shop. Look at the photo of ONE item and identify it.\n` +
-        `Reply with ONLY this JSON: {"brand":"","productName":"","category":"","confidence":"high|medium|low"}\n` +
+        `Reply with ONLY this JSON: {"brand":"","productName":"","category":"","description":"","confidence":"high|medium|low"}\n` +
         `- brand: the clothing brand ONLY if you can see it (logo, tag, label, printed text) or clearly recognise the design; otherwise "". Never guess. Use normal capitalisation.\n` +
         (brands.length ? `  Brands already in the shop (reuse the same spelling when it matches): ${brands.join(', ')}.\n` : '') +
         `- productName: short shop-style name: brand (if known) + style/line + garment type, e.g. "Nike Windrunner Jacket" or "Fila Heritage Crewneck". Maximum 6 words. If the exact line is unknown use brand + garment type. No colours, sizes or prices.\n` +
         `- category: choose EXACTLY one of these shop categories, copied exactly: ${cats.map(c => '"' + c + '"').join(', ')}. If none fits, "".\n` +
+        `- description: one short line for the shop listing, max 90 characters, in the style "Embroidered crewneck · Black/Gold": garment details, main colours, notable features (logo, print, zipper, hood, material only if visible). Do not mention size, price, or condition you cannot see.\n` +
         `- confidence: how sure you are about brand and product name.` },
         { inline_data: { mime_type: img.mime, data: img.b64 } }]);
-      sc.ai = { brand: String(out.brand || '').trim().slice(0, 60), productName: String(out.productName || '').trim().slice(0, 80), category: String(out.category || ''), confidence: ['high', 'medium', 'low'].includes(out.confidence) ? out.confidence : 'medium' };
+      sc.ai = { brand: String(out.brand || '').trim().slice(0, 60), productName: String(out.productName || '').trim().slice(0, 80), category: String(out.category || ''), description: String(out.description || '').trim().slice(0, 140), confidence: ['high', 'medium', 'low'].includes(out.confidence) ? out.confidence : 'medium' };
       const mc = matchCategory(sc.ai.category);
-      sc.f = { categoryId: mc || sc.f.categoryId || '', brand: sc.ai.brand, productName: sc.ai.productName };
+      sc.f = { categoryId: mc || sc.f.categoryId || '', brand: sc.ai.brand, productName: sc.ai.productName, description: sc.ai.description };
       sc.error = '';
     } catch(err){
       console.error(err);
@@ -5762,7 +5764,7 @@ match /counters/{id} {
 
   async function scanCreate(){
     scanSet();
-    const { categoryId, brand, productName } = sc.f;
+    const { categoryId, brand, productName, description } = sc.f;
     if (!categoryId){ showToast({ type: 'err', title: 'Category needed', message: 'Choose which category this item belongs to.' }); return; }
     if (!productName && !brand){ showToast({ type: 'err', title: 'Add a name or brand', message: 'Fill in at least the product name or the brand.' }); return; }
     const cat = categories.find(c => c.id === categoryId);
@@ -5770,7 +5772,7 @@ match /counters/{id} {
     try{
       await ensureCategoryCode(cat);
       const created = await createProductWithSku(cat.id);
-      await updateDoc(doc(db, 'products', created.id), { brand, productName, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, 'products', created.id), { brand, productName, item: description, updatedAt: new Date().toISOString() });
       sc.created = { ...created, categoryId: cat.id };
       sc.busy = false;
       if (sc.file) scanStep('photo'); else scanFinish();
