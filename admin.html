@@ -470,6 +470,19 @@
   .rv-list li.warn i{ background:#f3e3c2; color:#6b4a12; } .rv-list li.bad i{ background:#f3d6d0; color:#a4452f; }
   .rv-list li div{ flex:1; min-width:0; } .rv-list li small{ display:block; color:rgba(20,32,28,.6); margin-top:2px; } .rv-list .btn{ padding:6px 14px; font-size:.76rem; }
   @media (max-width:760px){ .bsteps{ grid-template-columns:repeat(2,minmax(0,1fr)); } .rv-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } .sku-add{ flex-direction:column; } .sku-add .btn{ width:100%; justify-content:center; } .bnav .btn{ flex:1; justify-content:center; } }
+  #scanOverlay{ z-index:940; }
+  .scan-drop{ display:block; border:2px dashed var(--line); border-radius:16px; padding:34px 20px; text-align:center; cursor:pointer; background:var(--paper); }
+  .scan-drop:hover,.scan-drop.over{ border-color:var(--gold); background:rgba(201,164,104,.12); } .scan-drop b{ display:block; font-size:1rem; margin:6px 0 2px; } .scan-drop small{ color:rgba(20,32,28,.6); }
+  .scan-drop .ico{ font-size:2rem; }
+  .scan-prev{ display:flex; gap:16px; align-items:flex-start; } .scan-prev img{ width:132px; height:132px; object-fit:cover; border-radius:14px; border:1px solid var(--line); flex:none; background:var(--paper); }
+  .scan-big{ width:100%; max-height:340px; object-fit:contain; border-radius:14px; border:1px solid var(--line); background:var(--paper); }
+  .scan-spin{ width:34px; height:34px; border:3px solid var(--line); border-top-color:var(--green-deep); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+  .scan-center{ text-align:center; padding:26px 6px; }
+  .scan-conf{ font-size:.8rem; border-radius:10px; padding:8px 12px; margin:0 0 12px; background:rgba(201,164,104,.16); border:1px solid rgba(201,164,104,.4); } .scan-conf.low{ background:#f7e2dd; border-color:#e3b9ae; }
+  .scan-fields{ display:grid; gap:12px; flex:1; min-width:0; } .scan-fields input,.scan-fields select{ margin:0; }
+  .scan-fields .tag{ font-size:.7rem; background:rgba(201,164,104,.25); border-radius:999px; padding:1px 8px; margin-left:6px; text-transform:none; letter-spacing:0; }
+  .scan-ask{ display:grid; gap:10px; margin-top:16px; } .scan-ask .btn{ justify-content:center; padding:13px; }
+  @media (max-width:560px){ .scan-prev{ flex-direction:column; } .scan-prev img{ width:100%; height:200px; } }
   .ship-url{ font-family:'Space Mono',monospace; font-size:.74rem; word-break:break-all; background:var(--paper); border-radius:8px; padding:8px 10px; }
   @media (max-width:640px){ .ship-grid,.ship-add{ grid-template-columns:1fr; } .ship-body{ padding:6px 16px 16px; } .ship-foot .btn{ flex:1; } }
   .overlay{
@@ -942,6 +955,14 @@
 </div>
 <input type="file" id="impFile" accept=".csv,.xlsx,.xls,text/csv" style="display:none;">
 
+<div class="overlay" id="scanOverlay" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+  <div class="ship-modal" style="max-width:620px;">
+    <div class="im-head"><div style="min-width:0;"><h2 id="scanTitle">Scan product photo</h2><p id="scanSub">Upload a photo and the name, brand and category are filled in for you.</p></div><button type="button" class="icon-btn" id="scanClose" aria-label="Close">✕</button></div>
+    <div class="ship-body" id="scanBody"></div>
+    <div class="ship-foot" id="scanFoot"></div>
+  </div>
+</div>
+
 <div class="overlay" id="claimOverlay" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
   <div class="ship-modal" style="max-width:660px;">
     <div class="im-head"><div style="min-width:0;"><h2 id="claimTitle">Mark as claimed</h2><p id="claimSub"></p></div><button type="button" class="icon-btn" id="claimClose" aria-label="Close">✕</button></div>
@@ -1316,6 +1337,7 @@ match /counters/{id} {
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
             <div class="tool-row"><div><div class="set-title">Secure private product data</div><div class="set-desc" id="toolSecureInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolSecure">Secure now</button></div>
+            <div class="tool-row"><div><div class="set-title">Photo scan (Gemini)</div><div class="set-desc" id="toolScanInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolScanKey">Set up</button></div>
             <div class="tool-row"><div><div class="set-title">Convert “1 Left” items</div><div class="set-desc" id="toolOneLeftInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolOneLeft">Convert to Available</button></div>
             <div class="tool-row"><div><div class="set-title">Recalculate all sizes</div><div class="set-desc">Re-works every item's saved size from its measurements using its category's sizing type and the charts above. Manual-size categories are never touched.</div></div><button type="button" class="btn btn-outline" id="toolSizes">Recalculate sizes</button></div>
             <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
@@ -1341,7 +1363,7 @@ match /counters/{id} {
               <h1>Products</h1>
               <p class="lead" style="margin:0;">Organize your catalog into categories. Click a category to manage its products.</p>
             </div>
-            <button type="button" class="btn btn-gold" id="qsOpenProducts">⚡ Update item status</button>
+            <div class="head-actions"><button type="button" class="btn btn-outline" id="scanOpenProducts">📷 Scan product photo</button><button type="button" class="btn btn-gold" id="qsOpenProducts">⚡ Update item status</button></div>
           </div>
 
           <div class="card">
@@ -1397,6 +1419,7 @@ match /counters/{id} {
                 <button type="button" class="btn btn-outline" id="qsOpenCat">⚡ Update status</button>
                 <button type="button" class="btn btn-outline" id="assignSkuBtn" style="display:none;">Assign SKUs</button>
                 <button type="button" class="btn btn-outline" id="openAttrBtn" disabled>Open in Attribute View</button>
+                <button type="button" class="btn btn-outline" id="scanBtn">📷 Scan Photo</button>
                 <button type="button" class="btn btn-outline" id="importBtn">Import Products</button>
                 <button type="button" class="btn btn-gold" id="addProductBtn">+ Add Product</button>
               </div>
@@ -5545,6 +5568,263 @@ match /counters/{id} {
   ['dragover', 'dragenter'].forEach(ev => impOverlay.addEventListener(ev, (e) => { if (imp.step !== 'pick') return; e.preventDefault(); const d = document.getElementById('impDrop'); if (d) d.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(ev => impOverlay.addEventListener(ev, (e) => { const d = document.getElementById('impDrop'); if (d) d.classList.remove('over'); }));
   impOverlay.addEventListener('drop', (e) => { if (imp.step !== 'pick') return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; impHandleFile(f); });
+
+  // =====================================================================
+  //  Scan product photo: Gemini reads the photo -> name / brand / category -> create product -> confirm photo
+  // =====================================================================
+  const GEM_KEY_STORE = 'vestigeGeminiKey', GEM_MODEL_STORE = 'vestigeGeminiModel';
+  const GEM_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  const lsGet = (k) => { try{ return localStorage.getItem(k) || ''; } catch(e){ return ''; } };
+  const lsSet = (k, v) => { try{ v ? localStorage.setItem(k, v) : localStorage.removeItem(k); return true; } catch(e){ return false; } };
+  const geminiKey = () => lsGet(GEM_KEY_STORE).trim();
+  const geminiModel = () => lsGet(GEM_MODEL_STORE).trim();
+  const gemErr = (kind, message) => Object.assign(new Error(message || kind), { gem: kind });
+
+  async function geminiCall(model, key, parts){
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 45000);
+    let res;
+    try{
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
+        body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } })
+      });
+    } catch(err){ throw gemErr(err && err.name === 'AbortError' ? 'timeout' : 'network'); }
+    finally { clearTimeout(timer); }
+    if (!res.ok){
+      let msg = ''; try{ msg = ((await res.json()).error || {}).message || ''; } catch(e){}
+      if (res.status === 429) throw gemErr('quota', msg);
+      if (res.status === 404 || /not found|not supported|no longer available/i.test(msg)) throw gemErr('model', msg);
+      if (res.status === 400 && /api key|API_KEY/i.test(msg) || res.status === 401 || res.status === 403) throw gemErr('key', msg);
+      if (res.status >= 500) throw gemErr('busy', msg);
+      throw gemErr('other', msg);
+    }
+    const data = await res.json();
+    if (data.promptFeedback && data.promptFeedback.blockReason) throw gemErr('blocked');
+    const text = (((data.candidates || [])[0] || {}).content || {}).parts;
+    const raw = (text || []).map(p => p.text || '').join('').trim();
+    if (!raw) throw gemErr('empty');
+    try{ return JSON.parse(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')); } catch(e){ throw gemErr('empty'); }
+  }
+  async function geminiRun(parts){
+    const key = geminiKey(); if (!key) throw gemErr('nokey');
+    let last = null;
+    for (const m of [...new Set([geminiModel(), ...GEM_MODELS].filter(Boolean))]){
+      try{ return await geminiCall(m, key, parts); } catch(err){ if (err.gem === 'model'){ last = err; continue; } throw err; }
+    }
+    throw last || gemErr('model');
+  }
+  const gemMessage = (err) => ({
+    nokey: 'Add your Gemini key first.', key: 'Google rejected the API key. Check it in Settings → Tools → Photo scan.',
+    quota: 'The free Gemini limit was reached. Wait a minute and try again.', network: 'No connection to Google. Check your internet and try again.',
+    timeout: 'Google took too long to answer. Try again.', busy: 'Google is busy right now. Try again in a moment.',
+    model: 'None of the Gemini models were available. Open Settings → Tools → Photo scan and enter a current model name.',
+    blocked: 'Google could not process that photo. Try a different one.', empty: 'The AI did not return a usable answer. Try again or fill it in yourself.'
+  }[err && err.gem] || 'The photo could not be read. Try again or fill it in yourself.');
+
+  // Shrinks the photo for the AI (faster + cheaper); falls back to the raw file when the browser can't resize.
+  async function prepareForAi(file){
+    const readB64 = (blob) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1] || ''); r.onerror = no; r.readAsDataURL(blob); });
+    try{
+      const bmp = await createImageBitmap(file), k = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      return { mime: 'image/jpeg', b64: c.toDataURL('image/jpeg', 0.85).split(',')[1] };
+    } catch(e){ return { mime: file.type || 'image/jpeg', b64: await readB64(file) }; }
+  }
+  async function bigPhotoForUpload(file){
+    if (file.size <= 9 * 1024 * 1024) return file;
+    try{
+      const bmp = await createImageBitmap(file), k = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      return await new Promise(ok => c.toBlob(b => ok(b || file), 'image/jpeg', 0.88));
+    } catch(e){ return file; }
+  }
+  const matchCategory = (name) => {
+    const n = String(name || '').trim().toLowerCase(); if (!n) return '';
+    const hit = categories.find(c => String(c.name).trim().toLowerCase() === n) || categories.find(c => String(c.name).toLowerCase().includes(n) || n.includes(String(c.name).toLowerCase()));
+    return hit ? hit.id : '';
+  };
+
+  const scanOverlay = document.getElementById('scanOverlay');
+  const sc = { step: 'pick', file: null, url: '', f: { categoryId: '', brand: '', productName: '' }, ai: null, created: null, setupOnly: false, busy: false };
+  const scanBody = document.getElementById('scanBody'), scanFoot = document.getElementById('scanFoot');
+  const maskKey = (k) => k ? k.slice(0, 4) + '…' + k.slice(-3) : '';
+
+  async function openScan({ setup = false } = {}){
+    if (!categories.length){ try{ await refreshCategoriesView(); } catch(e){} }
+    if (!setup && !categories.length){ showToast({ type: 'err', title: 'Create a category first', message: 'Scanned products are added to a category, such as Hoodies or Jackets.' }); return; }
+    if (!setup && !confirmDiscard()) return;
+    Object.assign(sc, { file: null, url: '', ai: null, created: null, busy: false, setupOnly: setup, f: { categoryId: currentCategoryId || '', brand: '', productName: '' } });
+    scanOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    scanStep(setup || !geminiKey() ? 'setup' : 'pick');
+  }
+  function closeScan(){
+    if (sc.busy) return;
+    scanOverlay.classList.remove('open'); document.body.style.overflow = '';
+    if (sc.url){ URL.revokeObjectURL(sc.url); sc.url = ''; }
+  }
+  const btn = (id, label, cls = 'btn-outline') => `<button type="button" class="btn ${cls}" id="${id}">${label}</button>`;
+  function scanStep(step, extra = {}){
+    sc.step = step; Object.assign(sc, extra);
+    const T = (t, sub) => { document.getElementById('scanTitle').textContent = t; document.getElementById('scanSub').textContent = sub || ''; };
+    const drop = (id, big, small) => `<label class="scan-drop" id="${id}" for="scanFile"><div class="ico">📷</div><b>${big}</b><small>${small}</small></label><input type="file" id="scanFile" accept="image/*" hidden>`;
+    if (step === 'setup'){
+      T('Set up photo scan', 'One-time setup — the key stays in this browser only.');
+      const k = geminiKey();
+      scanBody.innerHTML = `<div class="ship-sec"><h3>Gemini API key</h3>
+        <p class="fld-note" style="margin:0 0 10px;">Get a free key at <b>aistudio.google.com/app/apikey</b> (sign in with Google → “Create API key”), then paste it here. In Google Cloud Console you can also restrict the key to your website's address.</p>
+        <label for="scanKey">API key</label><input id="scanKey" type="password" autocomplete="off" placeholder="${k ? 'Saved: ' + esc(maskKey(k)) + ' — paste a new one to replace' : 'Paste your key'}">
+        <details class="more"><summary>Advanced: model name</summary><label for="scanModel">Model (leave empty for automatic)</label><input id="scanModel" type="text" autocomplete="off" value="${esc(geminiModel())}" placeholder="gemini-3.8-flash"></details>
+        <p class="fld-note" id="scanSetupMsg"></p>
+        <p class="fld-note">Photos are sent to Google for reading. On the free tier Google may use submissions to improve its products — fine for catalog photos, but don't scan photos with people's faces or personal details.</p></div>`;
+      scanFoot.innerHTML = (k ? btn('scanRemoveKey', 'Remove key', 'btn-outline btn-danger-outline') : '') + '<span style="margin-right:auto"></span>' + btn('scanTestKey', 'Test') + btn('scanSaveKey', sc.setupOnly ? 'Save' : 'Save &amp; continue', 'btn-gold');
+    } else if (step === 'pick' || step === 'repick'){
+      const re = step === 'repick';
+      T(re ? 'Choose the item photo' : 'Scan product photo', re ? 'Pick the photo to use for this item, or skip for now.' : 'Upload a photo of the item — name, brand and category are filled in for you.');
+      scanBody.innerHTML = drop('scanDrop', re ? 'Choose the item photo' : 'Take or choose a photo of the item', 'A clear photo of the whole item works best. Brand tags and logos help.');
+      scanFoot.innerHTML = re ? '<span style="margin-right:auto"></span>' + btn('scanSkipPhoto', 'Skip for now') : (btn('scanKeyBtn', 'Key settings') + '<span style="margin-right:auto"></span>' + btn('scanManual', 'Skip scan — fill in myself'));
+    } else if (step === 'busy' || step === 'creating' || step === 'uploading'){
+      const msg = { busy: 'Reading the photo…', creating: 'Creating the product…', uploading: 'Uploading the photo…' }[step];
+      scanBody.innerHTML = `<div class="scan-center"><div class="scan-spin"></div><b>${msg}</b>${step === 'busy' && sc.url ? `<div style="margin-top:14px;"><img src="${esc(sc.url)}" alt="" style="width:120px;height:120px;object-fit:cover;border-radius:14px;"></div>` : ''}</div>`;
+      scanFoot.innerHTML = '';
+    } else if (step === 'review'){
+      const ai = sc.ai, low = !ai || ai.confidence === 'low' || (!sc.f.brand && !sc.f.productName);
+      T('Check the details', 'Fix anything that looks off, then create the product.');
+      const brands = [...new Set(hotProducts.map(p => p.brand).concat(allProductsForCounts.map(p => p.brand)).filter(Boolean))].sort().slice(0, 300);
+      scanBody.innerHTML = `${sc.error ? `<div class="scan-conf low">${esc(sc.error)} You can fill the fields in yourself.</div>` : ai ? `<div class="scan-conf ${low ? 'low' : ''}">${low ? 'The AI was not sure — please check every field.' : 'Filled in by AI from your photo — please double-check, it can be wrong.'}</div>` : ''}
+        <div class="scan-prev">${sc.url ? `<img src="${esc(sc.url)}" alt="Your photo">` : ''}
+          <div class="scan-fields">
+            <div><label for="scCat">Category${ai && sc.f.categoryId && matchCategory(ai.category) === sc.f.categoryId ? '<span class="tag">AI</span>' : ''}</label><select id="scCat"><option value="">Choose a category…</option>${categories.map(c => `<option value="${esc(c.id)}" ${c.id === sc.f.categoryId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+            <div><label for="scBrand">Brand${ai && ai.brand && sc.f.brand === ai.brand ? '<span class="tag">AI</span>' : ''}</label><input id="scBrand" type="text" list="scBrands" maxlength="60" autocomplete="off" value="${esc(sc.f.brand)}" placeholder="e.g. Fila Heritage"><datalist id="scBrands">${brands.map(b => `<option value="${esc(b)}"></option>`).join('')}</datalist></div>
+            <div><label for="scName">Product name${ai && ai.productName && sc.f.productName === ai.productName ? '<span class="tag">AI</span>' : ''}</label><input id="scName" type="text" maxlength="80" autocomplete="off" value="${esc(sc.f.productName)}" placeholder="e.g. Fila Heritage Crewneck"></div>
+          </div></div>`;
+      scanFoot.innerHTML = btn('scanRetry', sc.file ? 'Choose another photo' : 'Back') + '<span style="margin-right:auto"></span>' + btn('scanCreate', 'Create product', 'btn-gold');
+    } else if (step === 'photo'){
+      T('Use this photo?', `Product ${sc.created.sku} was created. Is this the photo you want to use for it?`);
+      scanBody.innerHTML = `${sc.url ? `<img class="scan-big" src="${esc(sc.url)}" alt="Your photo">` : ''}<div class="scan-ask">${btn('scanYes', 'Yes, use this photo', 'btn-gold')}${btn('scanNo', 'No, choose another photo')}${btn('scanSkipPhoto', 'Skip for now')}</div>`;
+      scanFoot.innerHTML = '';
+    }
+  }
+  const scanSet = () => { const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; }; if (document.getElementById('scName')) sc.f = { categoryId: document.getElementById('scCat').value, brand: g('scBrand'), productName: g('scName') }; };
+
+  async function scanHandleFile(file){
+    if (!file) return;
+    if (!/^image\//.test(file.type)){ showToast({ type: 'err', title: 'Not a photo', message: 'Choose an image file (JPG, PNG, WEBP).' }); return; }
+    if (sc.step === 'repick'){ return scanUploadPhoto(file); }
+    if (sc.url) URL.revokeObjectURL(sc.url);
+    sc.file = file; sc.url = URL.createObjectURL(file); sc.ai = null; sc.error = '';
+    scanStep('busy'); sc.busy = true;
+    try{
+      const img = await prepareForAi(file);
+      const cats = categories.map(c => c.name);
+      const brands = [...new Set(hotProducts.map(p => p.brand).filter(Boolean))].slice(0, 60);
+      const out = await geminiRun([{ text:
+        `You catalogue second-hand (thrift) clothing for an online shop. Look at the photo of ONE item and identify it.\n` +
+        `Reply with ONLY this JSON: {"brand":"","productName":"","category":"","confidence":"high|medium|low"}\n` +
+        `- brand: the clothing brand ONLY if you can see it (logo, tag, label, printed text) or clearly recognise the design; otherwise "". Never guess. Use normal capitalisation.\n` +
+        (brands.length ? `  Brands already in the shop (reuse the same spelling when it matches): ${brands.join(', ')}.\n` : '') +
+        `- productName: short shop-style name: brand (if known) + style/line + garment type, e.g. "Nike Windrunner Jacket" or "Fila Heritage Crewneck". Maximum 6 words. If the exact line is unknown use brand + garment type. No colours, sizes or prices.\n` +
+        `- category: choose EXACTLY one of these shop categories, copied exactly: ${cats.map(c => '"' + c + '"').join(', ')}. If none fits, "".\n` +
+        `- confidence: how sure you are about brand and product name.` },
+        { inline_data: { mime_type: img.mime, data: img.b64 } }]);
+      sc.ai = { brand: String(out.brand || '').trim().slice(0, 60), productName: String(out.productName || '').trim().slice(0, 80), category: String(out.category || ''), confidence: ['high', 'medium', 'low'].includes(out.confidence) ? out.confidence : 'medium' };
+      const mc = matchCategory(sc.ai.category);
+      sc.f = { categoryId: mc || sc.f.categoryId || '', brand: sc.ai.brand, productName: sc.ai.productName };
+      sc.error = '';
+    } catch(err){
+      console.error(err);
+      sc.ai = null; sc.error = gemMessage(err);
+      if (err.gem === 'key' || err.gem === 'nokey'){ sc.busy = false; scanStep('setup'); document.getElementById('scanSetupMsg').textContent = gemMessage(err); return; }
+    }
+    sc.busy = false; scanStep('review');
+  }
+
+  async function scanCreate(){
+    scanSet();
+    const { categoryId, brand, productName } = sc.f;
+    if (!categoryId){ showToast({ type: 'err', title: 'Category needed', message: 'Choose which category this item belongs to.' }); return; }
+    if (!productName && !brand){ showToast({ type: 'err', title: 'Add a name or brand', message: 'Fill in at least the product name or the brand.' }); return; }
+    const cat = categories.find(c => c.id === categoryId);
+    sc.busy = true; scanStep('creating');
+    try{
+      await ensureCategoryCode(cat);
+      const created = await createProductWithSku(cat.id);
+      await updateDoc(doc(db, 'products', created.id), { brand, productName, updatedAt: new Date().toISOString() });
+      sc.created = { ...created, categoryId: cat.id };
+      sc.busy = false;
+      if (sc.file) scanStep('photo'); else scanFinish();
+    } catch(err){
+      console.error(err); sc.busy = false;
+      showToast({ type: 'err', title: 'Could Not Create Product', message: 'Check your connection and Firestore rules, then try again.' });
+      scanStep('review');
+    }
+  }
+  async function scanUploadPhoto(file){
+    const prev = sc.step; sc.busy = true; scanStep('uploading');
+    try{
+      const url = await uploadToCloudinary(await bigPhotoForUpload(file));
+      await updateDoc(doc(db, 'products', sc.created.id), { images: [url], updatedAt: new Date().toISOString() });
+      sc.busy = false; await scanFinish('Photo added.');
+    } catch(err){
+      console.error(err); sc.busy = false;
+      showToast({ type: 'err', title: 'Photo Upload Failed', message: 'Try again, or skip and add the photo from the product page.' });
+      scanStep(prev === 'repick' ? 'repick' : 'photo');
+    }
+  }
+  async function scanFinish(extra = ''){
+    const c = sc.created; sc.busy = false;
+    closeScan();
+    const cat = categories.find(x => x.id === c.categoryId);
+    showToast({ type: 'ok', title: 'Product Created', message: `${c.sku} is ready — ${extra ? extra + ' ' : ''}fill in the other details.`, duration: 6000 });
+    if (!cat) return;
+    await openCategoryDetail(cat);
+    await loadProductsForCategory(cat.id);
+    openAttribute(c.id);
+  }
+
+  scanBody.addEventListener('change', (e) => { if (e.target.id === 'scanFile'){ const f = e.target.files && e.target.files[0]; e.target.value = ''; scanHandleFile(f); } });
+  scanBody.addEventListener('dragover', (e) => { if (e.target.closest('#scanDrop')){ e.preventDefault(); document.getElementById('scanDrop').classList.add('over'); } });
+  scanBody.addEventListener('dragleave', () => { const d = document.getElementById('scanDrop'); if (d) d.classList.remove('over'); });
+  scanBody.addEventListener('drop', (e) => { if (!e.target.closest('#scanDrop')) return; e.preventDefault(); scanHandleFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });
+  const scanClick = async (e) => {
+    const id = (e.target.closest('button') || {}).id; if (!id) return;
+    if (id === 'scanSaveKey' || id === 'scanTestKey'){
+      const typed = document.getElementById('scanKey').value.trim(), model = document.getElementById('scanModel').value.trim(), msg = document.getElementById('scanSetupMsg');
+      const key = typed || geminiKey();
+      if (!key){ msg.textContent = 'Paste your API key first.'; return; }
+      if (id === 'scanTestKey'){
+        msg.textContent = 'Testing…';
+        const old = [geminiKey(), geminiModel()]; lsSet(GEM_KEY_STORE, key); lsSet(GEM_MODEL_STORE, model);
+        try{ await geminiRun([{ text: 'Reply with only this JSON: {"ok":true}' }]); msg.textContent = '✓ The key works.'; }
+        catch(err){ msg.textContent = gemMessage(err); lsSet(GEM_KEY_STORE, old[0]); lsSet(GEM_MODEL_STORE, old[1]); }
+        return;
+      }
+      if (!lsSet(GEM_KEY_STORE, key)){ msg.textContent = 'This browser blocked saving the key (private window?).'; return; }
+      lsSet(GEM_MODEL_STORE, model); refreshScanInfo();
+      if (sc.setupOnly){ closeScan(); showToast({ type: 'ok', title: 'Key saved', message: 'Use “Scan Photo” in Products to try it.' }); } else scanStep('pick');
+    }
+    else if (id === 'scanRemoveKey'){ lsSet(GEM_KEY_STORE, ''); refreshScanInfo(); closeScan(); showToast({ type: 'ok', title: 'Key removed', message: 'Photo scan is off until you add a key again.' }); }
+    else if (id === 'scanKeyBtn') scanStep('setup', { setupOnly: false });
+    else if (id === 'scanManual'){ sc.file = null; sc.ai = null; sc.error = ''; if (sc.url){ URL.revokeObjectURL(sc.url); sc.url = ''; } scanStep('review'); }
+    else if (id === 'scanRetry'){ scanSet(); sc.file = null; sc.ai = null; sc.error = ''; scanStep('pick'); }
+    else if (id === 'scanCreate') scanCreate();
+    else if (id === 'scanYes') scanUploadPhoto(sc.file);
+    else if (id === 'scanNo') scanStep('repick');
+    else if (id === 'scanSkipPhoto') scanFinish('Add its photo later from the product page.');
+  };
+  scanBody.addEventListener('click', scanClick); scanFoot.addEventListener('click', scanClick);
+  document.getElementById('scanClose').addEventListener('click', () => { if (sc.created && !sc.busy && (sc.step === 'photo' || sc.step === 'repick')) scanFinish(); else closeScan(); });
+  scanOverlay.addEventListener('mousedown', (e) => { if (e.target === scanOverlay && sc.step !== 'photo' && sc.step !== 'repick') closeScan(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && scanOverlay.classList.contains('open') && sc.step !== 'photo' && sc.step !== 'repick') closeScan(); });
+  ['scanOpenProducts', 'scanBtn'].forEach(id => document.getElementById(id).addEventListener('click', () => openScan()));
+  function refreshScanInfo(){
+    const k = geminiKey(), i = document.getElementById('toolScanInfo'); if (!i) return;
+    i.textContent = k ? `Key saved in this browser (${maskKey(k)}). Use “Scan Photo” in Products.` : 'Not set up. Add a free Gemini key to fill name, brand and category from a photo.';
+    document.getElementById('toolScanKey').textContent = k ? 'Change key' : 'Set up';
+  }
+  document.getElementById('toolScanKey').addEventListener('click', () => openScan({ setup: true }));
+  refreshScanInfo();
 
   document.getElementById('addProductBtn').addEventListener('click', async (e) => {
     if (!currentCategoryId) return;
