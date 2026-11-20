@@ -177,6 +177,58 @@
   .category-card-actions button:hover{ color:var(--green-deep); }
   .category-card-actions button.danger:hover{ color:var(--danger); }
 
+  /* ---- Products: search + categories ---- */
+  .vh{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; overflow:hidden; }
+  .ps-card{ margin-bottom:18px; position:relative; }
+  .ps-label{ display:block; font-family:'Fraunces',serif; font-size:1.05rem; color:var(--green-deep); margin:0 0 10px; text-transform:none; letter-spacing:0; }
+  .ps-box{ display:flex; gap:10px; } .ps-box input{ margin:0; flex:1; min-width:0; font-size:1rem; padding:14px 16px; } .ps-box .btn{ flex:none; padding:0 26px; }
+  .ps-help{ margin:10px 0 0; font-size:.8rem; color:rgba(20,32,28,.6); } .ps-help.warn{ color:var(--danger); font-weight:600; }
+  .ps-sugg{ position:absolute; left:24px; right:24px; z-index:30; background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 18px 40px -16px rgba(15,36,28,.45); margin-top:6px; overflow:hidden; max-height:60vh; overflow-y:auto; }
+  .ps-sugg[hidden]{ display:none; }
+  .ps-opt{ display:flex; gap:12px; align-items:center; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--line); min-height:52px; } .ps-opt:last-child{ border-bottom:0; }
+  .ps-opt:hover,.ps-opt.hl{ background:rgba(201,164,104,.16); }
+  .ps-opt img,.ps-opt .ph{ width:40px; height:40px; border-radius:8px; object-fit:cover; background:var(--paper); flex:none; border:1px solid var(--line); }
+  .ps-opt .t{ min-width:0; flex:1; } .ps-opt .t b{ display:block; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ps-opt .t small{ color:rgba(20,32,28,.6); font-size:.74rem; }
+  .ps-opt mark{ background:rgba(201,164,104,.45); color:inherit; border-radius:3px; padding:0 1px; }
+  .ps-opt .sku{ font-family:'Space Mono',monospace; font-size:.72rem; color:var(--green-deep); font-weight:700; }
+  .ps-all{ padding:12px 16px; background:var(--paper); font-size:.82rem; color:var(--green-deep); font-weight:600; cursor:pointer; min-height:46px; display:flex; align-items:center; } .ps-all:hover,.ps-all.hl{ background:rgba(201,164,104,.2); }
+  .ps-scroll{ max-height:none; } .ps-table tbody td{ vertical-align:middle; } .ps-table .thumb{ width:44px; height:44px; border-radius:8px; object-fit:cover; border:1px solid var(--line); background:var(--paper); display:block; }
+  .ps-table td.ps-name{ white-space:normal; min-width:160px; font-weight:600; } .ps-table mark{ background:rgba(201,164,104,.45); color:inherit; border-radius:3px; padding:0 1px; }
+  .prod-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+  .ps-stat{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; } .ps-stat b{ display:block; font-family:'Fraunces',serif; font-size:1.6rem; color:var(--green-deep); line-height:1.1; } .ps-stat span{ font-size:.74rem; color:rgba(20,32,28,.6); }
+  .sec-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:16px; } .sec-head h2{ margin:0; }
+  .category-card{ position:relative; display:flex; flex-direction:column; gap:8px; } .category-card.just-added{ animation:catpulse 1.6s ease 2; }
+  @keyframes catpulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(201,164,104,0); } 50%{ box-shadow:0 0 0 6px rgba(201,164,104,.45); } }
+  .cc-top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; } .cc-top h3{ margin:0; } .category-card .code-chip{ float:none; margin:0; flex:none; }
+  .cc-counts{ font-size:.82rem; color:rgba(20,32,28,.75); } .cc-counts b{ font-family:'Fraunces',serif; font-size:1.5rem; color:var(--green-deep); margin-right:4px; } .cc-counts .mini{ display:block; font-family:'Space Mono',monospace; font-size:.7rem; color:rgba(20,32,28,.55); margin-top:2px; }
+  .cc-open{ margin-top:4px; font-weight:600; color:var(--green-deep); font-size:.86rem; }
+  .category-card-actions{ margin-top:6px; padding-top:10px; border-top:1px solid var(--line); gap:6px; }
+  .category-card-actions button{ flex:1; min-height:40px; border-radius:10px; font-family:'Work Sans',sans-serif; font-size:.78rem; letter-spacing:0; color:rgba(20,32,28,.75); background:var(--paper); }
+  .category-card-actions button:hover{ background:rgba(201,164,104,.22); }
+  .category-card.add-card{ border:2px dashed var(--line); background:transparent; align-items:center; justify-content:center; text-align:center; min-height:170px; color:var(--green-deep); font-weight:600; }
+  .category-card.add-card:hover{ border-color:var(--gold); background:rgba(201,164,104,.1); } .category-card.add-card .plus{ font-size:2rem; line-height:1; }
+  .cat-empty{ grid-column:1/-1; background:linear-gradient(135deg,rgba(201,164,104,.16),rgba(201,164,104,.05)); border:1px solid rgba(201,164,104,.45); border-radius:16px; padding:24px; }
+  .cat-empty h3{ font-family:'Fraunces',serif; font-size:1.3rem; margin:0 0 6px; color:var(--green-deep); } .cat-empty p{ margin:0 0 14px; font-size:.9rem; }
+  .cat-empty ol{ margin:0 0 16px; padding-left:20px; font-size:.88rem; line-height:1.6; }
+  .cat-quick{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; } .cat-quick:empty{ display:none; }
+  .cat-chip{ border:1px solid var(--line); background:#fff; border-radius:999px; padding:9px 14px; min-height:40px; font-family:'Work Sans',sans-serif; font-size:.84rem; cursor:pointer; color:var(--green-deep); } .cat-chip:hover{ border-color:var(--gold); background:rgba(201,164,104,.15); }
+  .step-no{ display:inline-flex; width:22px; height:22px; border-radius:50%; background:var(--green-deep); color:#fff; font-size:.72rem; align-items:center; justify-content:center; margin-right:8px; font-family:'Space Mono',monospace; letter-spacing:0; }
+  .size-opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .size-opt{ display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; text-align:left; border:2px solid var(--line); background:#fff; border-radius:14px; padding:12px 14px; cursor:pointer; font-family:'Work Sans',sans-serif; min-height:84px; color:inherit; }
+  .size-opt b{ display:block; font-size:.92rem; color:var(--green-deep); } .size-opt small{ display:block; margin-top:3px; font-size:.74rem; color:rgba(20,32,28,.65); line-height:1.35; }
+  .size-opt.on{ border-color:var(--green-deep); background:rgba(31,74,56,.07); box-shadow:inset 0 0 0 1px var(--green-deep); }
+  .cat-preview{ background:var(--paper); border-radius:12px; padding:12px 14px; font-size:.84rem; margin-top:4px; } .cat-preview code{ font-family:'Space Mono',monospace; font-weight:700; color:var(--green-deep); }
+  .howto{ margin-top:18px; } .howto summary{ cursor:pointer; font-weight:600; color:var(--green-deep); min-height:32px; display:flex; align-items:center; } .howto ol{ margin:12px 0 0; padding-left:20px; line-height:1.7; font-size:.9rem; }
+  @media (max-width:760px){
+    .prod-stats{ grid-template-columns:1fr 1fr; } .category-grid{ grid-template-columns:1fr; } .size-opts{ grid-template-columns:1fr; }
+    .ps-box{ flex-direction:column; } .ps-box .btn{ min-height:48px; } .ps-box input{ min-height:50px; } .ps-sugg{ left:12px; right:12px; margin-top:-8px; position:static; margin:10px 0 0; }
+    #catOverlay{ padding:0; align-items:flex-end; } #catOverlay .ship-modal{ max-width:none !important; max-height:94vh; border-radius:18px 18px 0 0; }
+    #catOverlay input[type=text]{ font-size:16px; min-height:48px; } .cat-chip{ min-height:44px; }
+    .ps-table thead{ display:none; } .ps-table, .ps-table tbody, .ps-table tr, .ps-table td{ display:block; width:100%; max-width:none !important; white-space:normal !important; }
+    .ps-table tr{ position:relative; padding:12px 14px 12px 74px; border-bottom:1px solid var(--line); min-height:78px; } .ps-table td{ border:0 !important; padding:1px 0 !important; }
+    .ps-table td.ps-photo{ position:absolute; left:14px; top:12px; width:48px; } .ps-table td.ps-open{ display:none; } .ps-table td.num{ text-align:left !important; }
+    .ps-table td[data-l]::before{ content:attr(data-l) ' '; color:rgba(20,32,28,.5); font-size:.72rem; }
+  }
   .add-category-row{ display:flex; gap:12px; align-items:flex-start; }
   .add-category-row input{ margin-bottom:0; }
   .add-category-row .btn{ flex-shrink:0; }
@@ -669,6 +721,11 @@
   .subgroup::-webkit-scrollbar{ display:none; }
   .subgroup.show{ display:flex; }
   #categorySubNav{ display:flex; gap:2px; }
+  .subsearch{ padding:10px 0 2px; } .subsearch[hidden]{ display:none; }
+  .subsearch-box{ position:relative; display:flex; gap:8px; max-width:640px; }
+  .subsearch-box input{ margin:0; flex:1; min-width:0; padding:10px 14px; font-size:.92rem; } .subsearch-box .btn{ flex:none; padding:0 18px; min-height:42px; }
+  .subsearch-box .ps-sugg{ left:0; right:0; top:100%; margin-top:6px; position:absolute; }
+  @media (max-width:760px){ .subsearch{ padding:8px 10px 0; } .subsearch-box input{ font-size:16px; min-height:44px; } .subsearch-box .ps-sugg{ position:absolute; margin:6px 0 0; } }
   .sub-tab,.nav-subitem{ padding:14px 14px 12px; font-size:.86rem; color:rgba(20,32,28,.6); border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; background:none; border-top:0; border-left:0; border-right:0; font-family:inherit; font-weight:500; }
   .sub-tab:hover,.nav-subitem:hover{ color:var(--green-deep); }
   .sub-tab.active,.nav-subitem.active{ color:var(--green-deep); border-bottom-color:var(--gold); font-weight:600; }
@@ -1047,6 +1104,7 @@
 
     <div class="subbar" id="subBar">
       <div class="subbar-inner">
+        <div class="subsearch" id="subSearch" hidden><div class="subsearch-box"><input type="search" id="subProdSearch" placeholder="🔎 Find a product — SKU or name" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Find a product by SKU or name"><button type="button" class="btn btn-gold" id="subProdGo">Search</button><div class="ps-sugg" id="subSuggest" role="listbox" hidden></div></div></div>
         <div class="subgroup" data-module="batches">
           <div class="nav-item sub-tab" data-view="dashboard" role="button" tabindex="0">Batch Manager</div>
           <div class="nav-item sub-tab" data-view="batches" role="button" tabindex="0">Batch Search</div>
@@ -1361,25 +1419,85 @@ match /counters/{id} {
           <div class="dash-head">
             <div>
               <h1>Products</h1>
-              <p class="lead" style="margin:0;">Organize your catalog into categories. Click a category to manage its products.</p>
+              <p class="lead" style="margin:0;">Find any item fast, or open a category to add and edit its products.</p>
             </div>
             <div class="head-actions"><button type="button" class="btn btn-outline" id="scanOpenProducts">📷 Scan product photo</button><button type="button" class="btn btn-gold" id="qsOpenProducts">⚡ Update item status</button></div>
           </div>
 
-          <div class="card">
-            <h2>Categories</h2>
-            <div class="category-grid" id="categoryGrid"></div>
-            <div class="add-category-row">
-              <input type="text" id="newCategoryName" placeholder="e.g. Hoodies, Shorts, Caps">
-              <select id="newCategoryProfile" aria-label="Sizing type">
-                <option value="tops">Sizing: Tops &amp; Jackets</option>
-                <option value="bottoms">Sizing: Shorts &amp; Pants</option>
-                <option value="caps">Sizing: Caps &amp; Hats</option>
-                <option value="manual">Sizing: Other (type the size)</option>
-              </select>
-              <button class="btn btn-gold" id="addCategoryBtn">+ Add Category</button>
+          <div class="card ps-card">
+            <label class="ps-label" for="prodSearch">🔎 Find a product</label>
+            <div class="ps-box">
+              <input type="search" id="prodSearch" placeholder="Type a SKU or name — e.g. VG-WIN-0001 or Nike jacket" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="prodSuggest" aria-autocomplete="list">
+              <button type="button" class="btn btn-gold" id="prodSearchGo">Search</button>
             </div>
-            <p class="fld-note" id="newCategoryNote" style="margin:10px 0 0;"></p>
+            <div class="ps-sugg" id="prodSuggest" role="listbox" hidden></div>
+            <p class="ps-help" id="prodSearchMsg">One match opens the product straight away. Several matches show a list you can pick from.</p>
+          </div>
+
+          <div class="prod-stats" id="prodStats"></div>
+
+          <div class="card" id="catSection">
+            <div class="sec-head">
+              <div><h2>Categories</h2><p class="fld-note" style="margin:2px 0 0;">A category is a group of similar items, like Jackets or Shorts. Tap one to open it.</p></div>
+              <button type="button" class="btn btn-gold" id="newCatBtn">+ New category</button>
+            </div>
+            <div class="category-grid" id="categoryGrid"></div>
+          </div>
+
+          <details class="card howto">
+            <summary>How Products works (3 steps)</summary>
+            <ol>
+              <li><b>Create a category</b> for each kind of item (Jackets, Hoodies, Shorts…). It decides how sizes are worked out.</li>
+              <li><b>Add products</b> inside it — scan a photo, import a file, or add one by one. Every item gets its own SKU.</li>
+              <li><b>Put items in a batch</b> from the Batches tab, then mark them Claimed when sold.</li>
+            </ol>
+          </details>
+        </div>
+
+        <div class="view" id="view-product-search">
+          <button type="button" class="back-link" id="psBack">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Back to Products
+          </button>
+          <div class="cat-head"><div><h1 id="psTitle">Search results</h1><p class="lead" id="psLead" style="margin:0;"></p></div></div>
+          <div class="card folder-card">
+            <div class="folder-toolbar">
+              <div class="tb-left">
+                <input type="search" id="psInput" placeholder="Search SKU, name, brand, category…" autocomplete="off" aria-label="Search products">
+                <select id="psStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="Available">Available</option><option value="Claimed">Claimed</option></select>
+              </div>
+            </div>
+            <div class="table-scroll ps-scroll">
+              <table class="inv-table ps-table">
+                <thead><tr><th>SKU</th><th>Photo</th><th>Product</th><th>Brand</th><th>Category</th><th>Size</th><th class="num">Price</th><th>Status</th><th></th></tr></thead>
+                <tbody id="psBody"></tbody>
+              </table>
+            </div>
+            <p class="folder-hint">Tap a row to open that product in Attribute View.</p>
+          </div>
+        </div>
+
+        <div class="overlay" id="catOverlay" role="dialog" aria-modal="true" aria-labelledby="catTitle">
+          <div class="ship-modal" style="max-width:600px;">
+            <div class="im-head"><div style="min-width:0;"><h2 id="catTitle">New category</h2><p id="catSub">Takes about 10 seconds.</p></div><button type="button" class="icon-btn" id="catClose" aria-label="Close">✕</button></div>
+            <div class="ship-body">
+              <div class="ship-sec">
+                <label for="newCategoryName"><span class="step-no">1</span> What kind of items go here?</label>
+                <input type="text" id="newCategoryName" maxlength="40" autocomplete="off" placeholder="e.g. Hoodies, Shorts, Caps">
+                <div class="cat-quick" id="catQuick" aria-label="Quick picks"></div>
+                <p class="field-err" id="catErr" style="display:none;"></p>
+              </div>
+              <div class="ship-sec" id="catSizeSec">
+                <label><span class="step-no">2</span> How are these items measured?</label>
+                <select id="newCategoryProfile" aria-label="Sizing type" class="vh" tabindex="-1">
+                  <option value="tops">Tops &amp; Jackets</option><option value="bottoms">Shorts &amp; Pants</option><option value="caps">Caps &amp; Hats</option><option value="manual">Other (type the size)</option>
+                </select>
+                <div class="size-opts" id="catSizeOpts"></div>
+                <p class="fld-note" id="newCategoryNote" style="margin:10px 0 0;"></p>
+              </div>
+              <div class="cat-preview" id="catPreview"></div>
+            </div>
+            <div class="ship-foot"><button type="button" class="btn btn-outline" id="catCancel">Cancel</button><button type="button" class="btn btn-gold" id="addCategoryBtn">Create category</button></div>
           </div>
         </div>
 
@@ -1944,18 +2062,19 @@ match /counters/{id} {
   });
 
   // ---------- modular navigation: top module tabs + contextual sub-tabs ----------
-  const MODULE_OF = { overview: 'overview', dashboard: 'batches', batches: 'batches', products: 'products', 'category-detail': 'products', shipments: 'shipments', settings: 'settings' };
+  const MODULE_OF = { overview: 'overview', dashboard: 'batches', batches: 'batches', products: 'products', 'category-detail': 'products', 'product-search': 'products', shipments: 'shipments', settings: 'settings' };
   const subBar = document.getElementById('subBar');
 
   function switchView(viewName){
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + viewName).classList.add('active');
-    document.querySelector('.wrap').classList.toggle('wide', viewName === 'category-detail');
+    document.querySelector('.wrap').classList.toggle('wide', viewName === 'category-detail' || viewName === 'product-search');
     const mod = MODULE_OF[viewName] || 'overview';
     document.querySelectorAll('.mod-tab').forEach(t => t.classList.toggle('active', t.dataset.module === mod));
     let any = false;
     document.querySelectorAll('.subgroup').forEach(g => { const on = g.dataset.module === mod; g.classList.toggle('show', on); any = any || on; });
     subBar.classList.toggle('show', any);
+    { const ss = document.getElementById('subSearch'); if (ss) ss.hidden = mod !== 'products'; }
     document.documentElement.style.setProperty('--subbar-h', any ? subBar.offsetHeight + 'px' : '0px');
     document.querySelectorAll('.sub-tab[data-view]').forEach(t => t.classList.toggle('active', t.dataset.view === viewName));
     document.getElementById('subAllCats').classList.toggle('active', viewName === 'products');
@@ -4635,99 +4754,271 @@ match /counters/{id} {
     });
   }
 
+  function renderProdStats(){
+    const el = document.getElementById('prodStats'); if (!el) return;
+    const av = allProductsForCounts.filter(p => normStatus(p.status) === 'Available').length;
+    const box = (n, l) => `<div class="ps-stat"><b>${n}</b><span>${l}</span></div>`;
+    el.innerHTML = box(categories.length, categories.length === 1 ? 'category' : 'categories') + box(allProductsForCounts.length, 'products') + box(av, 'available') + box(allProductsForCounts.length - av, 'claimed');
+    el.style.display = categories.length ? '' : 'none';
+  }
+  let justAddedCatId = null;
   function renderCategoryGrid(){
+    renderProdStats();
     const grid = document.getElementById('categoryGrid');
     if (categories.length === 0){
-      grid.innerHTML = `<p class="lead" style="grid-column:1/-1; margin:0;">No categories yet — add your first one below.</p>`;
+      const quick = QUICK_CATS.slice(0, 6).map(q => `<button type="button" class="cat-chip" data-quick-cat="${esc(q.name)}">${esc(q.name)}</button>`).join('');
+      grid.innerHTML = `<div class="cat-empty"><h3>Welcome! Let’s set up your first category 👋</h3>
+        <p>Categories keep your catalog organised — one for each kind of item you sell.</p>
+        <ol><li>Create a category (for example <b>Jackets</b>).</li><li>Add products inside it — scan a photo or add them one by one.</li><li>Put them in a batch when you’re ready to sell.</li></ol>
+        <button type="button" class="btn btn-gold" id="emptyNewCat">+ Create my first category</button>
+        <p style="margin:16px 0 8px;font-size:.8rem;">Or start from a common one:</p><div class="cat-quick" style="margin:0;">${quick}</div></div>`;
       return;
     }
     grid.innerHTML = categories.map(cat => {
-      const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
+      const mine = allProductsForCounts.filter(p => p.categoryId === cat.id), count = mine.length;
+      const av = mine.filter(p => normStatus(p.status) === 'Available').length;
+      const prof = SIZE_PROFILES[profileKeyOfCat(cat)];
       return `
-        <div class="category-card" data-cat-id="${cat.id}">
-          <h3>${cat.name}</h3>
-          ${cat.code ? `<span class="code-chip" title="SKU prefix">${SKU_PREFIX}-${cat.code}</span>` : ''}
-          <span class="count">${count} product${count === 1 ? '' : 's'}</span>
-          <span class="size-chip" title="${esc(SIZE_PROFILES[profileKeyOfCat(cat)].name)}">Sizing: ${esc(SIZE_PROFILES[profileKeyOfCat(cat)].short)}</span>
+        <div class="category-card ${cat.id === justAddedCatId ? 'just-added' : ''}" data-cat-id="${cat.id}" role="button" tabindex="0" aria-label="Open ${esc(cat.name)}">
+          <div class="cc-top"><h3>${esc(cat.name)}</h3>${cat.code ? `<span class="code-chip" title="SKU prefix">${SKU_PREFIX}-${esc(cat.code)}</span>` : ''}</div>
+          <div class="cc-counts"><b>${count}</b>product${count === 1 ? '' : 's'}${count ? `<span class="mini">${av} available · ${count - av} claimed</span>` : '<span class="mini">Nothing here yet</span>'}</div>
+          <span class="size-chip" title="${esc(prof.name)}" style="align-self:flex-start;">Sizing: ${esc(prof.short)}</span>
+          <div class="cc-open">${count ? 'Open category →' : 'Open &amp; add products →'}</div>
           <div class="category-card-actions">
-            <button type="button" data-edit-cat="${cat.id}">Rename</button>
-            <button type="button" data-size-cat="${cat.id}">Sizing</button>
-            <button type="button" class="danger" data-delete-cat="${cat.id}">Delete</button>
+            <button type="button" data-edit-cat="${cat.id}">✏️ Rename</button>
+            <button type="button" data-size-cat="${cat.id}">📏 Sizing</button>
+            <button type="button" class="danger" data-delete-cat="${cat.id}">🗑 Delete</button>
           </div>
         </div>`;
-    }).join('');
-
-    grid.querySelectorAll('.category-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('button')) return;
-        const cat = categories.find(c => c.id === card.dataset.catId);
-        if (cat) openCategoryDetail(cat);
-      });
-    });
-    grid.querySelectorAll('[data-edit-cat]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const cat = categories.find(c => c.id === btn.dataset.editCat);
-        const newName = prompt('Rename category', cat.name);
-        if (newName && newName.trim()){
-          await updateDoc(doc(db, 'categories', cat.id), { name: newName.trim() });
-          refreshCategoriesView();
-        }
-      });
-    });
-    grid.querySelectorAll('[data-size-cat]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const cat = categories.find(c => c.id === btn.dataset.sizeCat);
-        if (cat) openSizingDialog(cat);
-      });
-    });
-    grid.querySelectorAll('[data-delete-cat]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const cat = categories.find(c => c.id === btn.dataset.deleteCat);
-        const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
-        const msg = count > 0
-          ? `Delete "${cat.name}"? ${count} product(s) in it will remain but become uncategorized.`
-          : `Delete "${cat.name}"?`;
-        if (!confirm(msg)) return;
-        await deleteDoc(doc(db, 'categories', cat.id));
-        showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
-        refreshCategoriesView();
-      });
-    });
+    }).join('') + `<div class="category-card add-card" id="addCatCard" role="button" tabindex="0"><div><div class="plus">+</div>New category</div></div>`;
+    if (justAddedCatId){ const el = grid.querySelector('.just-added'); if (el && el.scrollIntoView && !/jsdom/i.test(navigator.userAgent)) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); justAddedCatId = null; }
   }
 
-  // The sizing type is suggested from the category name (e.g. "Shorts" → Shorts & Pants) until you pick one yourself.
-  let profileTouched = false;
-  function updateNewCategoryNote(suggested){
-    const k = document.getElementById('newCategoryProfile').value, p = SIZE_PROFILES[k];
-    document.getElementById('newCategoryNote').innerHTML = `<strong>${esc(p.name)}</strong>${suggested ? ' (suggested from the name)' : ''}: ${esc(p.desc)}`;
-  }
-  document.getElementById('newCategoryName').addEventListener('input', (e) => {
-    if (profileTouched) return;
-    document.getElementById('newCategoryProfile').value = e.target.value.trim() ? suggestProfile(e.target.value) : 'tops';
-    updateNewCategoryNote(!!e.target.value.trim());
+  document.getElementById('categoryGrid').addEventListener('click', async (e) => {
+    const t = e.target;
+    const quick = t.closest('[data-quick-cat]'); if (quick){ openCatDialog({ name: quick.dataset.quickCat }); return; }
+    if (t.closest('#emptyNewCat') || t.closest('#addCatCard')){ openCatDialog(); return; }
+    const edit = t.closest('[data-edit-cat]'), size = t.closest('[data-size-cat]'), del = t.closest('[data-delete-cat]');
+    if (edit){ const cat = categories.find(c => c.id === edit.dataset.editCat); if (cat) openCatDialog({ rename: cat }); return; }
+    if (size){ const cat = categories.find(c => c.id === size.dataset.sizeCat); if (cat) openSizingDialog(cat); return; }
+    if (del){
+      const cat = categories.find(c => c.id === del.dataset.deleteCat); if (!cat) return;
+      const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
+      const msg = count > 0
+        ? `Delete "${cat.name}"?\n\n${count} product(s) in it will NOT be deleted, but they will have no category and will be hard to find. Move or delete them first if unsure.`
+        : `Delete "${cat.name}"?`;
+      if (!confirm(msg)) return;
+      await deleteDoc(doc(db, 'categories', cat.id));
+      showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
+      refreshCategoriesView();
+      return;
+    }
+    const card = t.closest('.category-card[data-cat-id]');
+    if (card){ const cat = categories.find(c => c.id === card.dataset.catId); if (cat) openCategoryDetail(cat); }
   });
-  document.getElementById('newCategoryProfile').addEventListener('change', () => { profileTouched = true; updateNewCategoryNote(false); });
-  updateNewCategoryNote(false);
+  document.getElementById('categoryGrid').addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.category-card')){ e.preventDefault(); e.target.click(); }
+  });
+
+  // ---- New / rename category dialog ----
+  const QUICK_CATS = [
+    { name: 'Jackets', profile: 'tops' }, { name: 'Hoodies', profile: 'tops' }, { name: 'Shirts', profile: 'tops' },
+    { name: 'Shorts', profile: 'bottoms' }, { name: 'Pants', profile: 'bottoms' }, { name: 'Caps', profile: 'caps' },
+    { name: 'Shoes', profile: 'manual' }, { name: 'Bags', profile: 'manual' }
+  ];
+  const SIZE_CHOICES = [
+    { k: 'tops', t: 'Jackets, hoodies, shirts', d: 'You enter Length and Width. The size (S, M, L…) is worked out for you.' },
+    { k: 'bottoms', t: 'Shorts, pants, jeans', d: 'You enter the Waist and Length. The size is worked out for you.' },
+    { k: 'caps', t: 'Caps, hats, beanies', d: 'You enter the head circumference. The size is worked out for you.' },
+    { k: 'manual', t: 'Shoes, bags, other', d: 'You type the size yourself, like 42, US 9 or One Size.' }
+  ];
+  const catOverlay = document.getElementById('catOverlay'), catName = document.getElementById('newCategoryName'), catSel = document.getElementById('newCategoryProfile');
+  let catRename = null, profileTouched = false;
+  function renderCatDialog(){
+    const k = catSel.value;
+    document.getElementById('catSizeOpts').innerHTML = SIZE_CHOICES.map(c => `<button type="button" class="size-opt ${c.k === k ? 'on' : ''}" data-size-pick="${c.k}" aria-pressed="${c.k === k}"><b>${c.t}</b><small>${c.d}</small></button>`).join('');
+    document.getElementById('newCategoryNote').textContent = SIZE_PROFILES[k] ? `Chosen: ${SIZE_PROFILES[k].name}.${profileTouched ? '' : ' (Suggested from the name — change it if it’s wrong.)'}` : '';
+    const have = new Set(categories.map(c => String(c.name).trim().toLowerCase()));
+    document.getElementById('catQuick').innerHTML = catRename ? '' : '<span class="fld-note" style="width:100%;margin:0;">Quick picks:</span>' + QUICK_CATS.filter(q => !have.has(q.name.toLowerCase())).map(q => `<button type="button" class="cat-chip" data-quick-pick="${esc(q.name)}">${esc(q.name)}</button>`).join('');
+    const name = catName.value.trim(), taken = new Set(categories.map(c => c.code).filter(Boolean));
+    document.getElementById('catPreview').innerHTML = catRename ? '' : (name ? `Product numbers (SKUs) for this category will look like <code>${SKU_PREFIX}-${esc(makeCategoryCode(name, taken))}-0001</code>.` : 'Type a name and you’ll see what the product numbers (SKUs) will look like.');
+  }
+  function catError(msg){ const e = document.getElementById('catErr'); e.textContent = msg || ''; e.style.display = msg ? '' : 'none'; }
+  function openCatDialog({ name = '', rename = null } = {}){
+    catRename = rename; profileTouched = false; catError('');
+    document.getElementById('catTitle').textContent = rename ? 'Rename category' : 'New category';
+    document.getElementById('catSub').textContent = rename ? 'The SKU prefix and sizing stay the same.' : 'Takes about 10 seconds.';
+    document.getElementById('catSizeSec').style.display = rename ? 'none' : '';
+    document.getElementById('addCategoryBtn').textContent = rename ? 'Save name' : 'Create category';
+    catName.value = rename ? rename.name : name;
+    catSel.value = name ? suggestProfile(name) : 'tops';
+    const q = QUICK_CATS.find(x => x.name.toLowerCase() === name.toLowerCase()); if (q) catSel.value = q.profile;
+    renderCatDialog();
+    catOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    setTimeout(() => { try{ catName.focus(); catName.select(); } catch(e){} }, 50);
+  }
+  function closeCatDialog(){ catOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+  catName.addEventListener('input', () => {
+    catError('');
+    if (!profileTouched && !catRename) catSel.value = catName.value.trim() ? suggestProfile(catName.value) : 'tops';
+    renderCatDialog();
+  });
+  catName.addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); document.getElementById('addCategoryBtn').click(); } });
+  catSel.addEventListener('change', () => { profileTouched = true; renderCatDialog(); });
+  catOverlay.addEventListener('click', (e) => {
+    const pick = e.target.closest('[data-size-pick]');
+    if (pick){ catSel.value = pick.dataset.sizePick; profileTouched = true; renderCatDialog(); return; }
+    const qp = e.target.closest('[data-quick-pick]');
+    if (qp){ catName.value = qp.dataset.quickPick; catSel.value = (QUICK_CATS.find(x => x.name === qp.dataset.quickPick) || {}).profile || 'tops'; profileTouched = false; catError(''); renderCatDialog(); return; }
+    if (e.target === catOverlay) closeCatDialog();
+  });
+  document.getElementById('catClose').addEventListener('click', closeCatDialog);
+  document.getElementById('catCancel').addEventListener('click', closeCatDialog);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && catOverlay.classList.contains('open')) closeCatDialog(); });
+  document.getElementById('newCatBtn').addEventListener('click', () => openCatDialog());
 
   document.getElementById('addCategoryBtn').addEventListener('click', async () => {
-    const input = document.getElementById('newCategoryName');
-    const name = input.value.trim();
-    if (!name) return;
+    const name = catName.value.trim().replace(/\s+/g, ' ');
+    if (!name){ catError('Please type a category name, like Hoodies.'); catName.focus(); return; }
+    if (categories.some(c => c.name.trim().toLowerCase() === name.toLowerCase() && (!catRename || c.id !== catRename.id))){ catError(`You already have a category called “${name}”.`); return; }
+    const btn = document.getElementById('addCategoryBtn'); btn.disabled = true;
     try{
-      const taken = new Set(categories.map(c => c.code).filter(Boolean));
-      const sizeProfile = document.getElementById('newCategoryProfile').value;
-      await addDoc(categoriesCol, { name, code: makeCategoryCode(name, taken), nextSeq: 1, sizeProfile, createdAt: new Date().toISOString() });
-      input.value = ''; profileTouched = false; document.getElementById('newCategoryProfile').value = 'tops'; updateNewCategoryNote(false);
-      showToast({ type: 'ok', title: 'Category Added', message: `"${name}" is ready for products.` });
-      refreshCategoriesView();
+      if (catRename){
+        await updateDoc(doc(db, 'categories', catRename.id), { name });
+        closeCatDialog(); showToast({ type: 'ok', title: 'Category Renamed', message: `Now called “${name}”.` });
+      } else {
+        const taken = new Set(categories.map(c => c.code).filter(Boolean));
+        const ref = await addDoc(categoriesCol, { name, code: makeCategoryCode(name, taken), nextSeq: 1, sizeProfile: catSel.value, createdAt: new Date().toISOString() });
+        justAddedCatId = ref && ref.id;
+        closeCatDialog(); showToast({ type: 'ok', title: 'Category Added', message: `“${name}” is ready — open it to add your first product.`, duration: 6000 });
+      }
+      await refreshCategoriesView();
     } catch(err){
       console.error(err);
-      showToast({ type: 'err', title: 'Could Not Add Category', message: 'Check your Firestore rules and try again.' });
+      showToast({ type: 'err', title: catRename ? 'Could Not Rename' : 'Could Not Add Category', message: 'Check your connection and Firestore rules, then try again.' });
+    } finally { btn.disabled = false; }
+  });
+
+  // ---- Product search (SKU / name / brand) ----
+  const compactKey = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  function searchProducts(q){
+    const raw = String(q || '').trim().toLowerCase(); if (!raw) return [];
+    const tokens = raw.split(/\s+/).filter(Boolean), ck = compactKey(raw);
+    const catName = (id) => (categories.find(c => c.id === id) || {}).name || '';
+    const rows = [];
+    for (const p of allProductsForCounts){
+      const sku = String(p.sku || '').toLowerCase(), name = String(p.productName || '').toLowerCase();
+      const hay = `${sku} ${name} ${String(p.brand || '').toLowerCase()} ${String(p.item || '').toLowerCase()} ${catName(p.categoryId).toLowerCase()}`;
+      const hayC = compactKey(hay);
+      const all = tokens.every(t => hay.includes(t) || (compactKey(t).length >= 3 && hayC.includes(compactKey(t))));
+      if (!all && !(ck.length >= 3 && compactKey(sku).includes(ck))) continue;
+      let score = 5;
+      if (compactKey(sku) === ck) score = 0; else if (name === raw) score = 1; else if (compactKey(sku).endsWith(ck) && ck.length >= 4) score = 2; else if (sku.startsWith(raw) || name.startsWith(raw)) score = 3; else if (hay.includes(raw)) score = 4;
+      rows.push({ p, score });
+    }
+    return rows.sort((a, b) => a.score - b.score || String(a.p.sku).localeCompare(String(b.p.sku))).map(r => r.p);
+  }
+  const markHit = (text, q) => {
+    const t = String(text || ''), tokens = String(q || '').trim().split(/\s+/).filter(x => x.length > 1).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (!tokens.length) return esc(t);
+    return esc(t).replace(new RegExp('(' + tokens.map(x => esc(x)).join('|') + ')', 'ig'), '<mark>$1</mark>');
+  };
+  function psThumb(p){ const u = (p.images || [])[0]; return u ? `<img src="${esc(u)}" alt="" loading="lazy">` : '<span class="ph"></span>'; }
+  async function openProductById(id){
+    const p = allProductsForCounts.find(x => x.id === id); if (!p) return;
+    const cat = categories.find(c => c.id === p.categoryId);
+    if (!cat){ showToast({ type: 'err', title: 'No Category', message: 'That product has no category, so it can’t be opened here.' }); return; }
+    document.querySelectorAll('.ps-sugg').forEach(x => { x.hidden = true; });
+    await openCategoryDetail(cat);
+    if (currentCategoryId !== cat.id) return;          // admin chose to keep unsaved changes
+    await loadProductsForCategory(cat.id);
+    if (!categoryProducts.some(x => x.id === id)){ showToast({ type: 'err', title: 'Product Not Found', message: 'It may have been deleted. Search again.' }); return; }
+    openAttribute(id);
+  }
+  function showResults(q, list){
+    document.getElementById('psTitle').textContent = `Results for “${q}”`;
+    document.getElementById('psInput').value = q; document.getElementById('psStatus').value = 'all';
+    psResults = list; psQuery = q; renderResults();
+    document.querySelectorAll('.ps-sugg').forEach(x => { x.hidden = true; });
+    if (!confirmDiscard()) return;
+    switchView('product-search');
+  }
+  let psResults = [], psQuery = '';
+  function renderResults(){
+    const st = document.getElementById('psStatus').value, q = psQuery;
+    const list = psResults.filter(p => st === 'all' || normStatus(p.status) === st);
+    document.getElementById('psLead').textContent = `${list.length} item${list.length === 1 ? '' : 's'} found${st === 'all' ? '' : ' (' + st + ' only)'}. Tap a row to open it.`;
+    const catN = (id) => (categories.find(c => c.id === id) || {}).name || '—';
+    document.getElementById('psBody').innerHTML = list.length ? list.map(p => {
+      const sz = p.size && p.size !== 'OVER' ? p.size : '—', s = normStatus(p.status);
+      return `<tr data-ps-open="${esc(p.id)}" tabindex="0"><td class="sku" data-l="SKU">${markHit(p.sku || '—', q)}</td><td class="ps-photo">${(p.images || [])[0] ? `<img class="thumb" src="${esc(p.images[0])}" alt="" loading="lazy">` : '<span class="thumb"></span>'}</td><td class="ps-name">${markHit(p.productName || '(no name)', q)}</td><td data-l="Brand:">${markHit(p.brand || '—', q)}</td><td data-l="Category:">${esc(catN(p.categoryId))}</td><td data-l="Size:">${esc(sz)}</td><td class="num" data-l="Price:">${esc(peso(p.price) || '₱0')}</td><td><span class="pill ${s === 'Claimed' ? 'pill-claimed' : 'pill-available'}">${s}</span></td><td class="ps-open"><button type="button" class="btn btn-outline" style="padding:6px 12px;">Open</button></td></tr>`;
+    }).join('') : `<tr><td colspan="9" class="empty-state">No items to show. Try another word, or set the status filter to All.</td></tr>`;
+  }
+  function bindSearch(psInputEl, psSugg, psMsg, goBtn){
+    let psHl = -1, psList = [];
+    const PS_HELP = psMsg ? psMsg.textContent : '';
+    const setMsg = (cls, text) => { if (psMsg){ psMsg.className = cls; psMsg.textContent = text; } else if (/warn/.test(cls)) showToast({ type: 'err', title: 'Search', message: text }); };
+  function renderSuggest(){
+    const q = psInputEl.value.trim();
+    if (!q){ psSugg.hidden = true; psInputEl.setAttribute('aria-expanded', 'false'); psList = []; return; }
+    psList = searchProducts(q);
+    const top = psList.slice(0, 6), catN = (id) => (categories.find(c => c.id === id) || {}).name || 'Uncategorized';
+    psHl = -1;
+    psSugg.innerHTML = top.length
+      ? top.map((p, i) => `<div class="ps-opt" role="option" data-ps-open="${esc(p.id)}" data-i="${i}">${psThumb(p)}<div class="t"><b>${markHit(p.productName || p.brand || '(no name)', q)}</b><small><span class="sku">${markHit(p.sku || '—', q)}</span> · ${esc(catN(p.categoryId))} · ${normStatus(p.status)}</small></div></div>`).join('')
+        + (psList.length > 1 ? `<div class="ps-all" data-ps-all="1" data-i="${top.length}">See all ${psList.length} matches as a list →</div>` : '')
+      : `<div class="ps-opt" style="cursor:default;"><div class="t"><b>No product matches “${esc(q)}”</b><small>Check the spelling, or try just the brand or part of the SKU.</small></div></div>`;
+    psSugg.hidden = false; psInputEl.setAttribute('aria-expanded', 'true');
+  }
+  function moveHl(d){
+    const items = [...psSugg.querySelectorAll('[data-ps-open],[data-ps-all]')]; if (!items.length) return;
+    psHl = (psHl + d + items.length) % items.length;
+    items.forEach((el, i) => el.classList.toggle('hl', i === psHl)); items[psHl].scrollIntoView && items[psHl].scrollIntoView({ block: 'nearest' });
+  }
+  async function runProductSearch(){
+    const q = psInputEl.value.trim();
+    setMsg('ps-help', PS_HELP);
+    if (!q){ setMsg('ps-help warn', 'Type a SKU or a product name first.'); psInputEl.focus(); return; }
+    if (!allProductsForCounts.length){ try{ await refreshCategoriesView(); } catch(e){} }
+    const list = searchProducts(q);
+    if (!list.length){ setMsg('ps-help warn', `No product matches “${q}”. Check the spelling, or try just the brand or part of the SKU.`); renderSuggest(); return; }
+    const ck = compactKey(q), exactSku = list.filter(p => compactKey(p.sku) === ck), exactName = list.filter(p => String(p.productName || '').trim().toLowerCase() === q.toLowerCase());
+    if (exactSku.length === 1) return openProductById(exactSku[0].id);
+    if (list.length === 1) return openProductById(list[0].id);
+    if (exactName.length === 1 && !exactSku.length) return openProductById(exactName[0].id);
+    showResults(q, list);
+  }
+  psInputEl.addEventListener('input', renderSuggest);
+  psInputEl.addEventListener('focus', () => { if (psInputEl.value.trim()) renderSuggest(); });
+  psInputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown'){ e.preventDefault(); if (psSugg.hidden) renderSuggest(); moveHl(1); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); moveHl(-1); }
+    else if (e.key === 'Escape'){ psSugg.hidden = true; }
+    else if (e.key === 'Enter'){
+      e.preventDefault();
+      const hl = psHl >= 0 ? [...psSugg.querySelectorAll('[data-ps-open],[data-ps-all]')][psHl] : null;
+      if (hl && hl.dataset.psOpen) openProductById(hl.dataset.psOpen);
+      else if (hl && hl.dataset.psAll) showResults(psInputEl.value.trim(), psList);
+      else runProductSearch();
     }
   });
+  if (goBtn) goBtn.addEventListener('click', runProductSearch);
+  psSugg.addEventListener('mousedown', (e) => e.preventDefault());
+  psSugg.addEventListener('click', (e) => {
+    const o = e.target.closest('[data-ps-open]'); if (o){ openProductById(o.dataset.psOpen); return; }
+    if (e.target.closest('[data-ps-all]')) showResults(psInputEl.value.trim(), psList);
+  });
+  document.addEventListener('click', (e) => { if (!psInputEl.parentElement.parentElement.contains(e.target)) psSugg.hidden = true; });
+  }
+  bindSearch(document.getElementById('prodSearch'), document.getElementById('prodSuggest'), document.getElementById('prodSearchMsg'), document.getElementById('prodSearchGo'));
+  bindSearch(document.getElementById('subProdSearch'), document.getElementById('subSuggest'), null, document.getElementById('subProdGo'));
+
+  document.getElementById('psBody').addEventListener('click', (e) => { const r = e.target.closest('[data-ps-open]'); if (r) openProductById(r.dataset.psOpen); });
+  document.getElementById('psBody').addEventListener('keydown', (e) => { if (e.key === 'Enter'){ const r = e.target.closest('[data-ps-open]'); if (r) openProductById(r.dataset.psOpen); } });
+  document.getElementById('psInput').addEventListener('input', (e) => { psQuery = e.target.value.trim(); psResults = psQuery ? searchProducts(psQuery) : []; document.getElementById('psTitle').textContent = psQuery ? `Results for “${psQuery}”` : 'Search results'; renderResults(); });
+  document.getElementById('psInput').addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); if (psResults.length === 1) openProductById(psResults[0].id); } });
+  document.getElementById('psStatus').addEventListener('change', renderResults);
+  document.getElementById('psBack').addEventListener('click', () => { switchView('products'); refreshCategoriesView(); });
 
   // =====================================================================
   //  Category codes + SKUs
