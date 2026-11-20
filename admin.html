@@ -178,6 +178,14 @@
   .category-card-actions button.danger:hover{ color:var(--danger); }
 
   /* ---- Products: search + categories ---- */
+  .i{ width:1.1em; height:1.1em; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-0.18em; }
+  .btn .i{ margin-right:2px; } .size-chip .i{ width:.95em; height:.95em; margin-left:2px; }
+  .subsearch-box .s-ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:rgba(20,32,28,.5); pointer-events:none; } .subsearch-box input{ padding-left:42px !important; }
+  .cat-manage{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:-6px 0 18px; } .cat-manage[hidden]{ display:none; } .cat-manage .btn{ padding:9px 16px; font-size:.82rem; } .cat-manage .note{ font-size:.8rem; color:rgba(20,32,28,.6); }
+  .cc-open{ display:flex; align-items:center; gap:4px; } .cc-open .i{ width:1em; height:1em; }
+  .size-chip.big{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+  .cat-empty .big-ico{ width:34px; height:34px; color:var(--green-deep); margin-bottom:8px; display:block; }
+  .scan-drop .ico .i{ width:2.2rem; height:2.2rem; color:var(--green-deep); }
   .vh{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; overflow:hidden; }
   .ps-card{ margin-bottom:18px; position:relative; }
   .ps-label{ display:block; font-family:'Fraunces',serif; font-size:1.05rem; color:var(--green-deep); margin:0 0 10px; text-transform:none; letter-spacing:0; }
@@ -1104,7 +1112,7 @@
 
     <div class="subbar" id="subBar">
       <div class="subbar-inner">
-        <div class="subsearch" id="subSearch" hidden><div class="subsearch-box"><input type="search" id="subProdSearch" placeholder="🔎 Find a product — SKU or name" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Find a product by SKU or name"><button type="button" class="btn btn-gold" id="subProdGo">Search</button><div class="ps-sugg" id="subSuggest" role="listbox" hidden></div></div></div>
+        <div class="subsearch" id="subSearch" hidden><div class="subsearch-box"><svg class="i s-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="subProdSearch" placeholder="Search SKU, name, brand or buyer" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Find a product by SKU or name"><button type="button" class="btn btn-gold" id="subProdGo">Search</button><div class="ps-sugg" id="subSuggest" role="listbox" hidden></div></div></div>
         <div class="subgroup" data-module="batches">
           <div class="nav-item sub-tab" data-view="dashboard" role="button" tabindex="0">Batch Manager</div>
           <div class="nav-item sub-tab" data-view="batches" role="button" tabindex="0">Batch Search</div>
@@ -1159,7 +1167,7 @@ match /counters/{id} {
               <p class="lead" style="margin:0;">Build each drop in three steps: set the schedule, choose the hot items, then add the rest of the batch.</p>
             </div>
             <div class="head-actions">
-              <button type="button" class="btn btn-outline" id="qsOpenBatch">⚡ Update item status</button>
+              <button type="button" class="btn btn-outline" id="qsOpenBatch"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg> Update item status</button>
               <button type="button" class="btn btn-gold" id="newBatchBtn">+ Add New Batch</button>
             </div>
           </div>
@@ -1303,7 +1311,6 @@ match /counters/{id} {
             <div class="ship-list" id="shipBody"></div>
           </div>
         </div>
-        </div>
 
         <div class="view" id="view-batches">
           <div class="dash-head">
@@ -1419,19 +1426,9 @@ match /counters/{id} {
           <div class="dash-head">
             <div>
               <h1>Products</h1>
-              <p class="lead" style="margin:0;">Find any item fast, or open a category to add and edit its products.</p>
+              <p class="lead" style="margin:0;">Pick a category to manage its products. To find a specific item, use the search bar above.</p>
             </div>
-            <div class="head-actions"><button type="button" class="btn btn-outline" id="scanOpenProducts">📷 Scan product photo</button><button type="button" class="btn btn-gold" id="qsOpenProducts">⚡ Update item status</button></div>
-          </div>
-
-          <div class="card ps-card">
-            <label class="ps-label" for="prodSearch">🔎 Find a product</label>
-            <div class="ps-box">
-              <input type="search" id="prodSearch" placeholder="Type a SKU or name — e.g. VG-WIN-0001 or Nike jacket" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="prodSuggest" aria-autocomplete="list">
-              <button type="button" class="btn btn-gold" id="prodSearchGo">Search</button>
-            </div>
-            <div class="ps-sugg" id="prodSuggest" role="listbox" hidden></div>
-            <p class="ps-help" id="prodSearchMsg">One match opens the product straight away. Several matches show a list you can pick from.</p>
+            <div class="head-actions"><button type="button" class="btn btn-outline" id="scanOpenProducts"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Scan product photo</button><button type="button" class="btn btn-gold" id="qsOpenProducts"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg> Update item status</button></div>
           </div>
 
           <div class="prod-stats" id="prodStats"></div>
@@ -1439,7 +1436,7 @@ match /counters/{id} {
           <div class="card" id="catSection">
             <div class="sec-head">
               <div><h2>Categories</h2><p class="fld-note" style="margin:2px 0 0;">A category is a group of similar items, like Jackets or Shorts. Tap one to open it.</p></div>
-              <button type="button" class="btn btn-gold" id="newCatBtn">+ New category</button>
+              <button type="button" class="btn btn-gold" id="newCatBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> New category</button>
             </div>
             <div class="category-grid" id="categoryGrid"></div>
           </div>
@@ -1518,6 +1515,12 @@ match /counters/{id} {
             </div>
           </div>
 
+          <div class="cat-manage" id="catManage" hidden>
+            <span class="note">This category is empty, so you can still rename or remove it.</span>
+            <button type="button" class="btn btn-outline" id="catRenameBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Rename</button>
+            <button type="button" class="btn btn-outline btn-danger-outline" id="catDeleteBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete category</button>
+          </div>
+
           <div class="view-tabs" role="tablist" aria-label="Product views">
             <button type="button" class="view-tab active" data-pview="folder" role="tab">Folder View</button>
             <button type="button" class="view-tab" data-pview="attribute" id="attrTab" role="tab" disabled title="Select an item in Folder View first">Attribute View</button>
@@ -1526,7 +1529,6 @@ match /counters/{id} {
           <div id="folderPanel" class="card folder-card">
             <div class="folder-toolbar">
               <div class="tb-left">
-                <input type="search" id="folderSearch" placeholder="Search SKU, name, brand, buyer, waybill…" autocomplete="off" aria-label="Search products">
                 <select id="folderStatus" aria-label="Filter by status">
                   <option value="all">All statuses</option>
                   <option value="Available">Available</option>
@@ -1534,10 +1536,10 @@ match /counters/{id} {
                 </select>
               </div>
               <div class="tb-right">
-                <button type="button" class="btn btn-outline" id="qsOpenCat">⚡ Update status</button>
+                <button type="button" class="btn btn-outline" id="qsOpenCat"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg> Update status</button>
                 <button type="button" class="btn btn-outline" id="assignSkuBtn" style="display:none;">Assign SKUs</button>
                 <button type="button" class="btn btn-outline" id="openAttrBtn" disabled>Open in Attribute View</button>
-                <button type="button" class="btn btn-outline" id="scanBtn">📷 Scan Photo</button>
+                <button type="button" class="btn btn-outline" id="scanBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Scan Photo</button>
                 <button type="button" class="btn btn-outline" id="importBtn">Import Products</button>
                 <button type="button" class="btn btn-gold" id="addProductBtn">+ Add Product</button>
               </div>
@@ -1563,13 +1565,6 @@ match /counters/{id} {
           <div id="attributePanel" style="display:none;"></div>
         </div>
 
-        <div class="view" id="view-settings">
-          <div class="placeholder-view">
-            <span class="tag">Coming soon</span>
-            <h2>Settings</h2>
-            <p>Shop name, social links, and other configuration will live here in a later phase.</p>
-          </div>
-        </div>
 
       </div>
     </div>
@@ -4727,9 +4722,9 @@ match /counters/{id} {
 
   async function refreshCategoriesView(){
     try{
-      const [catSnap, prodSnap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol)]);
+      const [catSnap, prodSnap, privMap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol), fetchPrivateMap().catch(() => ({}))]);
       categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      allProductsForCounts = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      allProductsForCounts = prodSnap.docs.map(d => withPrivate(d, privMap));
       // Older categories (made before SKUs) get their code once, automatically.
       for (const cat of categories){
         if (!cat.code){ try{ await ensureCategoryCode(cat); } catch(e){ console.error('Category code failed:', e); } }
@@ -4767,10 +4762,10 @@ match /counters/{id} {
     const grid = document.getElementById('categoryGrid');
     if (categories.length === 0){
       const quick = QUICK_CATS.slice(0, 6).map(q => `<button type="button" class="cat-chip" data-quick-cat="${esc(q.name)}">${esc(q.name)}</button>`).join('');
-      grid.innerHTML = `<div class="cat-empty"><h3>Welcome! Let’s set up your first category 👋</h3>
+      grid.innerHTML = `<div class="cat-empty"><svg class="i big-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><h3>Welcome — let’s set up your first category</h3>
         <p>Categories keep your catalog organised — one for each kind of item you sell.</p>
         <ol><li>Create a category (for example <b>Jackets</b>).</li><li>Add products inside it — scan a photo or add them one by one.</li><li>Put them in a batch when you’re ready to sell.</li></ol>
-        <button type="button" class="btn btn-gold" id="emptyNewCat">+ Create my first category</button>
+        <button type="button" class="btn btn-gold" id="emptyNewCat"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Create my first category</button>
         <p style="margin:16px 0 8px;font-size:.8rem;">Or start from a common one:</p><div class="cat-quick" style="margin:0;">${quick}</div></div>`;
       return;
     }
@@ -4783,36 +4778,16 @@ match /counters/{id} {
           <div class="cc-top"><h3>${esc(cat.name)}</h3>${cat.code ? `<span class="code-chip" title="SKU prefix">${SKU_PREFIX}-${esc(cat.code)}</span>` : ''}</div>
           <div class="cc-counts"><b>${count}</b>product${count === 1 ? '' : 's'}${count ? `<span class="mini">${av} available · ${count - av} claimed</span>` : '<span class="mini">Nothing here yet</span>'}</div>
           <span class="size-chip" title="${esc(prof.name)}" style="align-self:flex-start;">Sizing: ${esc(prof.short)}</span>
-          <div class="cc-open">${count ? 'Open category →' : 'Open &amp; add products →'}</div>
-          <div class="category-card-actions">
-            <button type="button" data-edit-cat="${cat.id}">✏️ Rename</button>
-            <button type="button" data-size-cat="${cat.id}">📏 Sizing</button>
-            <button type="button" class="danger" data-delete-cat="${cat.id}">🗑 Delete</button>
-          </div>
+          <div class="cc-open">${count ? 'Open category' : 'Open &amp; add products'} <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>`;
-    }).join('') + `<div class="category-card add-card" id="addCatCard" role="button" tabindex="0"><div><div class="plus">+</div>New category</div></div>`;
+    }).join('');
     if (justAddedCatId){ const el = grid.querySelector('.just-added'); if (el && el.scrollIntoView && !/jsdom/i.test(navigator.userAgent)) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); justAddedCatId = null; }
   }
 
   document.getElementById('categoryGrid').addEventListener('click', async (e) => {
     const t = e.target;
     const quick = t.closest('[data-quick-cat]'); if (quick){ openCatDialog({ name: quick.dataset.quickCat }); return; }
-    if (t.closest('#emptyNewCat') || t.closest('#addCatCard')){ openCatDialog(); return; }
-    const edit = t.closest('[data-edit-cat]'), size = t.closest('[data-size-cat]'), del = t.closest('[data-delete-cat]');
-    if (edit){ const cat = categories.find(c => c.id === edit.dataset.editCat); if (cat) openCatDialog({ rename: cat }); return; }
-    if (size){ const cat = categories.find(c => c.id === size.dataset.sizeCat); if (cat) openSizingDialog(cat); return; }
-    if (del){
-      const cat = categories.find(c => c.id === del.dataset.deleteCat); if (!cat) return;
-      const count = allProductsForCounts.filter(p => p.categoryId === cat.id).length;
-      const msg = count > 0
-        ? `Delete "${cat.name}"?\n\n${count} product(s) in it will NOT be deleted, but they will have no category and will be hard to find. Move or delete them first if unsure.`
-        : `Delete "${cat.name}"?`;
-      if (!confirm(msg)) return;
-      await deleteDoc(doc(db, 'categories', cat.id));
-      showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
-      refreshCategoriesView();
-      return;
-    }
+    if (t.closest('#emptyNewCat')){ openCatDialog(); return; }
     const card = t.closest('.category-card[data-cat-id]');
     if (card){ const cat = categories.find(c => c.id === card.dataset.catId); if (cat) openCategoryDetail(cat); }
   });
@@ -4884,7 +4859,10 @@ match /counters/{id} {
     const btn = document.getElementById('addCategoryBtn'); btn.disabled = true;
     try{
       if (catRename){
+        const used = await getDocs(query(productsCol, where('categoryId', '==', catRename.id)));
+        if (used.docs.length){ catError('This category has products now, so it can’t be renamed.'); btn.disabled = false; return; }
         await updateDoc(doc(db, 'categories', catRename.id), { name });
+        if (currentCategoryId === catRename.id) document.getElementById('categoryDetailName').textContent = name;
         closeCatDialog(); showToast({ type: 'ok', title: 'Category Renamed', message: `Now called “${name}”.` });
       } else {
         const taken = new Set(categories.map(c => c.code).filter(Boolean));
@@ -4908,7 +4886,7 @@ match /counters/{id} {
     const rows = [];
     for (const p of allProductsForCounts){
       const sku = String(p.sku || '').toLowerCase(), name = String(p.productName || '').toLowerCase();
-      const hay = `${sku} ${name} ${String(p.brand || '').toLowerCase()} ${String(p.item || '').toLowerCase()} ${catName(p.categoryId).toLowerCase()}`;
+      const hay = `${sku} ${name} ${String(p.brand || '').toLowerCase()} ${String(p.item || '').toLowerCase()} ${String(p.soldTo || '').toLowerCase()} ${String(p.waybill || '').toLowerCase()} ${catName(p.categoryId).toLowerCase()}`;
       const hayC = compactKey(hay);
       const all = tokens.every(t => hay.includes(t) || (compactKey(t).length >= 3 && hayC.includes(compactKey(t))));
       if (!all && !(ck.length >= 3 && compactKey(sku).includes(ck))) continue;
@@ -5010,8 +4988,7 @@ match /counters/{id} {
   });
   document.addEventListener('click', (e) => { if (!psInputEl.parentElement.parentElement.contains(e.target)) psSugg.hidden = true; });
   }
-  bindSearch(document.getElementById('prodSearch'), document.getElementById('prodSuggest'), document.getElementById('prodSearchMsg'), document.getElementById('prodSearchGo'));
-  bindSearch(document.getElementById('subProdSearch'), document.getElementById('subSuggest'), null, document.getElementById('subProdGo'));
+    bindSearch(document.getElementById('subProdSearch'), document.getElementById('subSuggest'), null, document.getElementById('subProdGo'));
 
   document.getElementById('psBody').addEventListener('click', (e) => { const r = e.target.closest('[data-ps-open]'); if (r) openProductById(r.dataset.psOpen); });
   document.getElementById('psBody').addEventListener('keydown', (e) => { if (e.key === 'Enter'){ const r = e.target.closest('[data-ps-open]'); if (r) openProductById(r.dataset.psOpen); } });
@@ -5283,7 +5260,7 @@ match /counters/{id} {
   }
 
   function visibleProducts(){
-    const q = document.getElementById('folderSearch').value.trim().toLowerCase();
+    const q = '';
     const st = document.getElementById('folderStatus').value;
     const list = categoryProducts.filter(p => {
       if (st !== 'all' && (p.status || 'Available') !== st) return false;
@@ -5307,6 +5284,7 @@ match /counters/{id} {
   }
 
   function renderFolder(){
+    updateCatManage();
     const FC = folderColumns();
     document.getElementById('folderThead').innerHTML = '<th class="fchk"><input type="checkbox" id="folderAll" aria-label="Select all shown"></th>' + FC.map(c =>
       `<th class="${c.type === 'num' ? 'num' : ''}" data-sort="${c.key}">${c.label}${
@@ -5433,7 +5411,6 @@ match /counters/{id} {
       if (next && next.dataset.id){ next.focus(); selectRow(next.dataset.id); }
     }
   });
-  document.getElementById('folderSearch').addEventListener('input', renderFolder);
   document.getElementById('folderStatus').addEventListener('change', renderFolder);
   document.getElementById('openAttrBtn').addEventListener('click', () => { if (selectedId) openAttribute(selectedId); });
   document.querySelectorAll('.view-tab').forEach(tab => {
@@ -5979,7 +5956,7 @@ match /counters/{id} {
   function scanStep(step, extra = {}){
     sc.step = step; Object.assign(sc, extra);
     const T = (t, sub) => { document.getElementById('scanTitle').textContent = t; document.getElementById('scanSub').textContent = sub || ''; };
-    const drop = (id, big, small) => `<label class="scan-drop" id="${id}" for="scanFile"><div class="ico">📷</div><b>${big}</b><small>${small}</small></label><input type="file" id="scanFile" accept="image/*" hidden>`;
+    const drop = (id, big, small) => `<label class="scan-drop" id="${id}" for="scanFile"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div><b>${big}</b><small>${small}</small></label><input type="file" id="scanFile" accept="image/*" hidden>`;
     if (step === 'setup'){
       T('Set up photo scan', 'One-time setup — the key stays in this browser only.');
       const k = geminiKey();
@@ -6463,12 +6440,18 @@ match /counters/{id} {
   // =====================================================================
   //  Category detail: open / load / back
   // =====================================================================
+  let catLoaded = false;
+  function updateCatManage(){
+    const box = document.getElementById('catManage'); if (!box) return;
+    box.hidden = !(catLoaded && currentCategoryId && categoryProducts.length === 0);
+  }
   async function loadProductsForCategory(categoryId){
     try{
       const q = query(productsCol, where('categoryId', '==', categoryId));
       const [snap, privMap] = await Promise.all([getDocs(q), fetchPrivateMap()]);
       if (categoryId !== currentCategoryId) return;   // user already moved to another category
       categoryProducts = snap.docs.map(d => withPrivate(d, privMap));
+      catLoaded = true;
       renderFolder();
     } catch(err){
       console.error('Could not load products:', err);
@@ -6478,7 +6461,7 @@ match /counters/{id} {
 
   function showCategoryChip(cat){
     document.getElementById('categoryCodeChip').textContent = cat.code ? `${SKU_PREFIX}-${cat.code}-####` : '…';
-    document.getElementById('categorySizingBtn').textContent = `Sizing: ${SIZE_PROFILES[profileKeyOfCat(cat)].short} ✎`;
+    document.getElementById('categorySizingBtn').innerHTML = `Sizing: ${esc(SIZE_PROFILES[profileKeyOfCat(cat)].short)} <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`;
   }
 
   async function openCategoryDetail(cat){
@@ -6490,7 +6473,6 @@ match /counters/{id} {
     dirty = false;
     sortKey = 'sku';
     sortDir = 'asc';
-    document.getElementById('folderSearch').value = '';
     document.getElementById('folderStatus').value = 'all';
     document.getElementById('categoryDetailName').textContent = cat.name;
     showCategoryChip(cat);
@@ -6498,11 +6480,28 @@ match /counters/{id} {
     switchView('category-detail');
     setProductView('folder');
     categoryProducts = [];
+    catLoaded = false;
     renderFolder();
     ensureCategoryCode(cat).then(() => showCategoryChip(cat)).catch(err => console.error('Could not assign category code:', err));
     loadProductsForCategory(cat.id);
   }
 
+  document.getElementById('catRenameBtn').addEventListener('click', () => {
+    const cat = categories.find(c => c.id === currentCategoryId);
+    if (cat && categoryProducts.length === 0) openCatDialog({ rename: cat });
+  });
+  document.getElementById('catDeleteBtn').addEventListener('click', async () => {
+    const cat = categories.find(c => c.id === currentCategoryId); if (!cat) return;
+    try{
+      const check = await getDocs(query(productsCol, where('categoryId', '==', cat.id)));
+      if (check.docs.length){ showToast({ type: 'err', title: 'Category Not Empty', message: 'It has products now, so it can’t be deleted.' }); loadProductsForCategory(cat.id); return; }
+      if (!confirm(`Delete the empty category "${cat.name}"?`)) return;
+      await deleteDoc(doc(db, 'categories', cat.id));
+      showToast({ type: 'ok', title: 'Category Deleted', message: `"${cat.name}" was removed.` });
+      currentCategoryId = null; selectedId = null; draft = null; dirty = false; catLoaded = false;
+      switchView('products'); refreshCategoriesView();
+    } catch(err){ console.error(err); showToast({ type: 'err', title: 'Could Not Delete', message: 'Check your connection and Firestore rules, then try again.' }); }
+  });
   document.getElementById('backToProductsBtn').addEventListener('click', () => {
     if (!confirmDiscard()) return;
     currentCategoryId = null;
