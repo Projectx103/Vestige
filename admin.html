@@ -937,19 +937,6 @@
   .chart-foot{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
   .chart-foot .btn{ padding:9px 16px; font-size:0.8rem; min-height:40px; }
   @media (max-width:760px){ .add-category-row{ flex-direction:column; align-items:stretch; } .add-category-row select{ max-width:none; width:100%; } .cat-head-tags{ justify-content:flex-start; } }
-  
-  /* ===== Batch items: detail lines + copy ===== */
-  .bi-lines{ margin-top:6px; display:grid; gap:3px; }
-  .bi-l{ display:flex; gap:8px; align-items:baseline; min-width:0; font-size:.8rem; line-height:1.4; }
-  .bi-l .k{ flex:0 0 84px; font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:.04em; text-transform:uppercase; color:rgba(20,32,28,.5); }
-  .bi-l .v{ min-width:0; overflow-wrap:anywhere; color:var(--ink); }
-  .bi-l .v.none{ color:rgba(20,32,28,.35); }
-  .bi-l.first .v{ font-weight:600; color:var(--green-deep); font-size:.86rem; }
-  .hot-price{ font-family:'Space Mono',monospace; font-size:.7rem; color:rgba(20,32,28,.6); }
-  .hot-head .head-btns{ display:flex; gap:8px; flex-wrap:wrap; }
-  @media (max-width:640px){ .bi-l .k{ flex-basis:68px; } .bi-l{ font-size:.76rem; } }
-
-  
 </style>
 </head>
 <body>
@@ -1267,10 +1254,7 @@ match /counters/{id} {
           <section class="card bpanel" data-bpanel="3">
             <div class="hot-head">
               <h2>Batch items <span class="count-pill" id="batchCount">0</span></h2>
-              <div class="head-btns">
-                <button type="button" class="btn btn-outline" id="copyBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Copy all details</button>
-                <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear all</button>
-              </div>
+              <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear all</button>
             </div>
             <p class="hot-note">The rest of this batch — listed on the shop's <strong>This Week's Batch</strong> page. Hot items are included automatically.</p>
             <div class="batch-summary" id="batchSummary"></div>
@@ -1609,9 +1593,6 @@ match /counters/{id} {
   const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks', 'statusHistory', 'claimedAt', 'claimedBatch'];
   // Only two statuses exist now. Anything else (the old "1 Left") counts as Available.
   const normStatus = (st) => st === 'Claimed' ? 'Claimed' : 'Available';
-  // Condition choices (best → worst). Add or rename here and the dropdown updates everywhere.
-const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
-  
   function splitPrivate(obj){
     const pub = {}, priv = {};
     for (const k of Object.keys(obj)) (PRIVATE_FIELDS.includes(k) ? priv : pub)[k] = obj[k];
@@ -4229,57 +4210,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
 
   // ---------- Batch Items: the rest of this batch (hot items are included automatically) ----------
   const bf = { q: '', st: 'all' };
-   // ---- item detail lines + copy ----
-  function itemDetail(it){
-    const p = it.productId ? hotProducts.find(x => x.id === it.productId) : null;
-    const brand = (p ? p.brand : it.brand) || '', name = p ? (p.productName || '') : '', desc = (p ? p.item : it.item) || '';
-    let dim = '';
-    if (p){
-      const lab = {}; SIZE_PROFILES[profileOfProduct(p)].measures.forEach(m => { lab[m.slot] = m.label.replace(/ \(in\)$/, ''); });
-      const parts = ['width', 'length'].filter(s => lab[s] && p[s] !== '' && p[s] != null && !isNaN(Number(p[s]))).map(s => `${lab[s]} ${Number(p[s])}`);
-      if (parts.length) dim = parts.join(', ') + ' in';
-    }
-    let size = p ? sizeText(p) : (it.size || '');
-    if (size === 'Over chart') size = '';
-    const cr = p ? p.colorRate : '';
-    return {
-      sku: it.code || (p && p.sku) || '', brand, name, desc, dim, size,
-      line1: [brand, name, desc].filter(Boolean).join(' · '),
-      color: (cr !== '' && cr != null && !isNaN(Number(cr))) ? `${Number(cr)}/10` : '',
-      cond: p ? (p.condition || '') : ''
-    };
-  }
-  function itemLinesHtml(it){
-    const d = itemDetail(it);
-    const row = (k, v, first) => `<div class="bi-l ${first ? 'first' : ''}"><span class="k">${k}</span><span class="v ${v ? '' : 'none'}">${esc(v || '—')}</span></div>`;
-    return `<div class="bi-lines">${row('Item', d.line1, true)}${row('Dimension', d.dim)}${row('Size', d.size)}${row('Color rate', d.color)}${row('Condition', d.cond)}</div>`;
-  }
-  function itemCopyText(it){
-    const d = itemDetail(it);
-    return [d.sku || 'NO SKU', d.line1 || '—', 'Dimension: ' + (d.dim || '—'), 'Size: ' + (d.size || '—'), 'Color rate: ' + (d.color || '—'), 'Condition: ' + (d.cond || '—')].join('\n');
-  }
-  async function copyText(text, okMsg){
-    try{ await navigator.clipboard.writeText(text); }
-    catch(e){
-      const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
-      document.body.appendChild(ta); ta.select(); let ok = false;
-      try{ ok = document.execCommand('copy'); } catch(_){}
-      ta.remove();
-      if (!ok){ showToast({ type: 'err', title: 'Copy failed', message: 'Your browser blocked copying. Try again or copy manually.' }); return false; }
-    }
-    showToast({ type: 'ok', title: 'Copied', message: okMsg, duration: 2500 });
-    return true;
-  }
-  function batchShownList(){
-    const q = bf.q.trim().toLowerCase();
-    return state.batchItems.map((it, i) => ({ it, i })).filter(({ it }) => {
-      if (!(bf.st === 'all' || (bf.st === 'Claimed') === (it.status === 'Claimed'))) return false;
-      if (!q) return true;
-      const d = itemDetail(it);
-      return [d.sku, d.brand, d.name, d.desc, d.size, d.cond, d.color].some(v => String(v || '').toLowerCase().includes(q));
-    });
-  }
-
   function renderBatchItems(){
     const n = state.batchItems.length, hot = state.items.length;
     document.getElementById('batchCount').textContent = String(n);
@@ -4299,26 +4229,28 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     document.getElementById('batchFilterBar').style.display = n ? '' : 'none';
     document.getElementById('batchChips').innerHTML = [['all', 'All', n], ['Available', 'Available', nAvail], ['Claimed', 'Claimed', nClaimed]].map(([k, l, c]) => `<button type="button" class="bs-chip ${bf.st === k ? 'active' : ''}" data-bchip="${k}">${l}<b>${c}</b></button>`).join('');
 
+    const q = bf.q.trim().toLowerCase();
     const c = document.getElementById('batchContainer');
     if (!n){
       c.innerHTML = `<div class="hot-empty">No extra items yet. Add by SKU above, or click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
     } else {
-      const shown = batchShownList();
+      const shown = state.batchItems.map((it, i) => ({ it, i })).filter(({ it }) =>
+        (bf.st === 'all' || (bf.st === 'Claimed') === (it.status === 'Claimed')) &&
+        (!q || [it.code, it.brand, it.item].some(v => String(v || '').toLowerCase().includes(q))));
       c.innerHTML = shown.length ? shown.map(({ it, i }) => `
         <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-bi="${i}">
           ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
           <div class="hot-info">
             <div class="hot-line1">
               <span class="code-chip">${esc(it.code || 'NO SKU')}</span>
+              <strong>${esc(it.brand || 'Untitled')}</strong>
               ${statusPill(it.status || 'Available')}
-              <span class="hot-price">${esc(peso(it.price) || '₱0')}</span>
               ${it.missing ? '<span class="hot-flag bad">Deleted from Products</span>' : ''}${lockFlag(it.productId)}
             </div>
-            ${itemLinesHtml(it)}
+            <div class="hot-line2">${esc(it.item || '—')} · Size ${esc(it.size || '—')} · ${peso(it.price) || '₱0'}</div>
             ${itemClaimLine(it)}
           </div>
           <div class="hot-actions">
-            <button type="button" class="btn btn-outline btn-xs" data-batch-copy="${i}">Copy</button>
             ${claimBtn(it)}
             ${it.productId && !it.missing && it.status !== 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-batch-promote="${i}" ${state.items.length >= state.hotLimit ? 'disabled title="No free hot slot"' : ''}>★ Make hot</button>` : ''}
             <button type="button" class="btn btn-outline btn-danger-outline btn-xs" data-batch-remove="${i}">Remove</button>
@@ -4326,18 +4258,12 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
         </div>`).join('') : '<div class="hot-empty">No items match your search or filter.</div>';
     }
     document.getElementById('clearBatchBtn').disabled = n === 0;
-    document.getElementById('copyBatchBtn').disabled = n === 0;
     renderTiles();
     renderSteps();
   }
 
   document.getElementById('batchContainer').addEventListener('click', (e) => {
     let el;
-    if ((el = e.target.closest('[data-batch-copy]'))){
-      const it = state.batchItems[Number(el.dataset.batchCopy)];
-      if (it) copyText(itemCopyText(it), `${it.code || 'Item'} details copied.`);
-      return;
-    }
     if ((el = e.target.closest('[data-claim-item]'))){ openClaimDialog([el.dataset.claimItem], 'claim'); return; }
     if ((el = e.target.closest('[data-return-item]'))){ openClaimDialog([el.dataset.returnItem], 'return'); return; }
     if ((el = e.target.closest('[data-batch-promote]'))){
@@ -4361,15 +4287,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     renderBatchItems();
   });
 
-
-  document.getElementById('copyBatchBtn').addEventListener('click', () => {
-    const list = batchShownList().map(({ it }) => it).filter(it => !it.missing);
-    if (!list.length){ showToast({ type: 'err', title: 'Nothing to copy', message: 'No items match the current search or filter.' }); return; }
-    copyText(list.map(itemCopyText).join('\n\n'), `${list.length} item${list.length === 1 ? '' : 's'} copied.`);
-  });
-
-
-  
   // ---------- quick add by SKU ----------
   function quickAddBySku(mode, raw){
     const codes = [...new Set(String(raw || '').toUpperCase().split(/[\s,;]+/).filter(Boolean))];
@@ -5267,8 +5184,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
       id, ...data, images, video: data.video || '',
       sku: data.sku || '', skuSeq: data.skuSeq ?? null,
       remarks: data.remarks || '',
-      colorRate: data.colorRate ?? '',
-      condition: data.condition || '',
       productName: data.productName || '',
       length: data.length ?? '',
       width: data.width ?? '',
@@ -5309,8 +5224,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     { key:'length',    label:'Length',           type:'num',  val:p => p.length, fmt:v => `${v} in` },
     { key:'width',     label:'Width',            type:'num',  val:p => p.width,  fmt:v => `${v} in` },
     { key:'size',      label:'Size',             type:'text', val:p => sizeText(p) },
-    { key:'colorRate', label:'Color Rate',       type:'num',  val:p => p.colorRate, fmt:v => `${v}/10` },
-    { key:'condition', label:'Condition',        type:'text', val:p => p.condition },
     { key:'category',  label:'Category',         type:'text', val:() => (currentCategory() || {}).name || '' },
     { key:'qty',       label:'Qty on Hand',      type:'num',  val:p => p.quantity },
     { key:'status',    label:'Status',           type:'text', val:p => p.status || 'Available', html:p => statusPill(p.status || 'Available') },
@@ -6317,15 +6230,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
           </div>
 
           <div class="attr-card">
-            <h3>Condition &amp; color</h3>
-            <div class="grid2">
-              <div><label>Color Rate (1–10)</label><input type="number" min="1" max="10" step="0.5" data-a-field="colorRate" value="${esc(d.colorRate)}" placeholder="9"><p class="fld-note" style="margin-top:-8px;">Shown as ${d.colorRate !== '' && d.colorRate != null ? esc(d.colorRate) : '9'}/10</p></div>
-              <div><label>Condition</label><select data-a-field="condition"><option value="">Not set</option>${CONDITIONS.map(c => `<option value="${esc(c)}" ${d.condition === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
-            </div>
-          </div>
-
-
-          <div class="attr-card">
             <h3>Inventory &amp; pricing</h3>
             <div class="grid2">
               <div><label>Quantity on Hand</label><input type="number" min="0" step="1" data-a-field="quantity" value="${esc(d.quantity)}" placeholder="1"></div>
@@ -6465,18 +6369,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
       }
     }
 
-
-
-    if (d.colorRate !== '' && d.colorRate != null){
-      const cr = Number(d.colorRate);
-      if (isNaN(cr) || cr < 1 || cr > 10){
-        const el = attrPanel.querySelector('[data-a-field="colorRate"]'); if (el) el.classList.add('invalid');
-        showToast({ type: 'err', title: 'Color Rate', message: 'Color Rate must be a number from 1 to 10.', duration: 6000 });
-        return;
-      }
-    }
-
-    
     btn.dataset.loading = 'true';
     try{
       const pk = curProfileKey();
@@ -6486,8 +6378,6 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
         brand: d.brand || '',
         item: d.item || '',
         remarks: d.remarks || '',
-        colorRate: (d.colorRate === '' || d.colorRate == null) ? null : Number(d.colorRate),
-        condition: d.condition || '',
         length: d.length === '' ? null : Number(d.length),
         width: d.width === '' ? null : Number(d.width),
         size: size === 'OVER' ? '' : size,
