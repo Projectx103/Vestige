@@ -1001,6 +1001,14 @@
   </div>
 </div>
 
+<div class="overlay" id="bidOverlay" role="dialog" aria-modal="true" aria-labelledby="bidTitle">
+  <div class="ship-modal" style="max-width:640px;">
+    <div class="im-head"><div><h2 id="bidTitle">Bid rules</h2><p>Sets the <strong>Steal</strong> increment and the automatic <strong>Lock</strong> price used when you copy item details.</p></div><button type="button" class="icon-btn" id="bidClose" aria-label="Close">✕</button></div>
+    <div class="ship-body" id="bidBody"></div>
+    <div class="ship-foot"><div class="left"><button type="button" class="btn btn-outline" id="bidReset">Reset to default</button></div><button type="button" class="btn btn-outline" id="bidCancel">Cancel</button><button type="button" class="btn btn-gold" id="bidSave">Save rules</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="presetOverlay" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
   <div class="ship-modal" style="max-width:720px;">
     <div class="im-head"><div><h2 id="pmTitle">Default steps &amp; saved locations</h2><p>Build your own step sets so you never start from scratch on each shipment.</p></div><button type="button" class="icon-btn" id="pmClose" aria-label="Close">✕</button></div>
@@ -1270,11 +1278,12 @@ match /counters/{id} {
             <div class="hot-head">
               <h2>Batch items <span class="count-pill" id="batchCount">0</span></h2>
               <div class="head-btns">
+                <button type="button" class="btn btn-outline" id="bidRulesBtn" style="padding:8px 16px; font-size:0.78rem;">Bid rules</button>
                 <button type="button" class="btn btn-outline" id="copyBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Copy all details</button>
-                <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear all</button>
+                <button type="button" class="btn btn-outline btn-danger-outline" id="clearBatchBtn" style="padding:8px 16px; font-size:0.78rem;" disabled>Clear extras</button>
               </div>
             </div>
-            <p class="hot-note">The rest of this batch — listed on the shop's <strong>This Week's Batch</strong> page. Hot items are included automatically.</p>
+            <p class="hot-note">The rest of this batch — listed on the shop's <strong>This Week's Batch</strong> page. Your <strong>Hot items</strong> are listed here too (marked ★ Hot) — they are managed in the Hot items step.</p>
             <div class="batch-summary" id="batchSummary"></div>
             <div class="hot-warn" id="batchWarn" style="display:none;"></div>
             <div class="sku-add"><textarea id="batchSku" rows="1" placeholder="Quick add by SKU — paste one or many, separated by spaces, commas or new lines" aria-label="Add batch items by SKU"></textarea><button type="button" class="btn btn-outline" id="batchSkuBtn">Add</button></div>
@@ -4334,6 +4343,31 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
   // ---------- Batch Items: the rest of this batch (hot items are included automatically) ----------
   const bf = { q: '', st: 'all' };
    // ---- item detail lines + copy ----
+  // ---- bid rules (Steal increment + automatic Lock). Saved in counters/bidRules, cached in this browser. ----
+  const BID_DEFAULT = { tiers: [{ below: 1000, inc: 50 }], over: 100, lockMult: 2 };
+  const bidRef = doc(db, 'counters', 'bidRules');
+  const cleanBid = (r) => {
+    const tiers = (Array.isArray(r && r.tiers) ? r.tiers : []).map(t => ({ below: Number(t.below), inc: Number(t.inc) })).filter(t => t.below > 0 && t.inc > 0).sort((x, y) => x.below - y.below).slice(0, 8);
+    const over = Number(r && r.over) > 0 ? Number(r.over) : (tiers.length ? tiers[tiers.length - 1].inc : BID_DEFAULT.over);
+    const lockMult = Number(r && r.lockMult) > 0 ? Number(r.lockMult) : BID_DEFAULT.lockMult;
+    return { tiers: tiers.length ? tiers : BID_DEFAULT.tiers.map(t => ({ ...t })), over, lockMult };
+  };
+  let bidRules = (() => { try{ const j = JSON.parse(localStorage.getItem('vestigeBidRules') || 'null'); if (j) return cleanBid(j); } catch(e){} return cleanBid(BID_DEFAULT); })();
+  let bidLoaded = false;
+  async function loadBidRules(){
+    if (bidLoaded) return; bidLoaded = true;
+    try{ const snap = await getDoc(bidRef); if (snap.exists()){ bidRules = cleanBid(snap.data()); try{ localStorage.setItem('vestigeBidRules', JSON.stringify(bidRules)); } catch(e){} renderBatchItems(); } }
+    catch(err){ console.error('Bid rules unavailable:', err); }
+  }
+  const fmtN = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const incFor = (price) => { const t = bidRules.tiers.find(t => price < t.below); return t ? t.inc : bidRules.over; };
+  function bidInfo(price, manualLock){
+    const mine = Number(price);
+    if (!(mine > 0)) return null;
+    const inc = incFor(mine), manual = Number(manualLock) > 0;
+    const lock = manual ? Number(manualLock) : Math.round(mine * bidRules.lockMult * 100) / 100;
+    return { mine, inc, steal: mine + inc, lock, manual };
+  }
   function itemDetail(it){
     const p = it.productId ? hotProducts.find(x => x.id === it.productId) : null;
     const brand = (p ? p.brand : it.brand) || '', name = p ? (p.productName || '') : '', desc = (p ? p.item : it.item) || '';
@@ -4346,21 +4380,27 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     let size = p ? sizeText(p) : (it.size || '');
     if (size === 'Over chart') size = '';
     const cr = p ? p.colorRate : '';
+    const bid = bidInfo(p ? p.price : it.price, p ? p.lockPrice : '');
     return {
       sku: it.code || (p && p.sku) || '', brand, name, desc, dim, size,
       line1: [brand, name, desc].filter(Boolean).join(' · '),
       color: (cr !== '' && cr != null && !isNaN(Number(cr))) ? `${Number(cr)}/10` : '',
-      cond: p ? (p.condition || '') : ''
+      issue: p ? String(p.remarks || '').trim() : '',
+      cond: p ? (p.condition || '') : '',
+      mine: bid ? fmtN(bid.mine) : '',
+      steal: bid ? `Increment + ${fmtN(bid.inc)}, Example ${fmtN(bid.mine)} + ${fmtN(bid.inc)} = ${fmtN(bid.steal)}` : '',
+      lock: bid ? fmtN(bid.lock) : '', lockManual: !!(bid && bid.manual)
     };
   }
   function itemLinesHtml(it){
     const d = itemDetail(it);
-    const row = (k, v, first) => `<div class="bi-l ${first ? 'first' : ''}"><span class="k">${k}</span><span class="v ${v ? '' : 'none'}">${esc(v || '—')}</span></div>`;
-    return `<div class="bi-lines">${row('Item', d.line1, true)}${row('Dimension', d.dim)}${row('Size', d.size)}${row('Color rate', d.color)}${row('Condition', d.cond)}</div>`;
+    const row = (k, v, first, tag) => `<div class="bi-l ${first ? 'first' : ''}"><span class="k">${k}</span><span class="v ${v ? '' : 'none'}">${esc(v || '—')}${v && tag ? ` <small style="opacity:.55">(${tag})</small>` : ''}</span></div>`;
+    return `<div class="bi-lines">${row('Item', d.line1, true)}${row('Dimension', d.dim)}${row('Size', d.size)}${row('Color rate', d.color)}${row('Issue', d.issue)}${row('Condition', d.cond)}${row('Mine', d.mine)}${row('Steal', d.steal)}${row('Lock', d.lock, false, d.lockManual ? 'set manually' : '')}</div>`;
   }
   function itemCopyText(it){
     const d = itemDetail(it);
-    return [d.sku || 'NO SKU', d.line1 || '—', 'Dimension: ' + (d.dim || '—'), 'Size: ' + (d.size || '—'), 'Color rate: ' + (d.color || '—'), 'Condition: ' + (d.cond || '—')].join('\n');
+    return [d.sku || 'NO SKU', d.line1 || '—', 'Dimension: ' + (d.dim || '—'), 'Size: ' + (d.size || '—'), 'Color rate: ' + (d.color || '—'),
+      'Issue: ' + (d.issue || '—'), 'Condition: ' + (d.cond || '—'), 'Mine: ' + (d.mine || '—'), 'Steal: ' + (d.steal || '—'), 'Lock: ' + (d.lock || '—')].join('\n');
   }
   async function copyText(text, okMsg){
     try{ await navigator.clipboard.writeText(text); }
@@ -4374,21 +4414,27 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     showToast({ type: 'ok', title: 'Copied', message: okMsg, duration: 2500 });
     return true;
   }
+  // Hot items first (marked ★ Hot), then the rest of the batch. `i` is the index inside its own array.
+  function batchAllItems(){
+    return [...state.items.map((it, i) => ({ it, i, hot: true })), ...state.batchItems.map((it, i) => ({ it, i, hot: false }))];
+  }
   function batchShownList(){
     const q = bf.q.trim().toLowerCase();
-    return state.batchItems.map((it, i) => ({ it, i })).filter(({ it }) => {
+    return batchAllItems().filter(({ it }) => {
       if (!(bf.st === 'all' || (bf.st === 'Claimed') === (it.status === 'Claimed'))) return false;
       if (!q) return true;
       const d = itemDetail(it);
-      return [d.sku, d.brand, d.name, d.desc, d.size, d.cond, d.color].some(v => String(v || '').toLowerCase().includes(q));
+      return [d.sku, d.brand, d.name, d.desc, d.size, d.cond, d.color, d.issue].some(v => String(v || '').toLowerCase().includes(q));
     });
   }
 
   function renderBatchItems(){
     const n = state.batchItems.length, hot = state.items.length;
-    document.getElementById('batchCount').textContent = String(n);
+    const all = batchAllItems(), total = all.length;
+    loadBidRules();
+    document.getElementById('batchCount').textContent = String(total);
     document.getElementById('batchSummary').innerHTML =
-      `<strong>${hot + n}</strong> item${hot + n === 1 ? '' : 's'} on the shop's batch page: <strong>${hot}</strong> hot item${hot === 1 ? '' : 's'} (included automatically) + <strong>${n}</strong> more.`;
+      `<strong>${hot + n}</strong> item${hot + n === 1 ? '' : 's'} on the shop's batch page: <strong>${hot}</strong> hot item${hot === 1 ? '' : 's'} (shown below with ★) + <strong>${n}</strong> more.`;
 
     const warnings = [];
     const gone = state.batchItems.filter(i => i.missing).length;
@@ -4399,22 +4445,22 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     warn.style.display = warnings.length ? 'block' : 'none';
     warn.innerHTML = warnings.map(w => `<div>${esc(w)}</div>`).join('');
 
-    const nAvail = state.batchItems.filter(i => i.status !== 'Claimed').length, nClaimed = n - nAvail;
-    document.getElementById('batchFilterBar').style.display = n ? '' : 'none';
-    document.getElementById('batchChips').innerHTML = [['all', 'All', n], ['Available', 'Available', nAvail], ['Claimed', 'Claimed', nClaimed]].map(([k, l, c]) => `<button type="button" class="bs-chip ${bf.st === k ? 'active' : ''}" data-bchip="${k}">${l}<b>${c}</b></button>`).join('');
+    const nAvail = all.filter(x => x.it.status !== 'Claimed').length, nClaimed = total - nAvail;
+    document.getElementById('batchFilterBar').style.display = total ? '' : 'none';
+    document.getElementById('batchChips').innerHTML = [['all', 'All', total], ['Available', 'Available', nAvail], ['Claimed', 'Claimed', nClaimed]].map(([k, l, c]) => `<button type="button" class="bs-chip ${bf.st === k ? 'active' : ''}" data-bchip="${k}">${l}<b>${c}</b></button>`).join('');
 
     const c = document.getElementById('batchContainer');
-    if (!n){
-      c.innerHTML = `<div class="hot-empty">No extra items yet. Add by SKU above, or click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
+    if (!total){
+      c.innerHTML = `<div class="hot-empty">No items yet. Add by SKU above, or click “+ Add from Products” to choose which Available items belong to this batch.</div>`;
     } else {
       const shown = batchShownList();
-      c.innerHTML = shown.length ? shown.map(({ it, i }) => `
-        <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-bi="${i}">
+      c.innerHTML = shown.length ? shown.map(({ it, i, hot }) => `
+        <div class="hot-row ${it.missing ? 'is-missing' : ''}" data-bi="${hot ? 'h' + i : i}">
           ${it.image ? `<img class="hot-thumb" src="${esc(it.image)}" alt="">` : `<div class="hot-thumb none">No photo</div>`}
           <div class="hot-info">
             <div class="hot-line1">
               <span class="code-chip">${esc(it.code || 'NO SKU')}</span>
-              ${statusPill(it.status || 'Available')}
+              ${hot ? '<span class="hot-flag">★ Hot</span>' : ''}${statusPill(it.status || 'Available')}
               <span class="hot-price">${esc(peso(it.price) || '₱0')}</span>
               ${it.missing ? '<span class="hot-flag bad">Deleted from Products</span>' : ''}${lockFlag(it.productId)}
             </div>
@@ -4422,21 +4468,26 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
             ${itemClaimLine(it)}
           </div>
           <div class="hot-actions">
-            <button type="button" class="btn btn-outline btn-xs" data-batch-copy="${i}">Copy</button>
+            <button type="button" class="btn btn-outline btn-xs" ${hot ? 'data-hot-copy' : 'data-batch-copy'}="${i}">Copy</button>
             ${claimBtn(it)}
-            ${it.productId && !it.missing && it.status !== 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-batch-promote="${i}" ${state.items.length >= state.hotLimit ? 'disabled title="No free hot slot"' : ''}>★ Make hot</button>` : ''}
-            <button type="button" class="btn btn-outline btn-danger-outline btn-xs" data-batch-remove="${i}">Remove</button>
+            ${hot ? '' : it.productId && !it.missing && it.status !== 'Claimed' ? `<button type="button" class="btn btn-outline btn-xs" data-batch-promote="${i}" ${state.items.length >= state.hotLimit ? 'disabled title="No free hot slot"' : ''}>★ Make hot</button>` : ''}
+            ${hot ? '' : `<button type="button" class="btn btn-outline btn-danger-outline btn-xs" data-batch-remove="${i}">Remove</button>`}
           </div>
         </div>`).join('') : '<div class="hot-empty">No items match your search or filter.</div>';
     }
     document.getElementById('clearBatchBtn').disabled = n === 0;
-    document.getElementById('copyBatchBtn').disabled = n === 0;
+    document.getElementById('copyBatchBtn').disabled = total === 0;
     renderTiles();
     renderSteps();
   }
 
   document.getElementById('batchContainer').addEventListener('click', (e) => {
     let el;
+    if ((el = e.target.closest('[data-hot-copy]'))){
+      const it = state.items[Number(el.dataset.hotCopy)];
+      if (it) copyText(itemCopyText(it), `${it.code || 'Item'} details copied.`);
+      return;
+    }
     if ((el = e.target.closest('[data-batch-copy]'))){
       const it = state.batchItems[Number(el.dataset.batchCopy)];
       if (it) copyText(itemCopyText(it), `${it.code || 'Item'} details copied.`);
@@ -4465,6 +4516,70 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     renderBatchItems();
   });
 
+
+  // ---------- Bid rules dialog ----------
+  const bidOverlay = document.getElementById('bidOverlay'), bidBody = document.getElementById('bidBody');
+  let bidDraft = null;
+  function bidDraftRead(){
+    const q = (sel) => [...bidBody.querySelectorAll(sel)];
+    const tiers = q('[data-bt]').map(r => ({ below: Number(r.querySelector('[data-bt-below]').value), inc: Number(r.querySelector('[data-bt-inc]').value) }));
+    const over = Number((bidBody.querySelector('[data-bt-over]') || {}).value), lockMult = Number((bidBody.querySelector('[data-bt-mult]') || {}).value);
+    return { tiers, over, lockMult };
+  }
+  function bidExample(){
+    const ex = Number((bidBody.querySelector('[data-bt-ex]') || {}).value) || 0, keep = bidRules;
+    const d = bidDraftRead(); bidRules = { tiers: d.tiers.filter(t => t.below > 0 && t.inc > 0).sort((a, b) => a.below - b.below), over: d.over > 0 ? d.over : 0, lockMult: d.lockMult > 0 ? d.lockMult : 0 };
+    let out = 'Enter a starting bid to preview.';
+    if (ex > 0 && bidRules.over > 0 && bidRules.lockMult > 0){ const b = bidInfo(ex); out = `Mine: ${fmtN(b.mine)}<br>Steal: Increment + ${fmtN(b.inc)}, Example ${fmtN(b.mine)} + ${fmtN(b.inc)} = ${fmtN(b.steal)}<br>Lock: ${fmtN(b.lock)}`; }
+    bidRules = keep; return out;
+  }
+  function bidRender(){
+    const d = bidDraft, ex = (bidBody.querySelector('[data-bt-ex]') || {}).value || 349;
+    bidBody.innerHTML = `
+      <div class="grid2" style="display:block;">
+        <label>Steal — increment by price</label>
+        <p class="fld-note">The Steal price is the starting bid <b>plus</b> the increment that matches the item's starting bid.</p>
+        ${d.tiers.map((t, i) => `<div class="bt-row" data-bt style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;">
+          <span>Starting bid below ₱</span><input type="number" min="1" step="1" data-bt-below value="${esc(t.below)}" style="width:110px;">
+          <span>→ add ₱</span><input type="number" min="1" step="1" data-bt-inc value="${esc(t.inc)}" style="width:90px;">
+          <button type="button" class="btn btn-outline btn-xs btn-danger-outline" data-bt-del="${i}" ${d.tiers.length < 2 ? 'disabled' : ''}>Remove</button></div>`).join('')}
+        <button type="button" class="btn btn-outline btn-xs" data-bt-add ${d.tiers.length >= 8 ? 'disabled' : ''}>+ Add another range</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 0;"><span>All higher starting bids → add ₱</span><input type="number" min="1" step="1" data-bt-over value="${esc(d.over)}" style="width:90px;"></div>
+        <label style="margin-top:22px;display:block;">Lock — automatic price</label>
+        <p class="fld-note">Lock = starting bid × the number below. To override one item, type its own <b>Lock Price</b> on the product (Products → Attribute view); that manual price wins.</p>
+        <div style="display:flex;gap:8px;align-items:center;"><span>Starting bid ×</span><input type="number" min="0.1" step="0.1" data-bt-mult value="${esc(d.lockMult)}" style="width:90px;"></div>
+        <label style="margin-top:22px;display:block;">Preview</label>
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0;"><span>Starting bid ₱</span><input type="number" min="1" data-bt-ex value="${esc(ex)}" style="width:110px;"></div>
+        <div class="fld-note" id="bidPreview" style="font-size:.9rem;line-height:1.6;color:var(--green-deep);"></div>
+      </div>`;
+    document.getElementById('bidPreview').innerHTML = bidExample();
+  }
+  document.getElementById('bidRulesBtn').addEventListener('click', () => { bidDraft = JSON.parse(JSON.stringify(bidRules)); bidRender(); bidOverlay.classList.add('open'); });
+  const bidClose = () => bidOverlay.classList.remove('open');
+  document.getElementById('bidClose').addEventListener('click', bidClose);
+  document.getElementById('bidCancel').addEventListener('click', bidClose);
+  bidOverlay.addEventListener('mousedown', (e) => { if (e.target === bidOverlay) bidClose(); });
+  bidBody.addEventListener('input', () => { document.getElementById('bidPreview').innerHTML = bidExample(); });
+  bidBody.addEventListener('click', (e) => {
+    if (e.target.closest('[data-bt-add]')){ bidDraft = bidDraftRead(); const last = bidDraft.tiers[bidDraft.tiers.length - 1]; bidDraft.tiers.push({ below: last ? (Number(last.below) || 0) * 2 || 2000 : 1000, inc: last ? Number(last.inc) || 50 : 50 }); bidRender(); return; }
+    const del = e.target.closest('[data-bt-del]');
+    if (del){ bidDraft = bidDraftRead(); bidDraft.tiers.splice(Number(del.dataset.btDel), 1); bidRender(); }
+  });
+  document.getElementById('bidReset').addEventListener('click', () => { bidDraft = JSON.parse(JSON.stringify(BID_DEFAULT)); bidRender(); });
+  document.getElementById('bidSave').addEventListener('click', async () => {
+    const d = bidDraftRead();
+    if (d.tiers.some(t => !(t.below > 0) || !(t.inc > 0)) || !(d.over > 0) || !(d.lockMult > 0)){ showToast({ type: 'err', title: 'Check the rules', message: 'Every amount and the Lock multiplier must be greater than 0.', duration: 6000 }); return; }
+    const below = d.tiers.map(t => t.below); if (new Set(below).size !== below.length){ showToast({ type: 'err', title: 'Check the rules', message: 'Two ranges use the same “below” amount.', duration: 6000 }); return; }
+    const btn = document.getElementById('bidSave'); btn.disabled = true;
+    try{
+      const clean = cleanBid(d);
+      await setDoc(bidRef, { ...clean, updatedAt: new Date().toISOString() });
+      bidRules = clean; try{ localStorage.setItem('vestigeBidRules', JSON.stringify(clean)); } catch(e){}
+      bidClose(); renderBatchItems();
+      showToast({ type: 'ok', title: 'Bid rules saved', message: 'Copied details now use these rules.' });
+    } catch(err){ console.error(err); showToast({ type: 'err', title: 'Could not save', message: err && err.code === 'permission-denied' ? 'Firestore rules do not allow saving to counters/bidRules.' : 'Check your connection and try again.', duration: 7000 }); }
+    finally { btn.disabled = false; }
+  });
 
   document.getElementById('copyBatchBtn').addEventListener('click', () => {
     const list = batchShownList().map(({ it }) => it).filter(it => !it.missing);
@@ -5372,6 +5487,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
       sku: data.sku || '', skuSeq: data.skuSeq ?? null,
       remarks: data.remarks || '',
       colorRate: data.colorRate ?? '',
+      lockPrice: data.lockPrice ?? '',
       condition: data.condition || '',
       productName: data.productName || '',
       length: data.length ?? '',
@@ -6440,6 +6556,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
               </div>
               <div><label>Investment Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="investmentPrice" value="${esc(d.investmentPrice)}" placeholder="What you paid for it"></div>
               <div><label>Starting Bid Price (₱)</label><input type="number" min="0" step="0.01" data-a-field="price" value="${esc(d.price)}" placeholder="1450"></div>
+              <div><label>Lock Price (₱) <small style="font-weight:400;opacity:.6;">optional</small></label><input type="number" min="0" step="0.01" data-a-field="lockPrice" value="${esc(d.lockPrice)}" placeholder="Auto from Bid rules"><p class="fld-note" style="margin-top:-8px;">Leave empty to use the automatic Lock (set in Batch items → Bid rules).</p></div>
             </div>
           </div>
 
@@ -6598,6 +6715,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
         quantity: d.quantity === '' ? 0 : Number(d.quantity),
         investmentPrice: d.investmentPrice === '' ? null : Number(d.investmentPrice),
         price: Number(d.price) || 0,
+        lockPrice: (d.lockPrice === '' || d.lockPrice == null || !(Number(d.lockPrice) > 0)) ? null : Number(d.lockPrice),
         status: normStatus(d.status),
         // Sale details are only kept while the item is Claimed
         soldTo: isClaimed ? (d.soldTo || '').trim() : '',
