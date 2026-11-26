@@ -788,21 +788,30 @@
 
   // Firebase init + real-time listener (config injected via firebase-config.js, loaded before this script)
   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js").then(async ({ initializeApp }) => {
-    const { getFirestore, doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const { getFirestore, doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     try{
       const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
       const db = getFirestore(app);
-      const ref = doc(db, "vestige", "liveBatch");
-      onSnapshot(ref, (snap) => {
-        if (snap.exists()){
-          renderBatch(snap.data());
-        } else {
-          document.getElementById('pieces-sub').textContent = "No batch published yet — check back soon.";
+      // One read, kept for 2 minutes in this browser (shared with the shop page) so Firestore's free read limit isn't wasted.
+      const KEY = 'vestigeCache:liveBatch', TTL = 2 * 60 * 1000;
+      let cached = null; try{ cached = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){}
+      const show = (data) => {
+        if (data) renderBatch(data);
+        else document.getElementById('pieces-sub').textContent = "No batch published yet — check back soon.";
+      };
+      if (cached && typeof cached.at === 'number' && Date.now() - cached.at < TTL){ show(cached.rows); }
+      else {
+        try{
+          const snap = await getDoc(doc(db, "vestige", "liveBatch"));
+          const data = snap.exists() ? snap.data() : null;
+          try{ localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), rows: data })); } catch(e){}
+          show(data);
+        } catch(err){
+          console.error('Firestore load error:', err);
+          if (cached && typeof cached.at === 'number') show(cached.rows);
+          else document.getElementById('pieces-sub').textContent = "Couldn't load live batch data.";
         }
-      }, (err) => {
-        console.error('Firestore listener error:', err);
-        document.getElementById('pieces-sub').textContent = "Couldn't load live batch data.";
-      });
+      }
     } catch(err){
       console.error('Firebase init error:', err);
       document.getElementById('pieces-sub').textContent = "Batch data not connected yet.";
