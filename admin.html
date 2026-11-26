@@ -1180,7 +1180,7 @@
 
         <div class="view" id="view-dashboard">
 
-          <div class="warn-banner" id="rulesBanner" style="display:none;">
+         <div class="warn-banner" id="shipBlocked" style="display:none;">Shipments can't be read yet. Publish the Firestore rules for <code>shipments</code>, <code>shipmentIndex</code> and <code>shipmentPrivate</code>, then reload.</div>
             <strong>One-time setup:</strong> add these two blocks inside <code>match /databases/{database}/documents</code> in your Firestore Rules, then click Publish:
             <pre class="rules-snip">match /batches/{batchId} {
   allow read: if true;
@@ -1433,7 +1433,7 @@ match /counters/{id} {
             <div id="chartEditor"></div>
           </div>
 
-         <div class="tool-row"><div><div class="set-title">Link existing shipments</div><div class="set-desc">One-time: marks items already in a shipment so they stop showing under “Ready to ship”. Reads each shipment once.</div></div><button type="button" class="btn btn-outline" id="toolShipLink">Link now</button></div>
+            <div class="card" data-pane="tools">
             <h2>Tools</h2>
             <div class="tool-row"><div><div class="set-title">Close ended batches</div><div class="set-desc" id="toolEndedInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolEnded">Close ended batches</button></div>
             <div class="tool-row"><div><div class="set-title">Secure private product data</div><div class="set-desc" id="toolSecureInfo">Checking…</div></div><button type="button" class="btn btn-outline" id="toolSecure">Secure now</button></div>
@@ -1442,6 +1442,7 @@ match /counters/{id} {
             <div class="tool-row"><div><div class="set-title">Recalculate all sizes</div><div class="set-desc">Re-works every item's saved size from its measurements using its category's sizing type and the charts above. Manual-size categories are never touched.</div></div><button type="button" class="btn btn-outline" id="toolSizes">Recalculate sizes</button></div>
             <div class="tool-row"><div><div class="set-title">Sync home page now</div><div class="set-desc">Rewrites the live copy that <code>home.html</code> reads from your newest Active batch. Use it if the home page ever looks out of date.</div></div><button type="button" class="btn btn-outline" id="toolSync">Sync now</button></div>
             <div class="tool-row"><div><div class="set-title">Repair batch index</div><div class="set-desc">Rebuilds the Control No. counter and the Batch Number / Name lookup from your saved batches. Safe to run; it also reports any duplicates.</div></div><button type="button" class="btn btn-outline" id="toolRepair">Repair index</button></div>
+            <div class="tool-row"><div><div class="set-title">Link existing shipments</div><div class="set-desc">One-time: marks items already in a shipment so they stop showing under “Ready to ship”. Reads each shipment once.</div></div><button type="button" class="btn btn-outline" id="toolShipLink">Link now</button></div>
             <div class="tool-row"><div><div class="set-title">Download backup</div><div class="set-desc">Saves all batches, the counter and these settings as a JSON file.</div></div><button type="button" class="btn btn-outline" id="toolBackup">Download JSON</button></div>
           </div>
 
@@ -1612,8 +1613,8 @@ match /counters/{id} {
   import {
     getAuth, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import {
-   const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks', 'statusHistory', 'claimedAt', 'claimedBatch', 'shipmentNo'];
+   import {
+    getFirestore, doc, setDoc as _setDoc, getDoc, collection, addDoc as _addDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, getDocs, query, where, orderBy, limit, startAfter, getCountFromServer, runTransaction as _runTransaction, deleteField
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // ---- Read saver: Firestore's free plan allows ~50,000 reads a day, so lists are kept for a few minutes and only
@@ -1644,7 +1645,7 @@ match /counters/{id} {
   // Private business data (cost, buyer, sale price, waybill, remarks) lives in an admin-only collection,
   // never in the public `products` documents that the shop can read.
   const privateCol = collection(db, "productPrivate");
-  const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks', 'statusHistory', 'claimedAt', 'claimedBatch'];
+   const PRIVATE_FIELDS = ['investmentPrice', 'soldTo', 'priceSold', 'waybill', 'remarks', 'statusHistory', 'claimedAt', 'claimedBatch', 'shipmentNo'];
   // Only two statuses exist now. Anything else (the old "1 Left") counts as Available.
   const normStatus = (st) => st === 'Claimed' ? 'Claimed' : 'Available';
   // Condition choices (best → worst). Add or rename here and the dropdown updates everywhere.
@@ -4029,7 +4030,7 @@ document.getElementById('shipDelete').addEventListener('click', async () => {
       tile('Live batch', live ? 'Control ' + esc(fmtControl(live.controlNo)) : 'None', live ? esc(live.batchName || '') : 'No Active batch', true) +
       tile('Available', String(avail), `of ${products.length} product${products.length === 1 ? '' : 's'}`) +
       tile('To ship', String(unshipped.length), 'claimed, no shipment yet') +
-      tile('In delivery', String(open.length), `${ships.length} shipment${ships.length === 1 ? '' : 's'} total`);
+           tile('In delivery', String(openN), `${totalN} shipment${totalN === 1 ? '' : 's'} total`);
 
     const items = [];
     const add = (cls, text, go, label) => items.push(`<li><span class="dot ${cls}"></span><span class="txt">${text}</span>${go ? `<button type="button" class="go" data-ov-go="${go}">${label}</button>` : ''}</li>`);
@@ -4040,7 +4041,6 @@ document.getElementById('shipDelete').addEventListener('click', async () => {
       else if (ms !== null && ms < 24 * 3600 * 1000) add('', `<strong>${esc(live.batchName || 'Live batch')}</strong> closes in under 24 hours.`, 'batches', 'View batch');
     }
     if (unshipped.length) add('warn', `<strong>${unshipped.length}</strong> claimed item${unshipped.length === 1 ? ' is' : 's are'} not in a shipment yet.`, 'shipments', 'Create shipment');
-    if (noTrack.length) add('', `<strong>${noTrack.length}</strong> shipment${noTrack.length === 1 ? ' is' : 's are'} waiting for a J&amp;T tracking number.`, 'shipments', 'Add tracking');
     if (noPhoto.length) add('', `<strong>${noPhoto.length}</strong> available item${noPhoto.length === 1 ? ' has' : 's have'} no photo.`, 'products', 'Open Products');
     if (!shipOk) add('warn', 'Shipments can’t be read — publish the Firestore rules for shipments.', 'settings', 'Settings');
     if (!items.length) add('ok', 'All clear — nothing needs your attention right now.');
@@ -4768,7 +4768,7 @@ document.getElementById('shipDelete').addEventListener('click', async () => {
         const now = new Date().toISOString();
         tx.update(pRef, { status: o.status, updatedAt: now, ...dropPrivateFields() });
         tx.set(vRef, { ...priv, updatedAt: now });
-        out = normalizeProduct(p.id, { ...cur, status: o.status, ...(o.status === 'Claimed' ? {} : { soldTo: '', priceSold: '', waybill: '', claimedAt: '', claimedBatch: null }), ...priv });
+         out = normalizeProduct(p.id, { ...cur, status: o.status, ...(o.status === 'Claimed' ? {} : { soldTo: '', priceSold: '', waybill: '', claimedAt: '', claimedBatch: null, shipmentNo: '' }), ...priv });
       });
       updated.push(out);
     }
@@ -4798,9 +4798,10 @@ document.getElementById('shipDelete').addEventListener('click', async () => {
   async function openClaimDialog(ids, mode){
     try{ await Promise.all([fetchAllProducts(), fetchBatches()]); } catch(err){ console.error(err); }
     const items = ids.map(id => hotProducts.find(p => p.id === id)).filter(p => p && (mode === 'claim' ? p.status !== 'Claimed' : p.status === 'Claimed'));
-    if (!items.length){ showToast({ type: 'err', title: 'Nothing to update', message: mode === 'claim' ? 'Those items are already claimed.' : 'Those items are already available.' }); return; }
+    if (!items.length){ showToast({ … }); return; }
+    cl = { mode, items, inShip: {} };
     if (mode === 'return') items.forEach(p => { if (p.shipmentNo) cl.inShip[p.id] = p.shipmentNo; });
-    
+
     renderClaim();
     claimOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
     setTimeout(() => { const f = document.getElementById(mode === 'claim' ? 'clBuyer' : 'clNote'); if (f) f.focus(); }, 30);
