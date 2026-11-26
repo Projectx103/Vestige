@@ -245,7 +245,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getFirestore, collection, doc, onSnapshot
+    getFirestore, collection, doc, getDocs, getDoc
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -578,45 +578,56 @@
     if (el) el.textContent = countdownText(live.batch, renderedBatchStatus);
   }, 1000);
 
-  // ---------- live data ----------
-  onSnapshot(collection(db, 'categories'), (snap) => {
-    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-    ready.categories = true;
+  // ---------- data (read once, then reused) ----------
+  // Firestore's free plan has a daily read limit, so the shop does NOT keep live listeners open.
+  // Each list is read once and kept in this browser for a few minutes (shared with the home page).
+  // If Firestore is unreachable or over its limit, the last saved copy is shown instead of an empty shop.
+  const LIST_MS = 5 * 60 * 1000, LIVE_MS = 2 * 60 * 1000;
+  const cacheGet = (k) => { try{ const v = JSON.parse(localStorage.getItem('vestigeCache:' + k) || 'null'); return v && typeof v.at === 'number' ? v : null; } catch(e){ return null; } };
+  const cachePut = (k, rows) => { try{ localStorage.setItem('vestigeCache:' + k, JSON.stringify({ at: Date.now(), rows })); } catch(e){} };
+  async function loadList(name, ttl){
+    const c = cacheGet(name);
+    if (c && Array.isArray(c.rows) && Date.now() - c.at < ttl) return { rows: c.rows, fresh: true };
+    try{
+      const snap = await getDocs(collection(db, name));
+      const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      cachePut(name, rows);
+      return { rows, fresh: true };
+    } catch(err){
+      if (c && Array.isArray(c.rows)) return { rows: c.rows, fresh: false };   // stale copy beats an empty shop
+      throw err;
+    }
+  }
+  async function loadLive(){
+    const c = cacheGet('liveBatch');
+    if (c && Date.now() - c.at < LIVE_MS) return c.rows;
+    try{
+      const snap = await getDoc(doc(db, 'vestige', 'liveBatch'));
+      const data = snap.exists() ? snap.data() : null;
+      cachePut('liveBatch', data);
+      return data;
+    } catch(err){ if (c) return c.rows; throw err; }
+  }
+  let refreshing = false;
+  async function refreshData(){
+    if (refreshing) return; refreshing = true;
+    await Promise.all([
+      loadList('categories', LIST_MS).then(({ rows }) => {
+        categories = rows.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+      }).catch(err => console.error('Categories load error:', err)).finally(() => { ready.categories = true; }),
+      loadList('products', LIST_MS).then(({ rows }) => { products = rows; failed.products = false; })
+        .catch(err => { console.error('Products load error:', err); failed.products = true; }).finally(() => { ready.products = true; }),
+      loadList('batches', LIST_MS).then(({ rows }) => { batches = rows; failed.batches = false; })
+        .catch(err => { console.error('Batches load error (falling back to the live batch):', err); batches = []; failed.batches = true; }).finally(() => { ready.batches = true; }),
+      loadLive().then(d => { liveDoc = d; failed.live = false; })
+        .catch(err => { console.error('Live batch load error:', err); failed.live = true; }).finally(() => { ready.live = true; })
+    ]);
+    refreshing = false;
     render();
-  }, (err) => console.error('Categories listener error:', err));
-
-  onSnapshot(collection(db, 'products'), (snap) => {
-    products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    ready.products = true; failed.products = false;
-    render();
-  }, (err) => {
-    console.error('Products listener error:', err);
-    failed.products = true;
-    render();
-  });
-
-  onSnapshot(collection(db, 'batches'), (snap) => {
-    batches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    ready.batches = true; failed.batches = false;
-    render();
-  }, (err) => {
-    // rules not published yet (or offline): fall back to the single live batch
-    console.error('Batches listener error:', err);
-    batches = [];
-    ready.batches = true; failed.batches = true;
-    render();
-  });
-
-  onSnapshot(doc(db, 'vestige', 'liveBatch'), (snap) => {
-    liveDoc = snap.exists() ? snap.data() : null;
-    ready.live = true; failed.live = false;
-    render();
-  }, (err) => {
-    console.error('Batch listener error:', err);
-    failed.live = true;
-    render();
-  });
+  }
+  refreshData();
+  // Coming back to the tab after a while picks up changes (only re-reads if the saved copy has expired).
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshData(); });
 
   render();
 </script>
