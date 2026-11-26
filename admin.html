@@ -1594,8 +1594,27 @@ match /counters/{id} {
     getAuth, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, getDocs, query, where, runTransaction, deleteField
+    getFirestore, doc, setDoc as _setDoc, getDoc, collection, addDoc as _addDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, getDocs, query, where, runTransaction as _runTransaction, deleteField
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ---- Read saver: Firestore's free plan allows ~50,000 reads a day, so lists are kept for a few minutes and only
+  // re-read after something was saved (or the page is reloaded).
+  let WRITE_VER = 0;
+  const bump = () => { WRITE_VER++; };
+  const setDoc = async (...a) => { try{ return await _setDoc(...a); } finally { bump(); } };
+  const addDoc = async (...a) => { try{ return await _addDoc(...a); } finally { bump(); } };
+  const updateDoc = async (...a) => { try{ return await _updateDoc(...a); } finally { bump(); } };
+  const deleteDoc = async (...a) => { try{ return await _deleteDoc(...a); } finally { bump(); } };
+  const runTransaction = async (...a) => { try{ return await _runTransaction(...a); } finally { bump(); } };
+  const _cache = {}, CACHE_MS = 5 * 60 * 1000;
+  function cached(key, loader, force){
+    const c = _cache[key];
+    if (!force && c && c.ver === WRITE_VER && Date.now() - c.at < CACHE_MS) return c.promise;
+    const entry = { ver: WRITE_VER, at: Date.now() };
+    entry.promise = Promise.resolve().then(loader).catch(err => { if (_cache[key] === entry) delete _cache[key]; throw err; });
+    _cache[key] = entry;
+    return entry.promise;
+  }
 
   const app = initializeApp(window.VESTIGE_FIREBASE_CONFIG);
   const auth = getAuth(app);
@@ -1619,12 +1638,16 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
   }
   const hasPrivateData = (o) => PRIVATE_FIELDS.some(k => o[k] !== undefined && o[k] !== null && o[k] !== '');
   const dropPrivateFields = () => Object.fromEntries(PRIVATE_FIELDS.map(k => [k, deleteField()]));
-  async function fetchPrivateMap(){
-    const map = {};
-    const snap = await getDocs(privateCol);
-    snap.docs.forEach(d => { map[d.id] = d.data(); });
-    return map;
+  // Products + their private copies, read together and shared by every screen (one read set, not one per screen).
+  function readCatalog(force){
+    return cached('catalog', async () => {
+      const [snap, priv] = await Promise.all([getDocs(productsCol), getDocs(privateCol)]);
+      const privMap = {}; priv.docs.forEach(d => { privMap[d.id] = d.data(); });
+      return { docs: snap.docs, privMap };
+    }, force);
   }
+  const readShips = (force) => cached('ships', () => Promise.all([getDocs(shipCol), getDocs(shipPrivCol)]), force);
+  async function fetchPrivateMap(){ return (await readCatalog()).privMap; }
   // Merges the admin-only data onto the public product. (Un-migrated products still carry the values publicly; the private copy wins.)
   const withPrivate = (d, privMap) => normalizeProduct(d.id, { ...d.data(), ...(privMap[d.id] || {}) });
 
@@ -1825,6 +1848,12 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
   function screenError(msg){
     gateShow(`<p class="login-err" style="display:block;">${esc(msg)}</p><button type="button" class="gate-btn gold" data-act="retry">Try again</button><div class="gate-links">${backLink}</div>`);
   }
+  function screenDenied(user){
+    gateShow(`<div class="gate-danger"><strong>This account is not an admin.</strong><br>You are signed in as <b>${esc(user.email || 'unknown')}</b>, but this account is not on the admin list.</div>
+      <p style="font-size:.78rem;margin:12px 0 4px;color:rgba(20,32,28,.7);">Admin ID of this sign-in (the Firestore <b>admins</b> document must use exactly this ID):</p>
+      <p style="font-family:'Space Mono',monospace;font-size:.74rem;word-break:break-all;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0 0 12px;user-select:all;">${esc(user.uid)}</p>
+      <div class="gate-links">${backLink}<button type="button" data-act="signout">Sign out</button></div>`);
+  }
   function screenLocked(){
     gateShow(`<div class="gate-danger"><strong>Admin access locked.</strong><br>Incorrect password was entered for 3 attempts. Please contact your system admin to fix this concern.</div>
       <div class="gate-links">${backLink}<button type="button" data-act="signout">Sign out</button></div>`);
@@ -1946,7 +1975,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     let isAdmin = false;
     try{ isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); }
     catch(err){ console.error('Admin check failed:', err); return screenError("We couldn't verify your access. Check your connection and try again."); }
-    if (!isAdmin){ location.replace('home.html'); return; }      // regular users never see the admin page
+    if (!isAdmin) return screenDenied(user);      // regular users never see the admin page (only this notice)
     try{ G.lock = await loadLock(); }
     catch(err){ console.error(err); return screenError("We couldn't load your admin security settings. Check your connection and try again."); }
     if (!G.lock){ G.st = { pw: '', pw2: '', qs: [{ sel: '', custom: '', ans: '' }, { sel: '', custom: '', ans: '' }, { sel: '', custom: '', ans: '' }] }; return screenSetup1(); }
@@ -2285,9 +2314,9 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     };
   }
 
-  async function fetchAllProducts(){
-    const [snap, privMap] = await Promise.all([getDocs(productsCol), fetchPrivateMap()]);
-    hotProducts = snap.docs.map(d => withPrivate(d, privMap));
+  async function fetchAllProducts(force){
+    const { docs, privMap } = await readCatalog(force);
+    hotProducts = docs.map(d => withPrivate(d, privMap));
     return hotProducts;
   }
 
@@ -2307,7 +2336,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
 
   // ---------- batches: load / index ----------
   async function fetchBatches(){
-    const snap = await getDocs(batchesCol);
+    const snap = await cached('batches', () => getDocs(batchesCol));
     allBatches = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.controlNo || 0) - (a.controlNo || 0));
     return allBatches;
@@ -3481,7 +3510,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     if (!list){ try{ list = await fetchAllProducts(); } catch(err){ console.error(err); list = productsCache || []; } }
     productsCache = list;
     try{
-      const [a, b] = await Promise.all([getDocs(shipCol), getDocs(shipPrivCol)]);
+      const [a, b] = await readShips();
       ships = a.docs.map(d => ({ ...d.data(), orderNo: d.id })).sort((x, y) => String(y.lastUpdated || '').localeCompare(String(x.lastUpdated || '')));
       shipPriv = {}; b.docs.forEach(d => { shipPriv[d.id] = d.data(); });
       document.getElementById('shipBlocked').style.display = 'none';
@@ -4635,7 +4664,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
     if (!items.length){ showToast({ type: 'err', title: 'Nothing to update', message: mode === 'claim' ? 'Those items are already claimed.' : 'Those items are already available.' }); return; }
     cl = { mode, items, inShip: {} };
     if (mode === 'return'){
-      try{ (await getDocs(shipPrivCol)).docs.forEach(d => (d.data().productIds || []).forEach(id => { if (items.some(p => p.id === id)) cl.inShip[id] = d.id; })); } catch(err){ /* shipments are optional */ }
+      try{ (await readShips())[1].docs.forEach(d => (d.data().productIds || []).forEach(id => { if (items.some(p => p.id === id)) cl.inShip[id] = d.id; })); } catch(err){ /* shipments are optional */ }
     }
     renderClaim();
     claimOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
@@ -4708,7 +4737,7 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
         message: claim ? `${n} item${n === 1 ? '' : 's'} claimed by ${o.soldTo} · ${fmtRef(o.batch)}.${live ? ' The live batch was updated.' : ''}` : `${n} item${n === 1 ? ' is' : 's are'} Available again.${live ? ' The live batch was updated.' : ''}`, duration: 6000 });
     } catch(err){
       console.error(err);
-      showToast({ type: 'err', title: 'Not Updated', message: err && err.batchCode === 'already' ? 'One of these items was claimed in the meantime. Reload and check.' : err && err.batchCode === 'already-available' ? 'One of these items is no longer claimed.' : err && err.code === 'permission-denied' ? 'Firestore rules are missing for the admin-only product data.' : 'Check your connection and try again.', duration: 7000 });
+      showToast({ type: 'err', title: 'Not Updated', message: err && err.batchCode === 'already' ? 'One of these items was claimed in the meantime. Reload and check.' : err && err.batchCode === 'already-available' ? 'One of these items is no longer claimed.' : err && err.code === 'permission-denied' ? 'Firestore Rules are blocking the private product data (buyer, price, history). In Firebase Console → Firestore → Rules, add the productPrivate rule (admins only) and click Publish.' : 'Check your connection and try again.', duration: 12000 });
     } finally { btn.disabled = false; btn.textContent = label; }
   });
 
@@ -4805,9 +4834,9 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
 
   async function refreshCategoriesView(){
     try{
-      const [catSnap, prodSnap, privMap] = await Promise.all([getDocs(categoriesCol), getDocs(productsCol), fetchPrivateMap().catch(() => ({}))]);
+      const [catSnap, cat] = await Promise.all([cached('categories', () => getDocs(categoriesCol)), readCatalog().catch(() => ({ docs: [], privMap: {} }))]);
       categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      allProductsForCounts = prodSnap.docs.map(d => withPrivate(d, privMap));
+      allProductsForCounts = cat.docs.map(d => withPrivate(d, cat.privMap));
       // Older categories (made before SKUs) get their code once, automatically.
       for (const cat of categories){
         if (!cat.code){ try{ await ensureCategoryCode(cat); } catch(e){ console.error('Category code failed:', e); } }
@@ -6557,10 +6586,9 @@ const CONDITIONS = ['Brand New', 'Like New', 'Excellent', 'Good'];
   }
   async function loadProductsForCategory(categoryId){
     try{
-      const q = query(productsCol, where('categoryId', '==', categoryId));
-      const [snap, privMap] = await Promise.all([getDocs(q), fetchPrivateMap()]);
+      const { docs, privMap } = await readCatalog();   // shared list, no extra reads
       if (categoryId !== currentCategoryId) return;   // user already moved to another category
-      categoryProducts = snap.docs.map(d => withPrivate(d, privMap));
+      categoryProducts = docs.filter(d => d.data().categoryId === categoryId).map(d => withPrivate(d, privMap));
       catLoaded = true;
       renderFolder();
     } catch(err){
